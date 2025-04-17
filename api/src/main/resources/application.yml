@@ -1,0 +1,14 @@
+spring:
+  config:
+    import: optional:file:.env[.properties]
+
+  # MySQL
+  datasource:
+    driver-class-name: ${MYSQL_DRIVER}
+    url: jdbc:mysql://${MYSQL_URL}/${MYSQL_SCHEMA}?serverTimezone=Asia/Seoul
+    username: ${MYSQL_USERNAME}
+    password: ${MYSQL_PASSWORD}
+    hikari:
+      maximum-pool-size: 10
+
+
