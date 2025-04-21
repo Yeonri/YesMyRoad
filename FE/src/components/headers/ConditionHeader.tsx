@@ -1,9 +1,11 @@
 import React from 'react'
 
 const ConditionHeader: React.FC = () => {
-  return <>
-    {/* <h1>hello</h1> */}
-  </>
+  return (
+    <>
+      <p>ConditionHeader</p>
+    </>
+  )
 }
 
 export default ConditionHeader
