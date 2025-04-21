@@ -1,6 +1,8 @@
-import '@/app/globals.css'
 import type { Metadata } from 'next'
-import { Geist, Geist_Mono } from 'next/font/google'
+
+// import { Geist, Geist_Mono } from 'next/font/google'
+
+import './globals.css'
 
 // const geistSans = Geist({
 //   variable: "--font-geist-sans",
@@ -17,6 +19,10 @@ export const metadata: Metadata = { title: 'Yes, my ROAD', description: '도로 
 const RootLayout = ({ children }: Readonly<{ children: React.ReactNode }>) => {
   return (
     <html lang="kr">
+      <head>
+        <link href="https://api.mapbox.com/mapbox-gl-js/v3.11.0/mapbox-gl.css" rel="stylesheet" />
+        <script src="https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-language/v1.0.0/mapbox-gl-language.js"></script>
+      </head>
       <body>{children}</body>
     </html>
   )
