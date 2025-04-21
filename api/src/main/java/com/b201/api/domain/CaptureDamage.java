@@ -61,7 +61,7 @@ public class CaptureDamage {
 	private Severity severity;
 
 	@CreatedDate
-	@Column(name = "created_at")
+	@Column(name = "created_at", nullable = false, updatable = false)
 	private LocalDateTime createdAt;
 
 	@LastModifiedDate

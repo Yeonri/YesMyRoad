@@ -2,7 +2,9 @@ package com.b201.api.domain;
 
 import java.time.LocalDateTime;
 
-import org.springframework.data.geo.Point;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
+import org.locationtech.jts.geom.Point;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -37,7 +39,8 @@ public class CapturePoint {
 	@Column(name = "capture_timestamp", nullable = false)
 	private LocalDateTime captureTimestamp;
 
-	@Column(name = "location", columnDefinition = "GEOMETRY", nullable = false)
+	@JdbcTypeCode(SqlTypes.GEOMETRY)
+	@Column(name = "location", nullable = false)
 	private Point location;
 
 	@Column(name = "accuracy_meters")
