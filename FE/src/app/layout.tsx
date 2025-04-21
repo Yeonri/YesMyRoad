@@ -1,6 +1,6 @@
-import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
-import "./globals.css";
+import '@/app/globals.css'
+import type { Metadata } from 'next'
+import { Geist, Geist_Mono } from 'next/font/google'
 
 // const geistSans = Geist({
 //   variable: "--font-geist-sans",
@@ -12,21 +12,14 @@ import "./globals.css";
 //   subsets: ["latin"],
 // });
 
-export const metadata: Metadata = {
-  title: "Yes, my ROAD",
-  description: "도로 파손 현황 실시간 모니터링 시스템",
-};
+export const metadata: Metadata = { title: 'Yes, my ROAD', description: '도로 파손 현황 실시간 모니터링 시스템' }
 
-export default function RootLayout({
-  children,
-}: Readonly<{
-  children: React.ReactNode;
-}>) {
+const RootLayout = ({ children }: Readonly<{ children: React.ReactNode }>) => {
   return (
     <html lang="kr">
-      <body>
-        {children}
-      </body>
+      <body>{children}</body>
     </html>
-  );
+  )
 }
+
+export default RootLayout

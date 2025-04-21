@@ -1,9 +1,8 @@
-export default function Home() {
-  return (
-    <>
-      <main>
-        <h1>Hello World</h1>
-      </main>
-    </>
-  );
+import Dashboard from '@/components/Dashboard'
+import React from 'react'
+
+const Home: React.FC = () => {
+  return <Dashboard />
 }
+
+export default Home
