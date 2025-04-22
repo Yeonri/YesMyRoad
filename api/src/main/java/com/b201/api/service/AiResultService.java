@@ -3,6 +3,6 @@ package com.b201.api.service;
 import org.springframework.stereotype.Service;
 
 @Service
-public class AiResultPersistenceService {
+public class AiResultService {
 
 }
