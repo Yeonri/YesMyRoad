@@ -40,6 +40,7 @@ public class CapturePointService {
 			.publicId(capturePoint.getPublicId())
 			.address(new AddressDto(capturePoint.getProvinceRegion().getName(), capturePoint.getCityRegion().getName(),
 				capturePoint.getDistrictRegion().getName(), capturePoint.getStreetAddress()))
+			.accuracyMeters(capturePoint.getAccuracyMeters())
 			.build();
 
 		return FeatureDto.builder().geometry(geometryDto).properties(propertiesDto).build();
