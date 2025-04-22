@@ -55,10 +55,8 @@ public class CaptureDamage {
 	@Column(name = "description")
 	private String description;
 
-	@Enumerated(EnumType.STRING)
-	@JsonFormat(shape = JsonFormat.Shape.NUMBER)
-	@Column(name = "severity", length = 10)
-	private Severity severity;
+	@Column(name = "risk", length = 10)
+	private Double risk;
 
 	@CreatedDate
 	@Column(name = "created_at", nullable = false, updatable = false)
@@ -75,12 +73,6 @@ public class CaptureDamage {
 		COMPLETED     // 수리완료
 	}
 
-	public enum Severity {
-		SAFE,    // 안전
-		WARNING, // 주의
-		DANGER   // 위험
-	}
-
 	@PrePersist
 	public void prePersist() {
 		if (this.status == null) {
@@ -92,23 +84,20 @@ public class CaptureDamage {
 	 * 자동생성 PK_ID 를 제외한 빌더 패턴 생성자
 	 * @param capturePoint         이미지 정보
 	 * @param damageCategory       파손 유형
-	 * @param status               수리 상태
 	 * @param description          설명
-	 * @param severity             심각도(optional)
+	 * @param risk                 심각도(optional)
 	 */
 	@Builder
 	public CaptureDamage(
 		CapturePoint capturePoint,
 		DamageCategory damageCategory,
-		DamageStatus status,
 		String description,
-		Severity severity
+		Double risk
 	) {
 		this.capturePoint = capturePoint;
 		this.damageCategory = damageCategory;
-		this.status = status;
 		this.description = description;
-		this.severity = severity;
+		this.risk = risk;
 	}
 
 }

@@ -1,11 +1,15 @@
 package com.b201.api.domain;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.UUID;
 
 import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.type.SqlTypes;
 import org.locationtech.jts.geom.Point;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -14,6 +18,8 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.PrePersist;
 import jakarta.persistence.Table;
 import lombok.Builder;
 import lombok.EqualsAndHashCode;
@@ -36,6 +42,9 @@ public class CapturePoint {
 	@Column(name = "capture_point_id", nullable = false, unique = true)
 	private Integer capturePointId;
 
+	@Column(name = "public_id", length = 36, nullable = false, unique = true)
+	private String publicId;
+
 	@Column(name = "capture_timestamp", nullable = false)
 	private LocalDateTime captureTimestamp;
 
@@ -48,6 +57,9 @@ public class CapturePoint {
 
 	@Column(name = "image_url")
 	private String imageUrl;
+
+	@OneToMany(mappedBy = "capturePoint", cascade = CascadeType.PERSIST, orphanRemoval = true)
+	private List<CaptureDamage> captureDamages = new ArrayList<>();
 
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "province_id", nullable = false)
@@ -63,6 +75,13 @@ public class CapturePoint {
 
 	@Column(name = "street_address")
 	private String streetAddress;
+
+	@PrePersist
+	public void prePersist() {
+		if (publicId == null) {
+			publicId = UUID.randomUUID().toString();
+		}
+	}
 
 	@Builder(toBuilder = true)
 	public CapturePoint(
