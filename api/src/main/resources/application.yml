@@ -25,3 +25,8 @@ spring:
       encoding: UTF-8
 
 
+# application.yml
+server:
+  error:
+    include-stacktrace: never
+    include-message: never
