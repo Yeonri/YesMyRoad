@@ -6,13 +6,12 @@ import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
-
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EntityListeners;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -24,6 +23,7 @@ import lombok.Builder;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 @Entity
 @EntityListeners(AuditingEntityListener.class)
@@ -39,7 +39,10 @@ public class CaptureDamage {
 	@Column(unique = true, nullable = false, name = "damage_id")
 	private Integer damageId;
 
-	@ManyToOne
+	// 양방향 동기화용 setter
+	@Setter
+	// ① ManyToOne에도 FetchType.LAZY 지정
+	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "capture_point_id", nullable = false)
 	private CapturePoint capturePoint;
 
@@ -48,15 +51,11 @@ public class CaptureDamage {
 	private DamageCategory damageCategory;
 
 	@Enumerated(EnumType.STRING)
-	@JsonFormat(shape = JsonFormat.Shape.NUMBER)
 	@Column(name = "status", nullable = false, length = 20)
 	private DamageStatus status;
 
 	@Column(name = "description")
 	private String description;
-
-	@Column(name = "risk", length = 10)
-	private Double risk;
 
 	@CreatedDate
 	@Column(name = "created_at", nullable = false, updatable = false)
@@ -66,13 +65,6 @@ public class CaptureDamage {
 	@Column(name = "updated_at")
 	private LocalDateTime updatedAt;
 
-	public enum DamageStatus {
-		REPORTED,     // 보고됨
-		RECEIVED,     // 수리접수
-		IN_PROGRESS,  // 수리중
-		COMPLETED     // 수리완료
-	}
-
 	@PrePersist
 	public void prePersist() {
 		if (this.status == null) {
@@ -80,24 +72,31 @@ public class CaptureDamage {
 		}
 	}
 
-	/**
-	 * 자동생성 PK_ID 를 제외한 빌더 패턴 생성자
-	 * @param capturePoint         이미지 정보
-	 * @param damageCategory       파손 유형
-	 * @param description          설명
-	 * @param risk                 심각도(optional)
-	 */
+	// ② 빌더에 상태값도 받을 수 있게 오버로드
 	@Builder
 	public CaptureDamage(
 		CapturePoint capturePoint,
 		DamageCategory damageCategory,
 		String description,
-		Double risk
+		DamageStatus status  // <- 상태를 명시적으로 받거나
 	) {
 		this.capturePoint = capturePoint;
 		this.damageCategory = damageCategory;
 		this.description = description;
-		this.risk = risk;
+		this.status = status != null ? status : DamageStatus.REPORTED;
+	}
+
+	public enum DamageStatus {
+		REPORTED(0), RECEIVED(1), IN_PROGRESS(2), COMPLETED(3);
+		private final int number;
+
+		DamageStatus(int number) {
+			this.number = number;
+		}
+
+		public int getNumber() {
+			return number;
+		}
 	}
 
 }

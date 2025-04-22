@@ -4,10 +4,12 @@ import java.util.List;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.b201.api.dto.CapturePointResponseDto;
+import com.b201.api.dto.DamageDetailResponseDto;
 import com.b201.api.dto.FeatureDto;
 import com.b201.api.service.CapturePointService;
 
@@ -22,12 +24,19 @@ public class CapturePointController {
 
 	@GetMapping
 	public ResponseEntity<CapturePointResponseDto> getCapturePoints() {
-		List<FeatureDto> featureDtos = capturePointService.findAllFeatures();
-		if (featureDtos.isEmpty()) {
+		List<FeatureDto> features = capturePointService.findAllFeatures();
+		if (features.isEmpty()) {
 			return ResponseEntity.noContent().build();
 		}
 
-		CapturePointResponseDto body = CapturePointResponseDto.builder().features(featureDtos).build();
+		CapturePointResponseDto body = CapturePointResponseDto.builder().features(features).build();
 		return ResponseEntity.ok(body);
 	}
+
+	@GetMapping("/{capturePointId}")
+	public ResponseEntity<DamageDetailResponseDto> getDamageDetails(@PathVariable("capturePointId") String publicId) {
+		DamageDetailResponseDto body = capturePointService.findDamageDetail(publicId);
+		return ResponseEntity.ok(body);
+	}
+
 }

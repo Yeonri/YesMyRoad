@@ -58,7 +58,16 @@ public class CapturePoint {
 	@Column(name = "image_url")
 	private String imageUrl;
 
-	@OneToMany(mappedBy = "capturePoint", cascade = CascadeType.PERSIST, orphanRemoval = true)
+	@Column(name = "risk", length = 10)
+	private Double risk;
+
+	// ① CascadeType.ALL 로 변경: Persist, Merge, Remove 모두 전파
+	@OneToMany(
+		mappedBy = "capturePoint",
+		cascade = CascadeType.ALL,
+		orphanRemoval = true,
+		fetch = FetchType.LAZY
+	)
 	private List<CaptureDamage> captureDamages = new ArrayList<>();
 
 	@ManyToOne(fetch = FetchType.LAZY)
@@ -83,12 +92,19 @@ public class CapturePoint {
 		}
 	}
 
+	// ② 양방향 관계를 위한 편의 메서드
+	public void addDamage(CaptureDamage damage) {
+		damage.setCapturePoint(this);
+		this.captureDamages.add(damage);
+	}
+
 	@Builder(toBuilder = true)
 	public CapturePoint(
 		LocalDateTime captureTimestamp,
 		Point location,
 		Double accuracyMeters,
 		String imageUrl,
+		Double risk,
 		Region provinceRegion,
 		Region cityRegion,
 		Region districtRegion,
@@ -98,6 +114,7 @@ public class CapturePoint {
 		this.location = location;
 		this.accuracyMeters = accuracyMeters;
 		this.imageUrl = imageUrl;
+		this.risk = risk;
 		this.provinceRegion = provinceRegion;
 		this.cityRegion = cityRegion;
 		this.districtRegion = districtRegion;
