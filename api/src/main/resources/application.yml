@@ -30,3 +30,7 @@ server:
   error:
     include-stacktrace: never
     include-message: never
+
+
+address:
+  key: ${ADDRESS_API_KEY}
