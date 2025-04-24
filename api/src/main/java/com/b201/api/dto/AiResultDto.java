@@ -28,8 +28,7 @@ public class AiResultDto {
 
 	private List<Detection> detections;
 
-	@Builder
-	@AllArgsConstructor
+	@Getter
 	@JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
 	public static class Location {
 		private Double latitude;
@@ -37,16 +36,14 @@ public class AiResultDto {
 		private Double accuracyMeters;
 	}
 
-	@Builder
-	@AllArgsConstructor
+	@Getter
 	@JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
 	public static class ImageInfo {
 		private String imageUrl;
 		private double risk;
 	}
 
-	@Builder
-	@AllArgsConstructor
+	@Getter
 	@JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
 	public static class Detection {
 		private String categoryName;

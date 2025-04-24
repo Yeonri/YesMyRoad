@@ -9,4 +9,6 @@ import com.b201.api.domain.DamageCategory;
 public interface DamageCategoryRepository extends JpaRepository<DamageCategory, Integer> {
 
 	Optional<DamageCategory> findByCategoryName(String categoryName);
+
+	boolean existsByCategoryName(String categoryName);
 }

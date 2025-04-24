@@ -44,8 +44,7 @@ public class CapturePointService {
 
 		PropertiesDto propertiesDto = PropertiesDto.builder()
 			.publicId(capturePoint.getPublicId())
-			.address(new AddressDto(capturePoint.getProvinceRegion().getName(), capturePoint.getCityRegion().getName(),
-				capturePoint.getDistrictRegion().getName(), capturePoint.getStreetAddress()))
+			.address(new AddressDto(capturePoint.getStreetAddress()))
 			.accuracyMeters(capturePoint.getAccuracyMeters())
 			.build();
 

@@ -33,8 +33,8 @@ public class CapturePointController {
 		return ResponseEntity.ok(body);
 	}
 
-	@GetMapping("/{capturePointId}")
-	public ResponseEntity<DamageDetailResponseDto> getDamageDetails(@PathVariable("capturePointId") String publicId) {
+	@GetMapping("/{publicId}")
+	public ResponseEntity<DamageDetailResponseDto> getDamageDetails(@PathVariable("publicId") String publicId) {
 		DamageDetailResponseDto body = capturePointService.findDamageDetail(publicId);
 		return ResponseEntity.ok(body);
 	}

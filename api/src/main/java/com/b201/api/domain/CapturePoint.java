@@ -16,8 +16,6 @@ import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.Table;
@@ -55,7 +53,7 @@ public class CapturePoint {
 	@Column(name = "accuracy_meters")
 	private Double accuracyMeters;
 
-	@Column(name = "image_url")
+	@Column(name = "image_url", nullable = false)
 	private String imageUrl;
 
 	@Column(name = "risk", length = 10)
@@ -69,18 +67,6 @@ public class CapturePoint {
 		fetch = FetchType.LAZY
 	)
 	private List<CaptureDamage> captureDamages = new ArrayList<>();
-
-	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "province_id", nullable = false)
-	private Region provinceRegion;
-
-	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "city_id", nullable = false)
-	private Region cityRegion;
-
-	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "district_id")
-	private Region districtRegion;
 
 	@Column(name = "street_address")
 	private String streetAddress;
@@ -105,9 +91,6 @@ public class CapturePoint {
 		Double accuracyMeters,
 		String imageUrl,
 		Double risk,
-		Region provinceRegion,
-		Region cityRegion,
-		Region districtRegion,
 		String streetAddress
 	) {
 		this.captureTimestamp = captureTimestamp;
@@ -115,9 +98,6 @@ public class CapturePoint {
 		this.accuracyMeters = accuracyMeters;
 		this.imageUrl = imageUrl;
 		this.risk = risk;
-		this.provinceRegion = provinceRegion;
-		this.cityRegion = cityRegion;
-		this.districtRegion = districtRegion;
 		this.streetAddress = streetAddress;
 	}
 
