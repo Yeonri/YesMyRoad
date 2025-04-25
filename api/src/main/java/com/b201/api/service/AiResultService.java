@@ -1,7 +1,6 @@
 package com.b201.api.service;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.GeometryFactory;
@@ -19,10 +18,12 @@ import com.b201.api.repository.DamageCategoryRepository;
 import com.b201.api.util.VworldAddressUtil;
 
 import jakarta.transaction.Transactional;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @Service
+@RequiredArgsConstructor
 public class AiResultService {
 
 	private final VworldAddressUtil addressUtil;
@@ -30,21 +31,9 @@ public class AiResultService {
 	private final CaptureDamageRepository captureDamageRepository;
 	private final DamageCategoryRepository damageCategoryRepository;
 
-	public AiResultService(
-		VworldAddressUtil addressUtil,
-		CapturePointRepository capturePointRepository,
-		CaptureDamageRepository captureDamageRepository,
-		DamageCategoryRepository damageCategoryRepository
-	) {
-		this.addressUtil = addressUtil;
-		this.capturePointRepository = capturePointRepository;
-		this.captureDamageRepository = captureDamageRepository;
-		this.damageCategoryRepository = damageCategoryRepository;
-	}
-
 	@Transactional
 	public void addAiResult(AiResultDto dto) {
-		// 1) 주소 조회
+		//  주소 조회
 		String street = null;
 		try {
 			street = addressUtil.changePointToAddress(
@@ -62,7 +51,7 @@ public class AiResultService {
 			dto.getLocation().getLongitude(),
 			dto.getLocation().getLatitude()
 		));
-		// 2) CapturePoint 저장
+		//  CapturePoint 저장
 		CapturePoint cp = CapturePoint.builder()
 			.accuracyMeters(dto.getLocation().getAccuracyMeters())
 			.captureTimestamp(dto.getCaptureTimestampUtc())
@@ -70,9 +59,8 @@ public class AiResultService {
 			.imageUrl(dto.getImageInfo().getImageUrl())
 			.streetAddress(street)
 			.location(pt).build();
-		capturePointRepository.save(cp);
 
-		// 3) Detection → CaptureDamage 배치 저장
+		//  Detection → CaptureDamage 배치 저장
 		List<CaptureDamage> damages = dto.getDetections().stream()
 			.map(d -> {
 				// 카테고리 조회 또는 저장
@@ -86,8 +74,12 @@ public class AiResultService {
 					.damageCategory(cat)
 					.build();
 			})
-			.collect(Collectors.toList());
-		captureDamageRepository.saveAll(damages);
+			.toList();
+
+		for (CaptureDamage d : damages) {
+			cp.addDamage(d);
+		}
+		capturePointRepository.save(cp);
 
 		log.info("AI 결과 저장 완료: pointId={}, damages={}", cp.getCapturePointId(), damages.size());
 	}

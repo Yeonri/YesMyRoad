@@ -23,7 +23,6 @@ public class VworldAddressUtil {
 	 * JSON 문자열을 리턴합니다.
 	 */
 	public String changePointToAddress(double lng, double lat) {
-		// vworld API는 "lat,lng" 형태로 point 파라미터를 받습니다.
 		String point = lng + "," + lat;
 
 		JsonNode root = addressRestClient.get()

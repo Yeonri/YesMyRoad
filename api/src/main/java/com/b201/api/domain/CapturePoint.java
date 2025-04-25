@@ -59,7 +59,7 @@ public class CapturePoint {
 	@Column(name = "risk", length = 10)
 	private Double risk;
 
-	// ① CascadeType.ALL 로 변경: Persist, Merge, Remove 모두 전파
+	// CascadeType.ALL 로 변경: Persist, Merge, Remove 모두 전파
 	@OneToMany(
 		mappedBy = "capturePoint",
 		cascade = CascadeType.ALL,
@@ -78,7 +78,7 @@ public class CapturePoint {
 		}
 	}
 
-	// ② 양방향 관계를 위한 편의 메서드
+	// 양방향 관계를 위한 편의 메서드
 	public void addDamage(CaptureDamage damage) {
 		damage.setCapturePoint(this);
 		this.captureDamages.add(damage);
