@@ -39,9 +39,7 @@ public class CaptureDamage {
 	@Column(unique = true, nullable = false, name = "damage_id")
 	private Integer damageId;
 
-	// 양방향 동기화용 setter
 	@Setter
-	// ① ManyToOne에도 FetchType.LAZY 지정
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "capture_point_id", nullable = false)
 	private CapturePoint capturePoint;
@@ -72,7 +70,6 @@ public class CaptureDamage {
 		}
 	}
 
-	// ② 빌더에 상태값도 받을 수 있게 오버로드
 	@Builder
 	public CaptureDamage(
 		CapturePoint capturePoint,
