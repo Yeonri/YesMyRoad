@@ -1,8 +1,5 @@
-import Dashboard from '@/components/Dashboard'
-import React from 'react'
+import Dashboard from "@/components/dashboard"
 
-const Home: React.FC = () => {
+export default function Home() {
   return <Dashboard />
 }
-
-export default Home
