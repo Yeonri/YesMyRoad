@@ -1,21 +1,22 @@
-"use client"
+'use client'
 
-import { useEffect } from "react"
-import { MapPin, AlertTriangle, BarChart3, Filter, Clock, Calendar } from "lucide-react"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import { Badge } from "@/components/ui/badge"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import LocationHeader from '@/components/headers/location-header'
+import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { useDefectStore } from '@/store/defect-store'
+import { AlertTriangle, BarChart3, Calendar, Clock, Filter, MapPin } from 'lucide-react'
+import { useEffect, useState } from 'react'
 
-import DefectMap from "./defect-map"
-import DefectHeatmap from "./defect-heatmap"
-import DefectList from "./defect-list"
-import DefectStats from "./defect-stats"
-import DefectTrends from "./defect-trends"
-import Header from "./header"
-import RecentAlerts from "./recent-alerts"
-import { useDefectStore } from "@/store/defect-store"
+import DefectHeatmap from './defect-heatmap'
+import DefectList from './defect-list'
+import DefectMap from './defect-map'
+import DefectStats from './defect-stats'
+import DefectTrends from './defect-trends'
+import Header from './header'
+import RecentAlerts from './recent-alerts'
 
 export default function Dashboard() {
   // Get state and actions from Zustand store
@@ -44,6 +45,8 @@ export default function Dashboard() {
     fetchDefectStats()
     fetchDefectTrends()
   }, [fetchDefects, fetchDefectLocations, fetchRecentAlerts, fetchDefectStats, fetchDefectTrends])
+
+  const [selectedTab, selectTab] = useState("map")
 
   return (
     <div className="flex min-h-screen w-full flex-col bg-muted/40">
@@ -171,12 +174,17 @@ export default function Dashboard() {
         </div>
 
         <Tabs defaultValue="map" className="space-y-4">
+          <div className='flex gap-5'>
           <TabsList>
-            <TabsTrigger value="map">지도</TabsTrigger>
-            <TabsTrigger value="heatmap">히트맵</TabsTrigger>
-            <TabsTrigger value="list">리스트</TabsTrigger>
-            <TabsTrigger value="analytics">통계</TabsTrigger>
+            <TabsTrigger value="map" onClick={() => selectTab("map")}>지도</TabsTrigger>
+            <TabsTrigger value="heatmap" onClick={() => selectTab("hitmap")}>히트맵</TabsTrigger>
+            <TabsTrigger value="list" onClick={() => selectTab(
+              "list"
+            )}>리스트</TabsTrigger>
+            <TabsTrigger value="analytics" onClick={() => selectTab("indicators")}>통계</TabsTrigger>
           </TabsList>
+          {(selectedTab === "map" || selectedTab === "hitmap") &&<LocationHeader />}
+          </div>
           <TabsContent value="map" className="space-y-4">
             <div className="grid gap-4 md:grid-cols-3">
               <Card className="md:col-span-2">
