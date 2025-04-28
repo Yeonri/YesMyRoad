@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { useDefectStore } from '@/store/defect-store'
+import { DefectType, SeverityType, TimeRangeType, useDefectStore } from '@/store/defect-store'
 import { AlertTriangle, BarChart3, Calendar, Clock, Filter, MapPin } from 'lucide-react'
 import { useEffect, useState } from 'react'
 
@@ -89,7 +89,7 @@ export default function Dashboard() {
             </Badge>
           </div>
           <div className="flex flex-wrap gap-2">
-            <Select value={timeRange} onValueChange={(value) => setTimeRange(value as any)}>
+            <Select value={timeRange} onValueChange={(value) => setTimeRange(value as TimeRangeType)}>
               <SelectTrigger className="h-8 w-[130px]">
                 <SelectValue placeholder="Time Range" />
               </SelectTrigger>
@@ -100,7 +100,7 @@ export default function Dashboard() {
                 <SelectItem value="30d">30일 이내</SelectItem>
               </SelectContent>
             </Select>
-            <Select value={defectType} onValueChange={(value) => setDefectType(value as any)}>
+            <Select value={defectType} onValueChange={(value) => setDefectType(value as DefectType)}>
               <SelectTrigger className="h-8 w-[130px]">
                 <SelectValue placeholder="Defect Type" />
               </SelectTrigger>
@@ -111,7 +111,7 @@ export default function Dashboard() {
                 <SelectItem value="paint">페인트 벗겨짐</SelectItem>
               </SelectContent>
             </Select>
-            <Select value={severity} onValueChange={(value) => setSeverity(value as any)}>
+            <Select value={severity} onValueChange={(value) => setSeverity(value as SeverityType)}>
               <SelectTrigger className="h-8 w-[130px]">
                 <SelectValue placeholder="Severity" />
               </SelectTrigger>

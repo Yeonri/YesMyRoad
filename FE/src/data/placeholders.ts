@@ -1,5 +1,7 @@
 // TODO: Replace these placeholder values with actual data from API endpoints
 
+import { Defect } from "@/store/defect-store"
+
 // Mock data for defect locations
 export const defectLocations = [
   { id: 1, lat: 36.355056, lng: 127.301378, type: 'pothole', severity: 'critical', title: '포트홀' },
@@ -99,7 +101,7 @@ export const defects = [
 ]
 
 // Mock data for recent alerts
-export const recentAlerts = [
+export const recentAlerts:Defect[] = [
   {
     id: 'DEF-1001',
     type: 'Pothole',
