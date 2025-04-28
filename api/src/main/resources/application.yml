@@ -1,0 +1,36 @@
+spring:
+  config:
+    import: optional:file:.env[.properties]
+
+  # MySQL
+  datasource:
+    driver-class-name: ${MYSQL_DRIVER}
+    url: jdbc:mysql://${MYSQL_URL}/${MYSQL_DATABASE}?serverTimezone=Asia/Seoul
+    username: ${MYSQL_USER}
+    password: ${MYSQL_PASSWORD}
+    hikari:
+      maximum-pool-size: 10
+
+  #jpa
+  jpa:
+    hibernate:
+      ddl-auto: create
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.MySQLDialect
+
+  #한글 깨짐 이슈 방지
+  sql:
+    init:
+      encoding: UTF-8
+
+
+# application.yml
+server:
+  error:
+    include-stacktrace: never
+    include-message: never
+
+
+address:
+  key: ${ADDRESS_API_KEY}
