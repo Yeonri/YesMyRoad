@@ -22,7 +22,7 @@ export type Defect = {
   severity: string
   location: string
   detectedAt: string
-  status: string
+  status?: string
   description?: string
 }
 

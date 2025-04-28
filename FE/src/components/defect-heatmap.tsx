@@ -43,16 +43,16 @@ export default function DefectHeatmap() {
 
       // 결함 위치를 GeoJSON 형식으로 변환
       const geojsonData = {
-        type: 'FeatureCollection',
+        type: 'FeatureCollection' as const,
         features: heatmapLocations.map((defect) => ({
-          type: 'Feature',
+          type: 'Feature' as const,
           properties: {},
-          geometry: { type: 'Point', coordinates: [defect.lng, defect.lat] },
+          geometry: { type: 'Point' as const, coordinates: [defect.lng, defect.lat] },
         })),
       }
 
       // 히트맵 소스 추가
-      map.current!.addSource('defects', { type: 'geojson', data: geojsonData as any })
+      map.current!.addSource('defects', { type: 'geojson', data: geojsonData })
 
       // 히트맵 레이어 추가
       map.current!.addLayer({

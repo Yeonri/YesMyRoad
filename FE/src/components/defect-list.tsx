@@ -40,9 +40,9 @@ export default function DefectList() {
 
   const sortedDefects = [...filteredDefects].sort((a, b) => {
     if (sortDirection === "asc") {
-      return a[sortColumn as keyof typeof a] > b[sortColumn as keyof typeof b] ? 1 : -1
+      return a[sortColumn as keyof typeof a]! > b[sortColumn as keyof typeof b]! ? 1 : -1
     } else {
-      return a[sortColumn as keyof typeof a] < b[sortColumn as keyof typeof b] ? 1 : -1
+      return a[sortColumn as keyof typeof a]! < b[sortColumn as keyof typeof b]! ? 1 : -1
     }
   })
 
@@ -159,7 +159,7 @@ export default function DefectList() {
                 {formatDate(defect.detectedAt)}
               </TableCell>
               <TableCell>
-                <Badge className={getStatusColor(defect.status)}>{defect.status}</Badge>
+                <Badge className={getStatusColor(defect.status!)}>{defect.status!}</Badge>
               </TableCell>
               <TableCell>
                 <DropdownMenu>
