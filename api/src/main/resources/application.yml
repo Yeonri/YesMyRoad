@@ -5,8 +5,8 @@ spring:
   # MySQL
   datasource:
     driver-class-name: ${MYSQL_DRIVER}
-    url: jdbc:mysql://${MYSQL_URL}/${MYSQL_SCHEMA}?serverTimezone=Asia/Seoul
-    username: ${MYSQL_USERNAME}
+    url: jdbc:mysql://${MYSQL_URL}/${MYSQL_DATABASE}?serverTimezone=Asia/Seoul
+    username: ${MYSQL_USER}
     password: ${MYSQL_PASSWORD}
     hikari:
       maximum-pool-size: 10
