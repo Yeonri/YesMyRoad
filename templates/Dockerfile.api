@@ -1,0 +1,24 @@
+# 1단계: 빌드용
+FROM gradle:8.13.0-jdk21-alpine AS builder
+
+WORKDIR /home/gradle/api
+
+COPY build.gradle settings.gradle ./
+
+COPY src ./src/
+
+# 실행 가능한 jar 빌드 (테스트는 스킵)
+RUN gradle bootJar -x test 
+
+# ----------------------------------------------------
+
+# 2단계: 실행용
+FROM openjdk:21-slim
+
+WORKDIR /api
+
+COPY --from=builder /home/gradle/api/build/libs/*.jar app.jar
+
+EXPOSE 8080
+
+ENTRYPOINT ["java", "-jar", "app.jar"]
