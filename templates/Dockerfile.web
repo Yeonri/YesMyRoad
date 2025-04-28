@@ -4,8 +4,6 @@ FROM node:22-alpine AS builder
 RUN corepack enable && corepack prepare pnpm@latest --activate
 # 작업 디렉토리 설정
 WORKDIR /app
-# 빌드용 .env 파일 복사 (있으면)
-COPY .env.production .env
 # 의존성 설치를 위한 파일 복사
 COPY package.json pnpm-lock.yaml* ./
 # 의존성 설치
