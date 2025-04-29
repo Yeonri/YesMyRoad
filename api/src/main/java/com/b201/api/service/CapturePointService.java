@@ -35,8 +35,8 @@ public class CapturePointService {
 
 	private FeatureDto mapToFeatureDto(CapturePoint capturePoint) {
 
-		double longitude = capturePoint.getLocation().getX();
-		double latitude = capturePoint.getLocation().getY();
+		double longitude = capturePoint.getLocation().getY();
+		double latitude = capturePoint.getLocation().getX();
 
 		GeometryDto geometryDto = GeometryDto.builder()
 			.coordinates(new double[] {longitude, latitude})
