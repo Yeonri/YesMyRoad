@@ -40,7 +40,7 @@ public class AiResultDto {
 	@JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
 	public static class ImageInfo {
 		private String imageUrl;
-		private double risk;
+		private Double risk;
 	}
 
 	@Getter
@@ -48,5 +48,4 @@ public class AiResultDto {
 	public static class Detection {
 		private String categoryName;
 	}
-
 }
