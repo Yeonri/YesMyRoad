@@ -4,10 +4,18 @@ import LocationHeader from '@/components/headers/location-header'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import {
+  DefectCard,
+  DefectCardContent,
+  DefectCardDescription,
+  DefectCardFooter,
+  DefectCardHeader,
+  DefectCardTitle,
+} from '@/components/ui/defect-card'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { DefectType, SeverityType, TimeRangeType, useDefectStore } from '@/store/defect-store'
-import { AlertTriangle, BarChart3, Calendar, Clock, Filter, MapPin } from 'lucide-react'
+import { AlertTriangle, ArrowRight, BarChart3, Calendar, Clock, Filter, MapPin } from 'lucide-react'
 import { useEffect, useState } from 'react'
 
 import DefectHeatmap from './defect-heatmap'
@@ -46,7 +54,7 @@ export default function Dashboard() {
     fetchDefectTrends()
   }, [fetchDefects, fetchDefectLocations, fetchRecentAlerts, fetchDefectStats, fetchDefectTrends])
 
-  const [selectedTab, selectTab] = useState("map")
+  const [selectedTab, selectTab] = useState('map')
 
   return (
     <div className="flex min-h-screen w-full flex-col bg-muted/40">
@@ -174,16 +182,22 @@ export default function Dashboard() {
         </div>
 
         <Tabs defaultValue="map" className="space-y-4">
-          <div className='flex gap-5'>
-          <TabsList>
-            <TabsTrigger value="map" onClick={() => selectTab("map")}>지도</TabsTrigger>
-            <TabsTrigger value="heatmap" onClick={() => selectTab("hitmap")}>히트맵</TabsTrigger>
-            <TabsTrigger value="list" onClick={() => selectTab(
-              "list"
-            )}>리스트</TabsTrigger>
-            <TabsTrigger value="analytics" onClick={() => selectTab("indicators")}>통계</TabsTrigger>
-          </TabsList>
-          {(selectedTab === "map" || selectedTab === "hitmap") &&<LocationHeader />}
+          <div className="flex gap-5">
+            <TabsList>
+              <TabsTrigger value="map" onClick={() => selectTab('map')}>
+                지도
+              </TabsTrigger>
+              <TabsTrigger value="heatmap" onClick={() => selectTab('hitmap')}>
+                히트맵
+              </TabsTrigger>
+              <TabsTrigger value="list" onClick={() => selectTab('list')}>
+                리스트
+              </TabsTrigger>
+              <TabsTrigger value="analytics" onClick={() => selectTab('indicators')}>
+                통계
+              </TabsTrigger>
+            </TabsList>
+            {(selectedTab === 'map' || selectedTab === 'hitmap') && <LocationHeader />}
           </div>
           <TabsContent value="map" className="space-y-4">
             <div className="grid gap-4 md:grid-cols-3">
@@ -198,15 +212,22 @@ export default function Dashboard() {
                   </div>
                 </CardContent>
               </Card>
-              <Card>
-                <CardHeader>
-                  <CardTitle>최근 발생한 결함 이력</CardTitle>
-                  <CardDescription>심각한 결함 및 높은 우선순위 결함</CardDescription>
-                </CardHeader>
-                <CardContent>
+
+              <DefectCard>
+                <DefectCardHeader>
+                  <DefectCardTitle>최근 발생한 결함 이력</DefectCardTitle>
+                  <DefectCardDescription>심각한 결함 및 높은 우선순위 결함</DefectCardDescription>
+                </DefectCardHeader>
+                <DefectCardContent>
                   <RecentAlerts />
-                </CardContent>
-              </Card>
+                </DefectCardContent>
+                <DefectCardFooter>
+                  <Button variant="outline" size="sm" className="w-full">
+                    View all alerts
+                    <ArrowRight className="ml-2 h-4 w-4" />
+                  </Button>
+                </DefectCardFooter>
+              </DefectCard>
             </div>
           </TabsContent>
           <TabsContent value="heatmap" className="space-y-4">
