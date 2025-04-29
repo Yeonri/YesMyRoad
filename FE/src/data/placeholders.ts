@@ -101,7 +101,7 @@ export const defects = [
 ]
 
 // Mock data for recent alerts
-export const recentAlerts:Defect[] = [
+export const recentAlerts: Defect[] = [
   {
     id: 'DEF-1001',
     type: 'Pothole',
