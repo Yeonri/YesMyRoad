@@ -12,7 +12,7 @@ import com.b201.api.domain.CaptureDamage;
 import com.b201.api.domain.CapturePoint;
 import com.b201.api.domain.DamageCategory;
 import com.b201.api.dto.AiResultDto;
-import com.b201.api.repository.CaptureDamageRepository;
+import com.b201.api.exception.AddressLookupException;
 import com.b201.api.repository.CapturePointRepository;
 import com.b201.api.repository.DamageCategoryRepository;
 import com.b201.api.util.VworldAddressUtil;
@@ -28,59 +28,68 @@ public class AiResultService {
 
 	private final VworldAddressUtil addressUtil;
 	private final CapturePointRepository capturePointRepository;
-	private final CaptureDamageRepository captureDamageRepository;
 	private final DamageCategoryRepository damageCategoryRepository;
+	private final GeometryFactory geometryFactory;
 
 	@Transactional
 	public void addAiResult(AiResultDto dto) {
 		//  주소 조회
-		String street = null;
+		String street = findAddress(dto);
+
+		Point pt = toPoint(dto);
+
+		CapturePoint capturePoint = toCapturePoint(dto, street, pt);
+
+		List<CaptureDamage> damages = toCaptureDamages(dto, capturePoint);
+
+		damages.forEach(capturePoint::addDamage);
+
+		capturePointRepository.save(capturePoint);
+	}
+
+	//Vworld api를 통해 좌표를 주소값으로 변환.
+	private String findAddress(AiResultDto dto) {
 		try {
-			street = addressUtil.changePointToAddress(
+			return addressUtil.changePointToAddress(
 				dto.getLocation().getLongitude(),
 				dto.getLocation().getLatitude()
 			);
 		} catch (RestClientException e) {
-			log.error("주소 변환 실패 for point={},{}",
-				dto.getLocation().getLongitude(), dto.getLocation().getLatitude(), e);
-			throw e;  // 필요에 따라 커스텀 예외로 래핑해도 좋습니다
+			throw new AddressLookupException(
+				"주소변환 실패 : [" + dto.getLocation().getLongitude() + ", " + dto.getLocation().getLatitude() + "]", e);
 		}
+	}
 
-		GeometryFactory gf = new GeometryFactory();
-		Point pt = gf.createPoint(new Coordinate(
-			dto.getLocation().getLongitude(),
-			dto.getLocation().getLatitude()
-		));
-		//  CapturePoint 저장
-		CapturePoint cp = CapturePoint.builder()
+	//dto의 있는 위도,경도를 point 객체 생성
+	private Point toPoint(AiResultDto dto) {
+		return geometryFactory.createPoint(
+			new Coordinate(dto.getLocation().getLongitude(), dto.getLocation().getLatitude()));
+	}
+
+	//dto 내용과 주소, point 객체를 통해 CapturePoint 객체 생성
+	private CapturePoint toCapturePoint(AiResultDto dto, String address, Point point) {
+		return CapturePoint.builder()
 			.accuracyMeters(dto.getLocation().getAccuracyMeters())
-			.captureTimestamp(dto.getCaptureTimestampUtc())
 			.risk(dto.getImageInfo().getRisk())
+			.captureTimestamp(dto.getCaptureTimestampUtc())
 			.imageUrl(dto.getImageInfo().getImageUrl())
-			.streetAddress(street)
-			.location(pt).build();
+			.location(point)
+			.streetAddress(address)
+			.build();
+	}
 
-		//  Detection → CaptureDamage 배치 저장
-		List<CaptureDamage> damages = dto.getDetections().stream()
-			.map(d -> {
-				// 카테고리 조회 또는 저장
-				DamageCategory cat = damageCategoryRepository
-					.findByCategoryName(d.getCategoryName())
-					.orElseGet(() -> damageCategoryRepository
-						.save(new DamageCategory(d.getCategoryName()))
-					);
+	//CaptureDamage 리스트 매핑
+	private List<CaptureDamage> toCaptureDamages(AiResultDto dto, CapturePoint capturePoint) {
+		return dto.getDetections().stream()
+			.map(detection -> {
+				DamageCategory category = damageCategoryRepository.findByCategoryName(detection.getCategoryName())
+					.orElseGet(() -> damageCategoryRepository.save(new DamageCategory(
+						detection.getCategoryName())));
 				return CaptureDamage.builder()
-					.capturePoint(cp)
-					.damageCategory(cat)
+					.capturePoint(capturePoint)
+					.damageCategory(category)
 					.build();
 			})
 			.toList();
-
-		for (CaptureDamage d : damages) {
-			cp.addDamage(d);
-		}
-		capturePointRepository.save(cp);
-
-		log.info("AI 결과 저장 완료: pointId={}, damages={}", cp.getCapturePointId(), damages.size());
 	}
 }
