@@ -1,7 +1,5 @@
 package com.b201.api.controller;
 
-import java.util.List;
-
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -10,7 +8,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.b201.api.dto.CapturePointResponseDto;
 import com.b201.api.dto.DamageDetailResponseDto;
-import com.b201.api.dto.FeatureDto;
 import com.b201.api.service.CapturePointService;
 
 import lombok.RequiredArgsConstructor;
@@ -24,19 +21,20 @@ public class CapturePointController {
 
 	@GetMapping
 	public ResponseEntity<CapturePointResponseDto> getCapturePoints() {
-		List<FeatureDto> features = capturePointService.findAllFeatures();
-		if (features.isEmpty()) {
+		CapturePointResponseDto body = capturePointService.findAllFeatures();
+		if (body.getFeatures().isEmpty()) {
+			// 데이터가 없으면 204 No Content
 			return ResponseEntity.noContent().build();
 		}
-
-		CapturePointResponseDto body = CapturePointResponseDto.builder().features(features).build();
+		// 데이터가 있으면 200 + body
 		return ResponseEntity.ok(body);
 	}
 
 	@GetMapping("/{publicId}")
-	public ResponseEntity<DamageDetailResponseDto> getDamageDetails(@PathVariable("publicId") String publicId) {
-		DamageDetailResponseDto body = capturePointService.findDamageDetail(publicId);
-		return ResponseEntity.ok(body);
+	public ResponseEntity<DamageDetailResponseDto> getDamageDetails(
+		@PathVariable String publicId
+	) {
+		return ResponseEntity.of(capturePointService.findDamageDetail(publicId));
 	}
 
 }
