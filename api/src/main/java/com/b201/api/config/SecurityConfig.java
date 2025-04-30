@@ -8,6 +8,8 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 
+import com.b201.api.filter.JwtAuthenticationFilter;
+
 @Configuration
 public class SecurityConfig {
 
@@ -21,7 +23,7 @@ public class SecurityConfig {
 		http
 			.csrf(AbstractHttpConfigurer::disable)
 			.authorizeHttpRequests(auth -> auth
-				.anyRequest().permitAll());
+				.anyRequest().permitAll()).addFilterAfter();
 
 		return http.build();
 	}
