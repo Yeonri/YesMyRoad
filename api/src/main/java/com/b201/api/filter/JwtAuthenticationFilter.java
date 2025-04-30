@@ -43,7 +43,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 					UsernamePasswordAuthenticationToken authentication =
 						new UsernamePasswordAuthenticationToken(username, null, Collections.emptyList());
 
-					//현재 요청 정보를 사용자 인증 객체에 포함시킴 (ip줏고, 세션 id 등) (나중에 보안 로깅에 사용됨)
+					//현재 요청 정보를 사용자 인증 객체에 포함시킴 (ip줏고, 세션 id 등) (보안 로깅에 사용됨)
 					authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
 
 					//SecurityContext에 인증 객체 등록
