@@ -6,6 +6,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.b201.api.dto.LoginDto;
 import com.b201.api.dto.SignupDto;
 import com.b201.api.service.UserService;
 
@@ -23,5 +24,10 @@ public class UserController {
 	public ResponseEntity<?> signup(@Valid @RequestBody SignupDto signupDto) {
 		userService.signUp(signupDto);
 		return ResponseEntity.ok().build();
+	}
+
+	@PostMapping("/login")
+	public ResponseEntity<?> login(@Valid @RequestBody LoginDto loginDto) {
+		return ResponseEntity.ok().body(userService.login(loginDto));
 	}
 }

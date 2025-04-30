@@ -26,7 +26,7 @@ public class JwtUtil {
 	}
 
 	//jwt 토큰 생성 메서드
-	private String generateToken(String username) {
+	public String generateToken(String username) {
 		return Jwts.builder()
 			//이 토큰의 주인이 누구인지 사용자 정보 저장
 			.setSubject(username)
@@ -40,7 +40,7 @@ public class JwtUtil {
 	}
 
 	//jwt 토큰 검증 메서드
-	private String getUsernameFromToken(String token) {
+	public String getUsernameFromToken(String token) {
 		return Jwts.parserBuilder()
 			.setSigningKey(getSigningKey()) //서명 검증용 키 설정
 			.build() //jwt 분석 도구 생성
