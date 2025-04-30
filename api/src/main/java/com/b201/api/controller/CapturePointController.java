@@ -34,10 +34,7 @@ public class CapturePointController {
 	public ResponseEntity<DamageDetailResponseDto> getDamageDetails(
 		@PathVariable String publicId
 	) {
-		return capturePointService
-			.findDamageDetail(publicId)
-			.map(ResponseEntity::ok)
-			.orElseGet(() -> ResponseEntity.notFound().build());
+		return ResponseEntity.of(capturePointService.findDamageDetail(publicId));
 	}
 
 }
