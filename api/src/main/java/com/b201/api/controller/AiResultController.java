@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.b201.api.dto.AiResultDto;
 import com.b201.api.service.AiResultService;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -22,8 +23,8 @@ public class AiResultController {
 	private final AiResultService aiResultService;
 
 	@PostMapping
-	public ResponseEntity<?> addPoint(@RequestBody AiResultDto aiResultDto) {
+	public ResponseEntity<?> addPoint(@Valid @RequestBody AiResultDto aiResultDto) {
 		aiResultService.addAiResult(aiResultDto);
-		return new ResponseEntity<>(HttpStatus.OK);
+		return ResponseEntity.status(HttpStatus.OK).body("point 저장 성공");
 	}
 }
