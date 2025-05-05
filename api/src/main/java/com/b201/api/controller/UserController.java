@@ -38,4 +38,11 @@ public class UserController {
 
 		return ResponseEntity.ok().body(userService.refreshAccessToken(requestHeader));
 	}
+
+	@PostMapping("/logout")
+	public ResponseEntity<?> logout(HttpServletRequest request) {
+		String requestHeader = request.getHeader("Authorization");
+		userService.logout(requestHeader);
+		return ResponseEntity.ok().body("로그아웃 성공");
+	}
 }
