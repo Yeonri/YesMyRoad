@@ -10,6 +10,7 @@ import com.b201.api.dto.LoginRequestDto;
 import com.b201.api.dto.SignupDto;
 import com.b201.api.service.UserService;
 
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
@@ -29,5 +30,12 @@ public class UserController {
 	@PostMapping("/login")
 	public ResponseEntity<?> login(@Valid @RequestBody LoginRequestDto loginDto) {
 		return ResponseEntity.ok().body(userService.login(loginDto));
+	}
+
+	@PostMapping("/refresh")
+	public ResponseEntity<?> refresh(HttpServletRequest request) {
+		String requestHeader = request.getHeader("Authorization");
+
+		return ResponseEntity.ok().body(userService.refreshAccessToken(requestHeader));
 	}
 }
