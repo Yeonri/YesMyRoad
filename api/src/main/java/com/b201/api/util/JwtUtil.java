@@ -17,7 +17,8 @@ import lombok.RequiredArgsConstructor;
 public class JwtUtil {
 
 	private final JwtProperties jwtProperties;
-	private static final long EXPIRATION_TIME = 5 * 60 * 1000; // 5분 (ms 단위)
+	private static final long EXPIRATION_TIME = 30 * 60 * 1000; // 30분 (ms 단위)
+	private static final long EXPIRATION_REFRESH_TIME = 2 * 60 * 60 * 1000;
 
 	//secretKey 생성 메서드 token 생성,검증에 모두 사용됨.
 	private Key getSigningKey() {
@@ -25,18 +26,28 @@ public class JwtUtil {
 		return Keys.hmacShaKeyFor(jwtProperties.getSecret().getBytes());
 	}
 
-	//jwt 토큰 생성 메서드
-	public String generateToken(String username) {
+	//jwt token 생성 메서드
+	public String generateToken(String username, long expiration) {
 		return Jwts.builder()
 			//이 토큰의 주인이 누구인지 사용자 정보 저장
 			.setSubject(username)
 			//만료 시간 설정
-			.setExpiration(new Date(System.currentTimeMillis() + EXPIRATION_TIME))
+			.setExpiration(new Date(System.currentTimeMillis() + expiration))
 			//인증 방법 설정
 			.signWith(getSigningKey(),
 				SignatureAlgorithm.HS256)
 			//생성
 			.compact();
+	}
+
+	//jwt access token 생성 메서드
+	public String generateAccessToken(String username) {
+		return generateToken(username, EXPIRATION_TIME);
+	}
+
+	//jwt refresh token 생성 메서드
+	public String generateRefreshToken(String username) {
+		return generateToken(username, EXPIRATION_REFRESH_TIME);
 	}
 
 	//jwt 토큰 검증 메서드
