@@ -65,4 +65,28 @@ public class UserService {
 			.username(user.getUsername())
 			.build();
 	}
+
+
+	//AccessToken 재발급 로직
+	public LoginResponseDto refreshAccessToken(String requestHeader) {
+		if(requestHeader == null || !requestHeader.startsWith("Bearer ")) {
+			throw new BadCredentialsException("Refresh Token이 존재하지 않거나 형식이 잘못되었습니다.");
+		}
+
+		String refreshToken = requestHeader.substring(7);
+		String userId = jwtUtil.getUsernameFromToken(refreshToken);
+
+		String savedRefreshToken = stringRedisTemplate.opsForValue().get("RT:"+userId);
+		if(savedRefreshToken == null || !savedRefreshToken.equals(refreshToken)) {
+			throw new BadCredentialsException("Refresh Token이 유효하지 않거나 만료되었습니다.");
+		}
+
+		String newAccessToken = jwtUtil.generateAccessToken(userId);
+
+		return LoginResponseDto.builder()
+			.accessToken(newAccessToken)
+			.refreshToken(refreshToken)
+			.username(userId)
+			.build();
+	}
 }
