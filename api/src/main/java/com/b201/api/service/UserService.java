@@ -89,4 +89,21 @@ public class UserService {
 			.username(userId)
 			.build();
 	}
+
+	//로그아웃 로직
+	public void logout(String requestHeader) {
+		if(requestHeader == null || !requestHeader.startsWith("Bearer ")) {
+			throw new BadCredentialsException("AccessToken이 존재하지 않거나 형식이 잘못되었습니다.");
+		}
+
+		String accessToken = requestHeader.substring(7);
+		String userId = jwtUtil.getUsernameFromToken(accessToken);
+
+		//RefreshToken 삭제
+		stringRedisTemplate.delete("RT:"+userId);
+
+		//AccessToken 블랙리스트 등록 (남은 유효 시간만큼 유지)
+		long remainTime = jwtUtil.getExpirationTime(accessToken);
+		stringRedisTemplate.opsForValue().set("BL:"+accessToken, "logout", remainTime, TimeUnit.MILLISECONDS);
+	}
 }

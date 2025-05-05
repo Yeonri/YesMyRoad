@@ -59,4 +59,16 @@ public class JwtUtil {
 			.getBody()
 			.getSubject(); //subject (id) 추출
 	}
+
+
+	public long getExpirationTime(String token) {
+		Date expiration = Jwts.parserBuilder()
+			.setSigningKey(getSigningKey())
+			.build()
+			.parseClaimsJws(token)
+			.getBody()
+			.getExpiration();
+
+		return expiration.getTime() - System.currentTimeMillis();
+	}
 }
