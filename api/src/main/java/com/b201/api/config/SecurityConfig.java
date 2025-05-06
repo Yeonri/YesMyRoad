@@ -8,6 +8,9 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 import com.b201.api.filter.JwtAuthenticationFilter;
 import com.b201.api.util.JwtUtil;
@@ -27,9 +30,25 @@ public class SecurityConfig {
 	}
 
 	@Bean
+	public CorsConfigurationSource corsConfigurationSource() {
+		CorsConfiguration config = new CorsConfiguration();
+		config.addAllowedOriginPattern("*"); // 프론트 도메인 명시해도 됨
+		config.addAllowedMethod("GET");
+		config.addAllowedMethod("POST");
+		config.addAllowedMethod("PUT");
+		config.addAllowedMethod("DELETE");
+		config.addAllowedHeader("Content-Type");
+		config.setAllowCredentials(true);
+
+		UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+		source.registerCorsConfiguration("/**", config);
+		return source;
+	}
+
+	@Bean
 	public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
 		http
-			.cors(cors -> {}) //cors 설정 가능
+			.cors(cors -> cors.configurationSource(corsConfigurationSource())) //cors 설정
 			.csrf(AbstractHttpConfigurer::disable) //jwt 인증방싟은 세션 인증 방식이 아니므로 csrf 설정이 불필요
 			.authorizeHttpRequests(auth -> auth
 				.requestMatchers("/api/users/**").permitAll()
