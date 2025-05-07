@@ -31,12 +31,14 @@ public class SecurityConfig {
 	@Bean
 	public CorsConfigurationSource corsConfigurationSource() {
 		CorsConfiguration config = new CorsConfiguration();
-		config.addAllowedOriginPattern("*"); // 프론트 도메인 명시해도 됨
+		config.addAllowedOriginPattern("https://k12b201.p.ssafy.io");
+		config.addAllowedOriginPattern("http://localhost:3000");
 		config.addAllowedMethod("GET");
 		config.addAllowedMethod("POST");
 		config.addAllowedMethod("PUT");
 		config.addAllowedMethod("DELETE");
 		config.addAllowedHeader("Content-Type");
+		config.addAllowedHeader("Authorization");
 		config.setAllowCredentials(true);
 
 		UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
@@ -48,7 +50,7 @@ public class SecurityConfig {
 	public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
 		http
 			.cors(cors -> cors.configurationSource(corsConfigurationSource())) //cors 설정
-			.csrf(AbstractHttpConfigurer::disable) //jwt 인증방싟은 세션 인증 방식이 아니므로 csrf 설정이 불필요
+			.csrf(AbstractHttpConfigurer::disable) //jwt 인증방식은 세션 인증 방식이 아니므로 csrf 설정이 불필요
 			.authorizeHttpRequests(auth -> auth
 				.requestMatchers("/api/users/**", "/api/detect").permitAll()
 				.anyRequest().authenticated())
