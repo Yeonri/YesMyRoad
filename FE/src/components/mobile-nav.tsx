@@ -1,14 +1,25 @@
-"use client"
+'use client'
 
-import { BarChart3, Home, Map, Settings, AlertTriangle, FileText, Users, Truck } from "lucide-react"
-import Link from "next/link"
-import { Button } from "@/components/ui/button"
+import { Button } from '@/components/ui/button'
+import {
+  AlertTriangle,
+  BarChart3,
+  FileText,
+  Home,
+  Map,
+  Settings,
+  Truck,
+  Users,
+} from 'lucide-react'
+import Link from 'next/link'
 
 export function MobileNav() {
   return (
     <div className="flex flex-col gap-4 py-2">
       <div className="px-3 py-2">
-        <h2 className="mb-2 px-4 text-lg font-semibold tracking-tight">RoadWatch</h2>
+        <h2 className="mb-2 px-4 text-lg font-semibold tracking-tight">
+          RoadWatch
+        </h2>
         <div className="space-y-1">
           <Button variant="ghost" className="w-full justify-start" asChild>
             <Link href="#">
@@ -37,7 +48,9 @@ export function MobileNav() {
         </div>
       </div>
       <div className="px-3 py-2">
-        <h2 className="mb-2 px-4 text-lg font-semibold tracking-tight">Management</h2>
+        <h2 className="mb-2 px-4 text-lg font-semibold tracking-tight">
+          Management
+        </h2>
         <div className="space-y-1">
           <Button variant="ghost" className="w-full justify-start" asChild>
             <Link href="#">

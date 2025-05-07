@@ -20,7 +20,7 @@ import { defectAPI } from '@/api/defect-api'
 
 export default function Header() {
   return (
-    <header className="sticky top-0 z-50 flex h-16 items-center gap-4 border-b bg-background px-4 md:px-6">
+    <header className="bg-background sticky top-0 z-50 flex h-16 items-center gap-4 border-b px-4 md:px-6">
       <Sheet>
         <SheetTrigger asChild>
           <Button variant="outline" size="icon" className="md:hidden">
@@ -57,11 +57,11 @@ export default function Header() {
       <div className="flex flex-1 items-center gap-4 md:gap-2 lg:gap-4">
         <form className="ml-auto flex-1 md:flex-initial">
           <div className="relative">
-            <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+            <Search className="text-muted-foreground absolute top-2.5 left-2.5 h-4 w-4" />
             <Input
               type="search"
               placeholder="결함 검색"
-              className="w-full rounded-lg bg-background pl-8 md:w-[200px] lg:w-[300px]"
+              className="bg-background w-full rounded-lg pl-8 md:w-[200px] lg:w-[300px]"
             />
           </div>
         </form>
@@ -69,7 +69,7 @@ export default function Header() {
           <DropdownMenuTrigger asChild>
             <Button variant="outline" size="icon" className="relative">
               <Bell className="h-4 w-4" />
-              <span className="absolute -right-1 -top-1 flex h-4 w-4 items-center justify-center rounded-full bg-red-600 text-[10px] font-medium text-white">
+              <span className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-red-600 text-[10px] font-medium text-white">
                 3
               </span>
               <span className="sr-only">알림</span>
@@ -78,8 +78,12 @@ export default function Header() {
           <DropdownMenuContent align="end">
             <DropdownMenuLabel>알림</DropdownMenuLabel>
             <DropdownMenuSeparator />
-            <DropdownMenuItem>심각 수준의 포트홀이 한밭대로에 발생</DropdownMenuItem>
-            <DropdownMenuItem>위험 수준의 도로 균열이 동서대로에 발생</DropdownMenuItem>
+            <DropdownMenuItem>
+              심각 수준의 포트홀이 한밭대로에 발생
+            </DropdownMenuItem>
+            <DropdownMenuItem>
+              위험 수준의 도로 균열이 동서대로에 발생
+            </DropdownMenuItem>
             <DropdownMenuItem>유지관리 팀이 현충원로 작업 중</DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>

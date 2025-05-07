@@ -9,7 +9,8 @@ import {
 import { Badge } from '@/components/ui/badge'
 import { Separator } from '@/components/ui/separator'
 import { useDefectStore } from '@/store/defect-store'
-import { AlertTriangle, ArrowRight, Clock, MapPin } from 'lucide-react'
+import { AlertTriangle, Clock, MapPin } from 'lucide-react'
+import Image from 'next/image'
 
 export default function RecentAlerts() {
   const { recentAlerts } = useDefectStore()
@@ -20,9 +21,9 @@ export default function RecentAlerts() {
   }
 
   return (
-    <div className="flex flex-col h-full min-h-0">
+    <div className="flex h-full min-h-0 flex-col">
       {/* 스크롤 리스트 영역 */}
-      <div className="flex-1 overflow-y-auto max-h-full">
+      <div className="max-h-full flex-1 overflow-y-auto">
         {recentAlerts.map((alert, index) => (
           <div key={alert.id}>
             <div className="flex items-start gap-2">
@@ -38,16 +39,25 @@ export default function RecentAlerts() {
                   <p className="text-sm font-medium">
                     {alert.type}: {alert.id}
                   </p>
-                  <Badge className={alert.severity === 'critical' ? 'bg-red-500' : 'bg-amber-500'}>
-                    {alert.severity.charAt(0).toUpperCase() + alert.severity.slice(1)}
+                  <Badge
+                    className={
+                      alert.severity === 'critical'
+                        ? 'bg-red-500'
+                        : 'bg-amber-500'
+                    }
+                  >
+                    {alert.severity.charAt(0).toUpperCase() +
+                      alert.severity.slice(1)}
                   </Badge>
                 </div>
                 <AlertAccordion type="single" collapsible>
                   <AlertAccordionItem value="item-1">
                     <AlertAccordionTrigger className="p-0">
                       <div className="group">
-                        <p className="text-xs text-muted-foreground group-hover:underline">{alert.description}</p>
-                        <div className="flex items-center gap-4 text-xs text-muted-foreground">
+                        <p className="text-muted-foreground text-xs group-hover:underline">
+                          {alert.description}
+                        </p>
+                        <div className="text-muted-foreground flex items-center gap-4 text-xs">
                           <span className="flex items-center gap-1">
                             <MapPin className="h-3 w-3" />
                             {alert.location}
@@ -60,7 +70,10 @@ export default function RecentAlerts() {
                       </div>
                     </AlertAccordionTrigger>
                     <AlertAccordionContent className="pt-2 pb-0">
-                      <img src="https://placehold.co/600x400" alt="temporary image" />
+                      <Image
+                        src="https://placehold.co/600x400"
+                        alt="temporary image"
+                      />
                       fill here
                     </AlertAccordionContent>
                   </AlertAccordionItem>
