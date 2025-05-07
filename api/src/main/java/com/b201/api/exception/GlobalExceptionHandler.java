@@ -56,7 +56,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 			.body(new ErrorResponse(ex.getMessage()));
 	}
 
-	// 주소 조회 실패 등 기타 커스텀 예외
+	// 주소 조회 실패
 	@ExceptionHandler(AddressLookupException.class)
 	public ResponseEntity<ErrorResponse> handleAddressLookup(AddressLookupException ex) {
 		return ResponseEntity

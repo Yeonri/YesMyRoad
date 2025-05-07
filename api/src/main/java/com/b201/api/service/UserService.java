@@ -44,7 +44,6 @@ public class UserService {
 		userRepository.save(user);
 	}
 
-
 	//로그인 로직
 	public LoginResponseDto login(LoginRequestDto loginDto) {
 		User user = userRepository.findByUsername(loginDto.getId())
@@ -58,26 +57,25 @@ public class UserService {
 		String refreshToekn = jwtUtil.generateRefreshToken(loginDto.getId());
 
 		//redis에 refreshToken 저장 (유효기간 2시간)
-		stringRedisTemplate.opsForValue().set("RT:"+user.getId(), refreshToekn,2, TimeUnit.HOURS);
+		stringRedisTemplate.opsForValue().set("RT:" + user.getUsername(), refreshToekn, 2, TimeUnit.HOURS);
 		return LoginResponseDto.builder()
 			.accessToken(accessToken)
 			.refreshToken(refreshToekn)
-			.username(user.getUsername())
+			.userId(user.getUsername())
 			.build();
 	}
 
-
 	//AccessToken 재발급 로직
 	public LoginResponseDto refreshAccessToken(String requestHeader) {
-		if(requestHeader == null || !requestHeader.startsWith("Bearer ")) {
+		if (requestHeader == null || !requestHeader.startsWith("Bearer ")) {
 			throw new BadCredentialsException("Refresh Token이 존재하지 않거나 형식이 잘못되었습니다.");
 		}
 
 		String refreshToken = requestHeader.substring(7);
 		String userId = jwtUtil.getUsernameFromToken(refreshToken);
 
-		String savedRefreshToken = stringRedisTemplate.opsForValue().get("RT:"+userId);
-		if(savedRefreshToken == null || !savedRefreshToken.equals(refreshToken)) {
+		String savedRefreshToken = stringRedisTemplate.opsForValue().get("RT:" + userId);
+		if (savedRefreshToken == null || !savedRefreshToken.equals(refreshToken)) {
 			throw new BadCredentialsException("Refresh Token이 유효하지 않거나 만료되었습니다.");
 		}
 
@@ -86,24 +84,30 @@ public class UserService {
 		return LoginResponseDto.builder()
 			.accessToken(newAccessToken)
 			.refreshToken(refreshToken)
-			.username(userId)
+			.userId(userId)
 			.build();
 	}
 
 	//로그아웃 로직
 	public void logout(String requestHeader) {
-		if(requestHeader == null || !requestHeader.startsWith("Bearer ")) {
+		if (requestHeader == null || !requestHeader.startsWith("Bearer ")) {
 			throw new BadCredentialsException("AccessToken이 존재하지 않거나 형식이 잘못되었습니다.");
 		}
 
 		String accessToken = requestHeader.substring(7);
-		String userId = jwtUtil.getUsernameFromToken(accessToken);
+		String userId;
+
+		try {
+			userId = jwtUtil.getUsernameFromToken(accessToken);
+		} catch (Exception e) {
+			throw new BadCredentialsException("AccessToken이 유효하지 않거나 만료되었습니다.");
+		}
 
 		//RefreshToken 삭제
-		stringRedisTemplate.delete("RT:"+userId);
+		stringRedisTemplate.delete("RT:" + userId);
 
 		//AccessToken 블랙리스트 등록 (남은 유효 시간만큼 유지)
 		long remainTime = jwtUtil.getExpirationTime(accessToken);
-		stringRedisTemplate.opsForValue().set("BL:"+accessToken, "logout", remainTime, TimeUnit.MILLISECONDS);
+		stringRedisTemplate.opsForValue().set("BL:" + accessToken, "logout", remainTime, TimeUnit.MILLISECONDS);
 	}
 }
