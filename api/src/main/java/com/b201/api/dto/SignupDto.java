@@ -14,4 +14,7 @@ public class SignupDto {
 
 	@NotNull(message = "name은 필수값입니다.")
 	private String name;
+
+	@NotNull(message = "regionId는 필수값입니다.")
+	private Integer regionId;
 }
