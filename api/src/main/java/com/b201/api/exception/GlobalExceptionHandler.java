@@ -64,6 +64,14 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 			.body(new ErrorResponse(ex.getMessage()));
 	}
 
+	//회원가입 시 잘못된 regionId를 매칭했을 때
+	@ExceptionHandler(IllegalArgumentException.class)
+	public ResponseEntity<ErrorResponse> handleIllegalArgument(IllegalArgumentException ex) {
+		return ResponseEntity
+			.status(HttpStatus.BAD_REQUEST)
+			.body(new ErrorResponse(ex.getMessage()));
+	}
+
 	// 기본 포맷
 	public static record ValidationError(String field, String defaultMessage) {
 	}
