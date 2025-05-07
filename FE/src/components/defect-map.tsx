@@ -7,19 +7,15 @@ import mapboxgl from 'mapbox-gl'
 import 'mapbox-gl/dist/mapbox-gl.css'
 import { useEffect, useRef, useState } from 'react'
 
-// Set your Mapbox access token here
-mapboxgl.accessToken =
-  process.env.NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN || 'YOUR_MAPBOX_ACCESS_TOKEN'
+mapboxgl.accessToken = process.env.NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN
 
 export default function DefectMap() {
   const mapContainer = useRef<HTMLDivElement>(null)
   const map = useRef<mapboxgl.Map | null>(null)
   const [loading, setLoading] = useState(true)
 
-  // Get defect locations from Zustand store
   const { defectLocations, defectType, severity } = useDefectStore()
 
-  // Filter defect locations based on selected filters
   const filteredDefectLocations = defectLocations.filter((defect) => {
     const matchesType = defectType === 'all' || defect.type === defectType
     const matchesSeverity = severity === 'all' || defect.severity === severity
@@ -28,9 +24,6 @@ export default function DefectMap() {
 
   useEffect(() => {
     if (!mapContainer.current) return
-
-    // TODO: Replace with actual API call to fetch defect locations
-    // This would be implemented in the Zustand store's fetchDefectLocations method
 
     // 지도 초기화
     map.current = new mapboxgl.Map({

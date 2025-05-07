@@ -11,6 +11,13 @@ import {
   CardTitle,
 } from '@/components/ui/card'
 import {
+  Carousel,
+  CarouselContent,
+  CarouselItem,
+  CarouselNext,
+  CarouselPrevious,
+} from '@/components/ui/carousel'
+import {
   DefectCard,
   DefectCardContent,
   DefectCardDescription,
@@ -326,26 +333,48 @@ export default function Dashboard() {
             </Card>
           </TabsContent>
           <TabsContent value="analytics" className="space-y-4">
-            <div className="grid gap-4 md:grid-cols-2">
-              <Card>
-                <CardHeader>
-                  <CardTitle>결함 통계</CardTitle>
-                  <CardDescription>유형 및 심각도별 분석</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <DefectStats />
-                </CardContent>
-              </Card>
-              <Card>
-                <CardHeader>
-                  <CardTitle>결함 추이</CardTitle>
-                  <CardDescription>시간에 따른 결함 추이</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <DefectTrends />
-                </CardContent>
-              </Card>
-            </div>
+              <Carousel>
+                <CarouselContent>
+                  <CarouselItem>
+                    <div className="grid gap-4 md:grid-cols-3">
+                      <Card>
+                        <CardHeader>
+                          <CardTitle>결함 통계</CardTitle>
+                          <CardDescription>유형 및 심각도별 분석</CardDescription>
+                        </CardHeader>
+                        <CardContent>테스트1-1</CardContent>
+                      </Card>
+                      <Card>
+                        <CardHeader>
+                          <CardTitle>결함 추이</CardTitle>
+                          <CardDescription>시간에 따른 결함 추이</CardDescription>
+                        </CardHeader>
+                        <CardContent>테스트1-2</CardContent>
+                      </Card>
+                    </div>
+                  </CarouselItem>
+                  <CarouselItem>
+                    <div className="grid gap-4 md:grid-cols-3">
+                      <Card>
+                        <CardHeader>
+                          <CardTitle>결함 통계</CardTitle>
+                          <CardDescription>유형 및 심각도별 분석</CardDescription>
+                        </CardHeader>
+                        <CardContent>테스트2-1</CardContent>
+                      </Card>
+                      <Card>
+                        <CardHeader>
+                          <CardTitle>결함 추이</CardTitle>
+                          <CardDescription>시간에 따른 결함 추이</CardDescription>
+                        </CardHeader>
+                        <CardContent>테스트2-2</CardContent>
+                      </Card>
+                    </div>
+                  </CarouselItem>
+                </CarouselContent>
+                <CarouselPrevious />
+                <CarouselNext />
+              </Carousel>
           </TabsContent>
         </Tabs>
       </main>
