@@ -13,7 +13,6 @@ import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 import com.b201.api.filter.JwtAuthenticationFilter;
-import com.b201.api.util.JwtUtil;
 
 import lombok.RequiredArgsConstructor;
 
@@ -51,7 +50,7 @@ public class SecurityConfig {
 			.cors(cors -> cors.configurationSource(corsConfigurationSource())) //cors 설정
 			.csrf(AbstractHttpConfigurer::disable) //jwt 인증방싟은 세션 인증 방식이 아니므로 csrf 설정이 불필요
 			.authorizeHttpRequests(auth -> auth
-				.requestMatchers("/api/users/**").permitAll()
+				.requestMatchers("/api/users/**", "/api/detect").permitAll()
 				.anyRequest().authenticated())
 
 			// JwtAuthenticationFilter를 UsernamePasswordAuthenticationFilter(Spring Security 기본 로그인 필터) 앞에 등록
