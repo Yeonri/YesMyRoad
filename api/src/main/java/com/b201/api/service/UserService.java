@@ -8,11 +8,13 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import com.b201.api.domain.Region;
 import com.b201.api.domain.User;
 import com.b201.api.dto.LoginRequestDto;
 import com.b201.api.dto.LoginResponseDto;
 import com.b201.api.dto.SignupDto;
 import com.b201.api.exception.DuplicateUsernameException;
+import com.b201.api.repository.RegionRepository;
 import com.b201.api.repository.UserRepository;
 import com.b201.api.util.JwtUtil;
 
@@ -28,6 +30,7 @@ public class UserService {
 	private final PasswordEncoder passwordEncoder;
 	private final JwtUtil jwtUtil;
 	private final StringRedisTemplate stringRedisTemplate;
+	private final RegionRepository regionRepository;
 
 	//회원가입 로직
 	public void signUp(SignupDto signupDto) {
@@ -35,10 +38,14 @@ public class UserService {
 			throw new DuplicateUsernameException("중복된 ID입니다: " + signupDto.getId());
 		}
 
+		Region region = regionRepository.findById(signupDto.getRegionId())
+			.orElseThrow(() -> new IllegalArgumentException("유효하지 않은 regionId입니다."));
+
 		User user = User.builder()
 			.username(signupDto.getId())
 			.password(passwordEncoder.encode(signupDto.getPassword()))
 			.name(signupDto.getName())
+			.region(region)
 			.build();
 
 		userRepository.save(user);

@@ -32,7 +32,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 		String requestURI = request.getRequestURI();
 
 		// 회원가입, 로그인 등은 JWT 인증 없이 허용
-		if (requestURI.startsWith("/api/users")) {
+		if (requestURI.startsWith("/api/users") || requestURI.startsWith("/api/detect")) {
 			filterChain.doFilter(request, response);
 			return;
 		}
@@ -50,7 +50,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
 		String token = authHeader.substring(7); // "Bearer " 이후 실제 토큰 값
 
-		if(stringRedisTemplate.hasKey("BL:"+token)) {
+		if (stringRedisTemplate.hasKey("BL:" + token)) {
 			response.setCharacterEncoding("UTF-8");
 			response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
 			response.getWriter().write("로그아웃된 토큰입니다.");
