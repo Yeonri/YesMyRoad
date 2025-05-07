@@ -11,10 +11,12 @@ import org.springframework.web.client.RestClientException;
 import com.b201.api.domain.CaptureDamage;
 import com.b201.api.domain.CapturePoint;
 import com.b201.api.domain.DamageCategory;
+import com.b201.api.domain.Region;
 import com.b201.api.dto.AiResultDto;
 import com.b201.api.exception.AddressLookupException;
 import com.b201.api.repository.CapturePointRepository;
 import com.b201.api.repository.DamageCategoryRepository;
+import com.b201.api.util.RegionMapperUtil;
 import com.b201.api.util.VworldAddressUtil;
 
 import jakarta.transaction.Transactional;
@@ -30,15 +32,20 @@ public class AiResultService {
 	private final CapturePointRepository capturePointRepository;
 	private final DamageCategoryRepository damageCategoryRepository;
 	private final GeometryFactory geometryFactory;
+	private final RegionMapperUtil regionMapperUtil;
 
 	@Transactional
 	public void addAiResult(AiResultDto dto) {
 		//  주소 조회
 		String street = findAddress(dto);
+		Region region = regionMapperUtil.mapAddressToRegion(street);
 
 		Point pt = toPoint(dto);
 
 		CapturePoint capturePoint = toCapturePoint(dto, street, pt);
+		capturePoint.setRegion(region);
+
+
 
 		List<CaptureDamage> damages = toCaptureDamages(dto, capturePoint);
 
