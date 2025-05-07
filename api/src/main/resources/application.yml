@@ -19,8 +19,6 @@ spring:
       hibernate:
         dialect: org.hibernate.dialect.MySQLDialect
 
-
-
   #한글 깨짐 이슈 방지
   sql:
     init:
