@@ -1,10 +1,10 @@
-"use client"
+'use client'
 
-import { useEffect, useRef, useState } from "react"
-import { init } from "echarts"
-import type { EChartsOption } from "echarts"
-import { Loader } from "lucide-react"
-import { useDefectStore } from "@/store/defect-store"
+import { useDefectStore } from '@/store/defect-store'
+import { init } from 'echarts'
+import type { EChartsOption } from 'echarts'
+import { Loader } from 'lucide-react'
+import { useEffect, useRef, useState } from 'react'
 
 export default function DefectTrends() {
   const chartRef = useRef<HTMLDivElement>(null)
@@ -23,57 +23,38 @@ export default function DefectTrends() {
 
       // Set chart options
       const option: EChartsOption = {
-        tooltip: {
-          trigger: "axis",
-          axisPointer: {
-            type: "shadow",
-          },
-        },
-        legend: {
-          data: ["Potholes", "Cracks", "Paint Peeling"],
-          bottom: 0,
-        },
+        tooltip: { trigger: 'axis', axisPointer: { type: 'shadow' } },
+        legend: { data: ['Potholes', 'Cracks', 'Paint Peeling'], bottom: 0 },
         grid: {
-          left: "3%",
-          right: "4%",
-          bottom: "15%",
-          top: "3%",
+          left: '3%',
+          right: '4%',
+          bottom: '15%',
+          top: '3%',
           containLabel: true,
         },
-        xAxis: {
-          type: "category",
-          data: trendData.dates,
-        },
-        yAxis: {
-          type: "value",
-        },
-        color: ["#3b82f6", "#22c55e", "#f59e0b"],
+        xAxis: { type: 'category', data: trendData.dates },
+        yAxis: { type: 'value' },
+        color: ['#3b82f6', '#22c55e', '#f59e0b'],
         series: [
           {
-            name: "Potholes",
-            type: "bar",
-            stack: "total",
-            emphasis: {
-              focus: "series",
-            },
+            name: 'Potholes',
+            type: 'bar',
+            stack: 'total',
+            emphasis: { focus: 'series' },
             data: trendData.potholesData,
           },
           {
-            name: "Cracks",
-            type: "bar",
-            stack: "total",
-            emphasis: {
-              focus: "series",
-            },
+            name: 'Cracks',
+            type: 'bar',
+            stack: 'total',
+            emphasis: { focus: 'series' },
             data: trendData.cracksData,
           },
           {
-            name: "Paint Peeling",
-            type: "bar",
-            stack: "total",
-            emphasis: {
-              focus: "series",
-            },
+            name: 'Paint Peeling',
+            type: 'bar',
+            stack: 'total',
+            emphasis: { focus: 'series' },
             data: trendData.paintData,
           },
         ],
@@ -86,7 +67,7 @@ export default function DefectTrends() {
       const handleResize = () => {
         chart.resize()
       }
-      window.addEventListener("resize", handleResize)
+      window.addEventListener('resize', handleResize)
 
       // Simulate loading
       setTimeout(() => {
@@ -96,7 +77,7 @@ export default function DefectTrends() {
       // Clean up
       return () => {
         chart.dispose()
-        window.removeEventListener("resize", handleResize)
+        window.removeEventListener('resize', handleResize)
       }
     }
   }, [trendData])
@@ -105,7 +86,7 @@ export default function DefectTrends() {
     <div className="h-[300px] w-full">
       {loading ? (
         <div className="flex h-full w-full items-center justify-center">
-          <Loader className="h-8 w-8 animate-spin text-primary" />
+          <Loader className="text-primary h-8 w-8 animate-spin" />
         </div>
       ) : (
         <div ref={chartRef} className="h-full w-full" />

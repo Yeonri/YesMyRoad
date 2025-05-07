@@ -47,7 +47,10 @@ export default function DefectHeatmap() {
         features: heatmapLocations.map((defect) => ({
           type: 'Feature' as const,
           properties: {},
-          geometry: { type: 'Point' as const, coordinates: [defect.lng, defect.lat] },
+          geometry: {
+            type: 'Point' as const,
+            coordinates: [defect.lng, defect.lat],
+          },
         })),
       }
 
@@ -64,7 +67,15 @@ export default function DefectHeatmap() {
           // 지름이 증가할수록 weight 증가
           'heatmap-weight': 1,
           // 줌 레벨이 증가할수록 intensity 증가
-          'heatmap-intensity': ['interpolate', ['linear'], ['zoom'], 0, 1, 15, 3],
+          'heatmap-intensity': [
+            'interpolate',
+            ['linear'],
+            ['zoom'],
+            0,
+            1,
+            15,
+            3,
+          ],
           // 히트맵 색상 라인 파랑에서 빨강으로
           'heatmap-color': [
             'interpolate',
@@ -117,12 +128,14 @@ export default function DefectHeatmap() {
   }, [heatmapLocations])
 
   return (
-    <div className="relative h-full w-full min-h-[400px]">
+    <div className="relative h-full min-h-[400px] w-full">
       {loading && (
-        <div className="absolute inset-0 flex items-center justify-center bg-muted/20 z-10">
+        <div className="bg-muted/20 absolute inset-0 z-10 flex items-center justify-center">
           <div className="flex flex-col items-center gap-2">
-            <Loader className="h-8 w-8 animate-spin text-primary" />
-            <p className="text-sm text-muted-foreground">Loading heatmap data...</p>
+            <Loader className="text-primary h-8 w-8 animate-spin" />
+            <p className="text-muted-foreground text-sm">
+              Loading heatmap data...
+            </p>
           </div>
         </div>
       )}

@@ -26,7 +26,14 @@ export type Defect = {
   description?: string
 }
 
-export type DefectLocation = { id: number; lat: number; lng: number; type: string; severity: string; title: string }
+export type DefectLocation = {
+  id: number
+  lat: number
+  lng: number
+  type: string
+  severity: string
+  title: string
+}
 
 export type HeatmapLocation = { lat: number; lng: number }
 
@@ -43,7 +50,12 @@ export type DefectStoreState = {
   recentAlerts: Defect[]
   defectTypeData: { value: number; name: string }[]
   severityData: { value: number; name: string }[]
-  trendData: { dates: string[]; potholesData: number[]; cracksData: number[]; paintData: number[] }
+  trendData: {
+    dates: string[]
+    potholesData: number[]
+    cracksData: number[]
+    paintData: number[]
+  }
   dashboardMetrics: {
     totalDefects: number
     totalDefectsChange: string
@@ -54,7 +66,12 @@ export type DefectStoreState = {
     affectedAreas: number
     affectedAreasChange: string
   }
-  severityCounts: { critical: number; high: number; medium: number; low: number }
+  severityCounts: {
+    critical: number
+    high: number
+    medium: number
+    low: number
+  }
 
   // Actions
   setTimeRange: (timeRange: TimeRangeType) => void

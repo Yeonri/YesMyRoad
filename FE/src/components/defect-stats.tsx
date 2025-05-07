@@ -27,9 +27,25 @@ export default function DefectStats() {
         legend: {
           orient: 'vertical',
           left: 10,
-          data: ['Potholes', 'Cracks', 'Paint Peeling', 'Critical', 'High', 'Medium', 'Low'],
+          data: [
+            'Potholes',
+            'Cracks',
+            'Paint Peeling',
+            'Critical',
+            'High',
+            'Medium',
+            'Low',
+          ],
         },
-        color: ['#3b82f6', '#22c55e', '#f59e0b', '#ef4444', '#f59e0b', '#3b82f6', '#22c55e'],
+        color: [
+          '#3b82f6',
+          '#22c55e',
+          '#f59e0b',
+          '#ef4444',
+          '#f59e0b',
+          '#3b82f6',
+          '#22c55e',
+        ],
         series: [
           {
             name: 'Defect Types',
@@ -37,9 +53,15 @@ export default function DefectStats() {
             radius: ['0%', '45%'],
             center: ['30%', '50%'],
             avoidLabelOverlap: false,
-            itemStyle: { borderRadius: 10, borderColor: '#fff', borderWidth: 2 },
+            itemStyle: {
+              borderRadius: 10,
+              borderColor: '#fff',
+              borderWidth: 2,
+            },
             label: { show: false, position: 'center' },
-            emphasis: { label: { show: true, fontSize: 14, fontWeight: 'bold' } },
+            emphasis: {
+              label: { show: true, fontSize: 14, fontWeight: 'bold' },
+            },
             labelLine: { show: false },
             data: defectTypeData,
           },
@@ -49,9 +71,15 @@ export default function DefectStats() {
             radius: ['0%', '45%'],
             center: ['75%', '50%'],
             avoidLabelOverlap: false,
-            itemStyle: { borderRadius: 10, borderColor: '#fff', borderWidth: 2 },
+            itemStyle: {
+              borderRadius: 10,
+              borderColor: '#fff',
+              borderWidth: 2,
+            },
             label: { show: false, position: 'center' },
-            emphasis: { label: { show: true, fontSize: 14, fontWeight: 'bold' } },
+            emphasis: {
+              label: { show: true, fontSize: 14, fontWeight: 'bold' },
+            },
             labelLine: { show: false },
             data: severityData,
           },
@@ -84,7 +112,7 @@ export default function DefectStats() {
     <div className="h-[300px] w-full">
       {loading ? (
         <div className="flex h-full w-full items-center justify-center">
-          <Loader className="h-8 w-8 animate-spin text-primary" />
+          <Loader className="text-primary h-8 w-8 animate-spin" />
         </div>
       ) : (
         <div ref={chartRef} className="h-full w-full" />
