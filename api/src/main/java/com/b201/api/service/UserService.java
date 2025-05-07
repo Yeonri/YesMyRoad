@@ -39,7 +39,7 @@ public class UserService {
 		}
 
 		Region region = regionRepository.findById(signupDto.getRegionId())
-			.orElseThrow(() -> new IllegalArgumentException("유효하지 않은 regionId입니다."));
+			.orElseThrow(() -> new IllegalArgumentException("해당 지역이 존재하지 않습니다."));
 
 		User user = User.builder()
 			.username(signupDto.getId())
