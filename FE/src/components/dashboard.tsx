@@ -1,6 +1,6 @@
 'use client'
 
-import LocationHeader from '@/components/headers/location-header'
+import LocationHeader from '@/components/location-header'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
