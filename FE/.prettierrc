@@ -3,8 +3,10 @@
   "singleQuote": true,
   "objectWrap": "collapse",
   "proseWrap": "preserve",
-  "plugins": ["@trivago/prettier-plugin-sort-imports"],
-
+  "plugins": [
+    "@trivago/prettier-plugin-sort-imports",
+    "prettier-plugin-tailwindcss"
+  ],
   "importOrder": [
     "^[A-Z](.*)$",
     "^@store/(.*)$",
