@@ -3,7 +3,20 @@
 import LocationHeader from '@/components/location-header'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card'
+// import {
+//   Carousel,
+//   CarouselContent,
+//   CarouselItem,
+//   CarouselNext,
+//   CarouselPrevious,
+// } from '@/components/ui/carousel'
 import {
   DefectCard,
   DefectCardContent,
@@ -12,17 +25,35 @@ import {
   DefectCardHeader,
   DefectCardTitle,
 } from '@/components/ui/defect-card'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { DefectType, SeverityType, TimeRangeType, useDefectStore } from '@/store/defect-store'
-import { AlertTriangle, ArrowRight, BarChart3, Calendar, Clock, Filter, MapPin } from 'lucide-react'
+import {
+  DefectType,
+  SeverityType,
+  TimeRangeType,
+  useDefectStore,
+} from '@/store/defect-store'
+import {
+  AlertTriangle,
+  ArrowRight,
+  BarChart3,
+  Calendar,
+  Clock,
+  Filter,
+  MapPin,
+} from 'lucide-react'
 import { useEffect, useState } from 'react'
 
 import DefectHeatmap from './defect-heatmap'
 import DefectList from './defect-list'
 import DefectMap from './defect-map'
 import DefectStats from './defect-stats'
-import DefectTrends from './defect-trends'
 import Header from './header'
 import RecentAlerts from './recent-alerts'
 
@@ -52,18 +83,26 @@ export default function Dashboard() {
     fetchRecentAlerts()
     fetchDefectStats()
     fetchDefectTrends()
-  }, [fetchDefects, fetchDefectLocations, fetchRecentAlerts, fetchDefectStats, fetchDefectTrends])
+  }, [
+    fetchDefects,
+    fetchDefectLocations,
+    fetchRecentAlerts,
+    fetchDefectStats,
+    fetchDefectTrends,
+  ])
 
   const [selectedTab, selectTab] = useState('map')
 
   return (
-    <div className="flex min-h-screen w-full flex-col bg-muted/40">
+    <div className="bg-muted/40 flex min-h-screen w-full flex-col">
       <Header />
       <main className="flex flex-1 flex-col gap-4 p-4 md:gap-8 md:p-8">
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-2xl font-bold tracking-tight">대시보드</h1>
-            <p className="text-muted-foreground">실시간 도로 결함 모니터링 시스템</p>
+            <p className="text-muted-foreground">
+              실시간 도로 결함 모니터링 시스템
+            </p>
           </div>
           <div className="flex items-center gap-2">
             <Button variant="outline" size="sm" className="h-8 gap-1">
@@ -97,7 +136,10 @@ export default function Dashboard() {
             </Badge>
           </div>
           <div className="flex flex-wrap gap-2">
-            <Select value={timeRange} onValueChange={(value) => setTimeRange(value as TimeRangeType)}>
+            <Select
+              value={timeRange}
+              onValueChange={(value) => setTimeRange(value as TimeRangeType)}
+            >
               <SelectTrigger className="h-8 w-[130px]">
                 <SelectValue placeholder="Time Range" />
               </SelectTrigger>
@@ -108,7 +150,10 @@ export default function Dashboard() {
                 <SelectItem value="30d">30일 이내</SelectItem>
               </SelectContent>
             </Select>
-            <Select value={defectType} onValueChange={(value) => setDefectType(value as DefectType)}>
+            <Select
+              value={defectType}
+              onValueChange={(value) => setDefectType(value as DefectType)}
+            >
               <SelectTrigger className="h-8 w-[130px]">
                 <SelectValue placeholder="Defect Type" />
               </SelectTrigger>
@@ -119,7 +164,10 @@ export default function Dashboard() {
                 <SelectItem value="paint">페인트 벗겨짐</SelectItem>
               </SelectContent>
             </Select>
-            <Select value={severity} onValueChange={(value) => setSeverity(value as SeverityType)}>
+            <Select
+              value={severity}
+              onValueChange={(value) => setSeverity(value as SeverityType)}
+            >
               <SelectTrigger className="h-8 w-[130px]">
                 <SelectValue placeholder="Severity" />
               </SelectTrigger>
@@ -142,41 +190,63 @@ export default function Dashboard() {
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">총 결함 수</CardTitle>
-              <BarChart3 className="h-4 w-4 text-muted-foreground" />
+              <BarChart3 className="text-muted-foreground h-4 w-4" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{dashboardMetrics.totalDefects}</div>
-              <p className="text-xs text-muted-foreground">지난 주 대비 {dashboardMetrics.totalDefectsChange}</p>
+              <div className="text-2xl font-bold">
+                {dashboardMetrics.totalDefects}
+              </div>
+              <p className="text-muted-foreground text-xs">
+                지난 주 대비 {dashboardMetrics.totalDefectsChange}
+              </p>
             </CardContent>
           </Card>
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">심각한 결함 수</CardTitle>
-              <AlertTriangle className="h-4 w-4 text-muted-foreground" />
+              <CardTitle className="text-sm font-medium">
+                심각한 결함 수
+              </CardTitle>
+              <AlertTriangle className="text-muted-foreground h-4 w-4" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{dashboardMetrics.criticalIssues}</div>
-              <p className="text-xs text-muted-foreground">지난 주 대비 {dashboardMetrics.criticalIssuesChange}</p>
+              <div className="text-2xl font-bold">
+                {dashboardMetrics.criticalIssues}
+              </div>
+              <p className="text-muted-foreground text-xs">
+                지난 주 대비 {dashboardMetrics.criticalIssuesChange}
+              </p>
             </CardContent>
           </Card>
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">평균 작업 착수 시간</CardTitle>
-              <Clock className="h-4 w-4 text-muted-foreground" />
+              <CardTitle className="text-sm font-medium">
+                평균 작업 착수 시간
+              </CardTitle>
+              <Clock className="text-muted-foreground h-4 w-4" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{dashboardMetrics.avgResponseTime}</div>
-              <p className="text-xs text-muted-foreground">지난 주 대비 {dashboardMetrics.avgResponseTimeChange}</p>
+              <div className="text-2xl font-bold">
+                {dashboardMetrics.avgResponseTime}
+              </div>
+              <p className="text-muted-foreground text-xs">
+                지난 주 대비 {dashboardMetrics.avgResponseTimeChange}
+              </p>
             </CardContent>
           </Card>
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">발생 행정구역 수</CardTitle>
-              <MapPin className="h-4 w-4 text-muted-foreground" />
+              <CardTitle className="text-sm font-medium">
+                발생 행정구역 수
+              </CardTitle>
+              <MapPin className="text-muted-foreground h-4 w-4" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{dashboardMetrics.affectedAreas}</div>
-              <p className="text-xs text-muted-foreground">지난 주 대비 {dashboardMetrics.affectedAreasChange}</p>
+              <div className="text-2xl font-bold">
+                {dashboardMetrics.affectedAreas}
+              </div>
+              <p className="text-muted-foreground text-xs">
+                지난 주 대비 {dashboardMetrics.affectedAreasChange}
+              </p>
             </CardContent>
           </Card>
         </div>
@@ -193,11 +263,16 @@ export default function Dashboard() {
               <TabsTrigger value="list" onClick={() => selectTab('list')}>
                 리스트
               </TabsTrigger>
-              <TabsTrigger value="analytics" onClick={() => selectTab('indicators')}>
+              <TabsTrigger
+                value="analytics"
+                onClick={() => selectTab('indicators')}
+              >
                 통계
               </TabsTrigger>
             </TabsList>
-            {(selectedTab === 'map' || selectedTab === 'hitmap') && <LocationHeader />}
+            {(selectedTab === 'map' || selectedTab === 'hitmap') && (
+              <LocationHeader />
+            )}
           </div>
           <TabsContent value="map" className="space-y-4">
             <div className="grid gap-4 md:grid-cols-3">
@@ -216,7 +291,9 @@ export default function Dashboard() {
               <DefectCard>
                 <DefectCardHeader>
                   <DefectCardTitle>최근 발생한 결함 이력</DefectCardTitle>
-                  <DefectCardDescription>심각한 결함 및 높은 우선순위 결함</DefectCardDescription>
+                  <DefectCardDescription>
+                    심각한 결함 및 높은 우선순위 결함
+                  </DefectCardDescription>
                 </DefectCardHeader>
                 <DefectCardContent>
                   <RecentAlerts />
@@ -255,26 +332,7 @@ export default function Dashboard() {
             </Card>
           </TabsContent>
           <TabsContent value="analytics" className="space-y-4">
-            <div className="grid gap-4 md:grid-cols-2">
-              <Card>
-                <CardHeader>
-                  <CardTitle>결함 통계</CardTitle>
-                  <CardDescription>유형 및 심각도별 분석</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <DefectStats />
-                </CardContent>
-              </Card>
-              <Card>
-                <CardHeader>
-                  <CardTitle>결함 추이</CardTitle>
-                  <CardDescription>시간에 따른 결함 추이</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <DefectTrends />
-                </CardContent>
-              </Card>
-            </div>
+            <DefectStats />
           </TabsContent>
         </Tabs>
       </main>

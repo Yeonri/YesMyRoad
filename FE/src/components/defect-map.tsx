@@ -7,18 +7,15 @@ import mapboxgl from 'mapbox-gl'
 import 'mapbox-gl/dist/mapbox-gl.css'
 import { useEffect, useRef, useState } from 'react'
 
-// Set your Mapbox access token here
-mapboxgl.accessToken = process.env.NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN || 'YOUR_MAPBOX_ACCESS_TOKEN'
+mapboxgl.accessToken = process.env.NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN
 
 export default function DefectMap() {
   const mapContainer = useRef<HTMLDivElement>(null)
   const map = useRef<mapboxgl.Map | null>(null)
   const [loading, setLoading] = useState(true)
 
-  // Get defect locations from Zustand store
   const { defectLocations, defectType, severity } = useDefectStore()
 
-  // Filter defect locations based on selected filters
   const filteredDefectLocations = defectLocations.filter((defect) => {
     const matchesType = defectType === 'all' || defect.type === defectType
     const matchesSeverity = severity === 'all' || defect.severity === severity
@@ -27,9 +24,6 @@ export default function DefectMap() {
 
   useEffect(() => {
     if (!mapContainer.current) return
-
-    // TODO: Replace with actual API call to fetch defect locations
-    // This would be implemented in the Zustand store's fetchDefectLocations method
 
     // 지도 초기화
     map.current = new mapboxgl.Map({
@@ -91,7 +85,10 @@ export default function DefectMap() {
         `)
 
         // 지도에 마커 추가
-        new mapboxgl.Marker(markerEl).setLngLat([defect.lng, defect.lat]).setPopup(popup).addTo(map.current!)
+        new mapboxgl.Marker(markerEl)
+          .setLngLat([defect.lng, defect.lat])
+          .setPopup(popup)
+          .addTo(map.current!)
       })
     })
 
@@ -104,12 +101,14 @@ export default function DefectMap() {
   }, [filteredDefectLocations])
 
   return (
-    <div className="relative h-full w-full min-h-[400px]">
+    <div className="relative h-full min-h-[400px] w-full">
       {loading && (
-        <div className="absolute inset-0 flex items-center justify-center bg-muted/20 z-10">
+        <div className="bg-muted/20 absolute inset-0 z-10 flex items-center justify-center">
           <div className="flex flex-col items-center gap-2">
-            <Loader className="h-8 w-8 animate-spin text-primary" />
-            <p className="text-sm text-muted-foreground">지도 데이터 로딩중...</p>
+            <Loader className="text-primary h-8 w-8 animate-spin" />
+            <p className="text-muted-foreground text-sm">
+              지도 데이터 로딩중...
+            </p>
           </div>
         </div>
       )}
