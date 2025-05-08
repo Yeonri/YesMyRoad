@@ -71,8 +71,10 @@ export default function RecentAlerts() {
                     </AlertAccordionTrigger>
                     <AlertAccordionContent className="pt-2 pb-0">
                       <Image
-                        src="https://placehold.co/600x400"
+                        src="https://placehold.co/600x400.png"
                         alt="temporary image"
+                        width={600}
+                        height={400}
                       />
                       fill here
                     </AlertAccordionContent>
