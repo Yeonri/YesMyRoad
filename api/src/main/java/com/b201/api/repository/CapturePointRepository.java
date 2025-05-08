@@ -4,9 +4,11 @@ import java.util.Optional;
 
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
 
 import com.b201.api.domain.CapturePoint;
 
+@Repository
 public interface CapturePointRepository extends JpaRepository<CapturePoint, Integer> {
 
 	// ① Optional 반환으로 null 체크를 안전하게

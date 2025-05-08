@@ -7,22 +7,18 @@ import org.springframework.stereotype.Component;
 import com.b201.api.domain.Region;
 import com.b201.api.repository.RegionRepository;
 
-import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 @Component
 @RequiredArgsConstructor
 public class RegionMapperUtil {
 
 	private final RegionRepository regionRepository;
-	private List<Region> regions;
-
-	@PostConstruct
-	public void init() {
-		this.regions = regionRepository.findAll();
-	}
 
 	public Region mapAddressToRegion(String fullAddress) {
+		List<Region> regions = regionRepository.findAll();
 		return regions.stream()
 			.filter(region -> fullAddress.startsWith(region.getRegionName()))
 			.findFirst()
