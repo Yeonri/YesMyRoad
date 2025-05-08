@@ -36,4 +36,5 @@ public interface CaptureDamageRepository extends JpaRepository<CaptureDamage, In
 		   ORDER BY DATE(d.capturePoint.captureTimestamp)
 		""")
 	List<DailyCountDto> countDaily();
+
 }
