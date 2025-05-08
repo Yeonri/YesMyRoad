@@ -44,4 +44,9 @@ public class DashBoardController {
 	public ResponseEntity<MonthlyStatusDto> getMonthly() {
 		return ResponseEntity.ok(dashboardService.getMonthlyStatusWithChangeRate());
 	}
+
+	@GetMapping("/monthly-summary")
+	public ResponseEntity<?> getMonthlySummary() {
+		return ResponseEntity.ok(dashboardService.getMonthlyDamageSummary());
+	}
 }

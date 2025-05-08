@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 import com.b201.api.dto.CategoryCountDto;
 import com.b201.api.dto.DailyCountDto;
 import com.b201.api.dto.DailyStatusDto;
+import com.b201.api.dto.MonthlyDamageSummaryDto;
 import com.b201.api.dto.MonthlyStatusDto;
 import com.b201.api.dto.WeeklyStatusDto;
 import com.b201.api.repository.CaptureDamageRepository;
@@ -104,6 +105,13 @@ public class DashboardService {
 		}
 
 		return new MonthlyStatusDto(thisYm, thisMonthSum, rate);
+	}
+
+	/**
+	 * 월별 도로파손 누적 탐지 현황
+	 */
+	public List<MonthlyDamageSummaryDto> getMonthlyDamageSummary() {
+		return damageRepo.findMonthlyDamageSummary();
 	}
 
 }
