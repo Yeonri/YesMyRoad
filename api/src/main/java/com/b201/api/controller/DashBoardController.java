@@ -5,11 +5,13 @@ import java.util.List;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.b201.api.dto.CategoryCountDto;
 import com.b201.api.dto.DailyStatusDto;
 import com.b201.api.dto.MonthlyStatusDto;
+import com.b201.api.dto.RegionCountDto;
 import com.b201.api.dto.WeeklyStatusDto;
 import com.b201.api.service.DashboardService;
 
@@ -48,5 +50,13 @@ public class DashBoardController {
 	@GetMapping("/monthly-summary")
 	public ResponseEntity<?> getMonthlySummary() {
 		return ResponseEntity.ok(dashboardService.getMonthlyDamageSummary());
+	}
+
+	@GetMapping("/districts")
+	public ResponseEntity<List<RegionCountDto>> getDistricts(
+		@RequestParam("city") String cityName
+	) {
+		List<RegionCountDto> list = dashboardService.getDistrictDistribution(cityName);
+		return ResponseEntity.ok(list);
 	}
 }

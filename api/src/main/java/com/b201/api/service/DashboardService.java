@@ -12,6 +12,7 @@ import com.b201.api.dto.DailyCountDto;
 import com.b201.api.dto.DailyStatusDto;
 import com.b201.api.dto.MonthlyDamageSummaryDto;
 import com.b201.api.dto.MonthlyStatusDto;
+import com.b201.api.dto.RegionCountDto;
 import com.b201.api.dto.WeeklyStatusDto;
 import com.b201.api.repository.CaptureDamageRepository;
 
@@ -112,6 +113,13 @@ public class DashboardService {
 	 */
 	public List<MonthlyDamageSummaryDto> getMonthlyDamageSummary() {
 		return damageRepo.findMonthlyDamageSummary();
+	}
+
+	/**
+	 * 특정 광역시의 구 단위 파손 분포
+	 */
+	public List<RegionCountDto> getDistrictDistribution(String cityName) {
+		return damageRepo.countByCity(cityName);
 	}
 
 }

@@ -4,12 +4,14 @@ import java.util.List;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import com.b201.api.domain.CaptureDamage;
 import com.b201.api.dto.CategoryCountDto;
 import com.b201.api.dto.DailyCountDto;
 import com.b201.api.dto.MonthlyDamageSummaryDto;
+import com.b201.api.dto.RegionCountDto;
 
 @Repository
 public interface CaptureDamageRepository extends JpaRepository<CaptureDamage, Integer> {
@@ -20,6 +22,7 @@ public interface CaptureDamageRepository extends JpaRepository<CaptureDamage, In
 		           COUNT(d)
 		         )
 		    FROM CaptureDamage d
+			WHERE d.status <> com.b201.api.domain.CaptureDamage.DamageStatus.COMPLETED
 		   GROUP BY d.damageCategory.categoryName
 		""")
 	List<CategoryCountDto> countByCategoryName();
@@ -56,5 +59,28 @@ public interface CaptureDamageRepository extends JpaRepository<CaptureDamage, In
 		           MONTH(d.capturePoint.captureTimestamp)
 		""")
 	List<MonthlyDamageSummaryDto> findMonthlyDamageSummary();
+
+	/**
+	 * cityName을 받아
+	 * 해당 광역시 이름으로 시작하는 regionName(구 단위)의 파손 건수를 집계
+	 */
+	@Query("""
+		  SELECT new com.b201.api.dto.RegionCountDto(
+		    r.regionName,
+		    COUNT(cd.damageId)
+		  )
+		  FROM Region r
+		  LEFT JOIN CapturePoint cp
+		    ON cp.region = r
+		  LEFT JOIN CaptureDamage cd
+		    ON cd.capturePoint = cp
+		   AND cd.status <> com.b201.api.domain.CaptureDamage.DamageStatus.COMPLETED
+		  WHERE r.parentRegion.regionName = :parentName
+		  GROUP BY r.regionName
+		  ORDER BY r.regionName
+		""")
+	List<RegionCountDto> countByCity(
+		@Param("parentName") String cityName
+	);
 
 }
