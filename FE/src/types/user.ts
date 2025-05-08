@@ -20,7 +20,7 @@ export interface RegisterFormData {
 }
 
 // 서버로부터 받는 로그인 응답 데이터
-export interface LoginResonse {
+export interface LoginResponse {
     user: User
     token: string
     refreshToken: string
@@ -30,6 +30,6 @@ export interface LoginResonse {
 export interface AuthState {
     user: User | null
     isAuthenticated: boolean
-    isLoading: boolean | null
+    isLoading: boolean
     error: string | null
 }

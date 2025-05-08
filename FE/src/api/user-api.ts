@@ -22,7 +22,7 @@ export const userAPI = {
     },
     register: async (Form: RegisterFormData) => {
         try {
-            const response = await apiClient.post("/api/users/signup", { id: Form.id, password: Form.password, name: Form.name, regionId: Form.id })
+            const response = await apiClient.post("/api/users/signup", { id: Form.id, password: Form.password, name: Form.name, regionId: Form.region })
             return { data: response.data, status: response.status }
         } catch (error) {
             console.error(`회원가입에 실패하였습니다`)
