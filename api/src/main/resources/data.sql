@@ -1,4 +1,4 @@
-insert into region (region_name)
+insert ignore into region (region_name)
 values ('강원특별자치도'),
        ('경기도'),
        ('경상남도'),
@@ -15,4 +15,5 @@ values ('강원특별자치도'),
        ('전북특별자치도'),
        ('제주특별자치도'),
        ('충청남도'),
-       ('충청북도');
+       ('충청북도')
+ON DUPLICATE KEY UPDATE region_name = region_name;
