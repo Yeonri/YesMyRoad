@@ -1,16 +1,20 @@
 import type { Metadata } from 'next'
 import type React from 'react'
 
-import './globals.css'
-
 import ClientLayout from './client-layout'
+import './globals.css'
 
 export const metadata: Metadata = {
   title: 'Road Defect Monitoring System',
-  description: 'Real-time monitoring of road defects such as potholes, cracks, and paint peeling',
+  description:
+    'Real-time monitoring of road defects such as potholes, cracks, and paint peeling',
 }
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+export default function RootLayout({
+  children,
+}: {
+  children: React.ReactNode
+}) {
   return (
     <html lang="en">
       <head>
@@ -21,7 +25,10 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         />
       </head>
       <body>
+        {/* 현재는 라우트보호가 해제되어있습니다 */}
         {children}
+
+        {/* 아래 코드 주석 해제하면 라우트 보호가 활성화됩니다 */}
         {/* <ClientLayout>{children}</ClientLayout> */}
       </body>
     </html>
