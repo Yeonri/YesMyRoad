@@ -10,6 +10,13 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card'
+// import {
+//   Carousel,
+//   CarouselContent,
+//   CarouselItem,
+//   CarouselNext,
+//   CarouselPrevious,
+// } from '@/components/ui/carousel'
 import {
   DefectCard,
   DefectCardContent,
@@ -47,7 +54,6 @@ import DefectHeatmap from './defect-heatmap'
 import DefectList from './defect-list'
 import DefectMap from './defect-map'
 import DefectStats from './defect-stats'
-import DefectTrends from './defect-trends'
 import Header from './header'
 import RecentAlerts from './recent-alerts'
 
@@ -326,26 +332,7 @@ export default function Dashboard() {
             </Card>
           </TabsContent>
           <TabsContent value="analytics" className="space-y-4">
-            <div className="grid gap-4 md:grid-cols-2">
-              <Card>
-                <CardHeader>
-                  <CardTitle>결함 통계</CardTitle>
-                  <CardDescription>유형 및 심각도별 분석</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <DefectStats />
-                </CardContent>
-              </Card>
-              <Card>
-                <CardHeader>
-                  <CardTitle>결함 추이</CardTitle>
-                  <CardDescription>시간에 따른 결함 추이</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <DefectTrends />
-                </CardContent>
-              </Card>
-            </div>
+            <DefectStats />
           </TabsContent>
         </Tabs>
       </main>
