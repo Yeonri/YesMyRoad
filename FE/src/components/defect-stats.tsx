@@ -1,122 +1,105 @@
 'use client'
 
-import { useDefectStore } from '@/store/defect-store'
-import { init } from 'echarts'
-import type { EChartsOption } from 'echarts'
-import { Loader } from 'lucide-react'
-import { useEffect, useRef, useState } from 'react'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import useEmblaCarousel from 'embla-carousel-react'
+import { ChevronLeft, ChevronRight } from 'lucide-react'
+import { useCallback, useEffect, useState } from 'react'
 
 export default function DefectStats() {
-  const chartRef = useRef<HTMLDivElement>(null)
-  const [loading, setLoading] = useState(true)
+  const [emblaRef, emblaApi] = useEmblaCarousel()
+  const [selectedIndex, setSelectedIndex] = useState(0)
+  const [scrollSnaps, setScrollSnaps] = useState<number[]>([])
 
-  // Get defect statistics from Zustand store
-  const { defectTypeData, severityData } = useDefectStore()
+  const scrollPrev = useCallback(
+    () => emblaApi && emblaApi.scrollPrev(),
+    [emblaApi],
+  )
+  const scrollNext = useCallback(
+    () => emblaApi && emblaApi.scrollNext(),
+    [emblaApi],
+  )
+
+  const onSelect = useCallback(() => {
+    if (!emblaApi) return
+    setSelectedIndex(emblaApi.selectedScrollSnap())
+  }, [emblaApi])
 
   useEffect(() => {
-    // Initialize chart
-    if (chartRef.current) {
-      const chart = init(chartRef.current)
-
-      // TODO: Replace with actual API call to fetch defect statistics
-      // This would be implemented in the Zustand store's fetchDefectStats method
-
-      // 차트 옵션 설정
-      const option: EChartsOption = {
-        tooltip: { trigger: 'item', formatter: '{a} <br/>{b}: {c} ({d}%)' },
-        legend: {
-          orient: 'vertical',
-          left: 10,
-          data: [
-            'Potholes',
-            'Cracks',
-            'Paint Peeling',
-            'Critical',
-            'High',
-            'Medium',
-            'Low',
-          ],
-        },
-        color: [
-          '#3b82f6',
-          '#22c55e',
-          '#f59e0b',
-          '#ef4444',
-          '#f59e0b',
-          '#3b82f6',
-          '#22c55e',
-        ],
-        series: [
-          {
-            name: 'Defect Types',
-            type: 'pie',
-            radius: ['0%', '45%'],
-            center: ['30%', '50%'],
-            avoidLabelOverlap: false,
-            itemStyle: {
-              borderRadius: 10,
-              borderColor: '#fff',
-              borderWidth: 2,
-            },
-            label: { show: false, position: 'center' },
-            emphasis: {
-              label: { show: true, fontSize: 14, fontWeight: 'bold' },
-            },
-            labelLine: { show: false },
-            data: defectTypeData,
-          },
-          {
-            name: 'Severity',
-            type: 'pie',
-            radius: ['0%', '45%'],
-            center: ['75%', '50%'],
-            avoidLabelOverlap: false,
-            itemStyle: {
-              borderRadius: 10,
-              borderColor: '#fff',
-              borderWidth: 2,
-            },
-            label: { show: false, position: 'center' },
-            emphasis: {
-              label: { show: true, fontSize: 14, fontWeight: 'bold' },
-            },
-            labelLine: { show: false },
-            data: severityData,
-          },
-        ],
-      }
-
-      // 차트 옵션 적용 및 렌더링
-      chart.setOption(option)
-
-      // 크기 변경 처리
-      const handleResize = () => {
-        chart.resize()
-      }
-      window.addEventListener('resize', handleResize)
-
-      // 로딩 시간 시뮬레이션
-      setTimeout(() => {
-        setLoading(false)
-      }, 1000)
-
-      // 정리
-      return () => {
-        chart.dispose()
-        window.removeEventListener('resize', handleResize)
-      }
-    }
-  }, [defectTypeData, severityData])
+    if (!emblaApi) return
+    onSelect()
+    setScrollSnaps(emblaApi.scrollSnapList())
+    emblaApi.on('select', onSelect)
+  }, [emblaApi, onSelect])
 
   return (
-    <div className="h-[300px] w-full">
-      {loading ? (
-        <div className="flex h-full w-full items-center justify-center">
-          <Loader className="text-primary h-8 w-8 animate-spin" />
+    <div className="relative w-full">
+      <div className="overflow-hidden" ref={emblaRef}>
+        <div className="flex">
+          {/* First Page */}
+          <div className="min-w-0 flex-[0_0_100%]">
+            <div className="grid grid-cols-3 grid-rows-2 gap-4">
+              {[1, 2, 3, 4, 5, 6].map((item) => (
+                <Card key={item} className="h-64">
+                  <CardHeader className="p-4">
+                    <CardTitle className="text-lg">Card {item}</CardTitle>
+                  </CardHeader>
+                  <CardContent className="p-4 pt-0">
+                    <p className="text-muted-foreground text-sm">
+                      Card content
+                    </p>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          </div>
+          {/* Second Page */}
+          <div className="min-w-0 flex-[0_0_100%]">
+            <div className="grid grid-cols-3 grid-rows-2 gap-4">
+              {[7, 8, 9, 10, 11, 12].map((item) => (
+                <Card key={item} className="h-64">
+                  <CardHeader className="p-4">
+                    <CardTitle className="text-lg">Card {item}</CardTitle>
+                  </CardHeader>
+                  <CardContent className="p-4 pt-0">
+                    <p className="text-muted-foreground text-sm">
+                      Card content
+                    </p>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          </div>
         </div>
-      ) : (
-        <div ref={chartRef} className="h-full w-full" />
-      )}
+      </div>
+
+      {/* Navigation Controls */}
+      <div className="mt-4 flex items-center justify-center gap-4">
+        <button
+          onClick={scrollPrev}
+          className="rounded-full p-2 transition-colors hover:bg-gray-100"
+        >
+          <ChevronLeft className="h-6 w-6" />
+        </button>
+
+        <div className="flex gap-2">
+          {scrollSnaps.map((_, index) => (
+            <button
+              key={index}
+              onClick={() => emblaApi?.scrollTo(index)}
+              className={`h-2 w-2 rounded-full transition-colors ${
+                index === selectedIndex ? 'bg-blue-600' : 'bg-gray-300'
+              }`}
+            />
+          ))}
+        </div>
+
+        <button
+          onClick={scrollNext}
+          className="rounded-full p-2 transition-colors hover:bg-gray-100"
+        >
+          <ChevronRight className="h-6 w-6" />
+        </button>
+      </div>
     </div>
   )
 }
