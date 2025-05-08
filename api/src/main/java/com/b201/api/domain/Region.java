@@ -17,6 +17,7 @@ public class Region {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	@Column(name = "region_id")
 	private Integer id;
 
 	@Column(nullable = false, unique = true)

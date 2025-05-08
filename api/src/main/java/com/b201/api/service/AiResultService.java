@@ -43,9 +43,8 @@ public class AiResultService {
 		Point pt = toPoint(dto);
 
 		CapturePoint capturePoint = toCapturePoint(dto, street, pt);
+		// capturepoint에 관할 지역 설정
 		capturePoint.setRegion(region);
-
-
 
 		List<CaptureDamage> damages = toCaptureDamages(dto, capturePoint);
 
