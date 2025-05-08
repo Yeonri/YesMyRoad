@@ -8,6 +8,7 @@ import org.springframework.stereotype.Repository;
 
 import com.b201.api.domain.CaptureDamage;
 import com.b201.api.dto.CategoryCountDto;
+import com.b201.api.dto.DailyCountDto;
 
 @Repository
 public interface CaptureDamageRepository extends JpaRepository<CaptureDamage, Integer> {
@@ -21,4 +22,18 @@ public interface CaptureDamageRepository extends JpaRepository<CaptureDamage, In
 		   GROUP BY d.damageCategory.categoryName
 		""")
 	List<CategoryCountDto> countByCategoryName();
+
+	/**
+	 * 일자별 파손 건수 집계
+	 */
+	@Query("""
+		  SELECT new com.b201.api.dto.DailyCountDto(
+		           DATE(d.capturePoint.captureTimestamp),
+		           COUNT(d)
+		         )
+		    FROM CaptureDamage d
+		   GROUP BY DATE(d.capturePoint.captureTimestamp)
+		   ORDER BY DATE(d.capturePoint.captureTimestamp)
+		""")
+	List<DailyCountDto> countDaily();
 }
