@@ -1,6 +1,7 @@
 import apiClient from '@/api/api-client'
 
 export const defectAPI = {
+  // 지도에 찍을 손상(캡처) 좌표 데이터를 GeoJSON 형식으로 조회합니다.
   checkDefects: async () => {
     try {
       const response = await apiClient.get('/api/capture-points')
@@ -11,6 +12,7 @@ export const defectAPI = {
     }
   },
 
+  // 좌표 클릭 시 상세 정보 조회
   checkDetailedDefects: async (publicId: string) => {
     try {
       const response = await apiClient.get(`/api/capture-points/${publicId}`)
@@ -20,4 +22,5 @@ export const defectAPI = {
       throw error
     }
   },
+  
 }

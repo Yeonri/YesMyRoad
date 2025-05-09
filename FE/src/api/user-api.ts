@@ -2,6 +2,7 @@ import apiClient from '@/api/api-client'
 import { LoginFormData, RegisterFormData } from '@/types/user'
 
 export const userAPI = {
+  // 로그인
   login: async (Form: LoginFormData) => {
     try {
       const response = await apiClient.post('/api/users/login', {
@@ -14,6 +15,8 @@ export const userAPI = {
       throw error
     }
   },
+
+  // 로그아웃
   logout: async () => {
     try {
       const response = await apiClient.post('/api/users/logout')
@@ -23,6 +26,8 @@ export const userAPI = {
       throw error
     }
   },
+
+  // 회원가입
   register: async (Form: RegisterFormData) => {
     try {
       const response = await apiClient.post('/api/users/signup', {
@@ -37,6 +42,8 @@ export const userAPI = {
       throw error
     }
   },
+
+  // 토큰 리프레시
   refresh: async () => {
     try {
       const response = await apiClient.post('/api/users/refresh')
