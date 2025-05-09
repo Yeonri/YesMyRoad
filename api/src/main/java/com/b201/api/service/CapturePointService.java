@@ -18,7 +18,9 @@ import com.b201.api.dto.PropertiesDto;
 import com.b201.api.repository.CapturePointRepository;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 @Service
 @Transactional(readOnly = true)
 @RequiredArgsConstructor
@@ -66,8 +68,8 @@ public class CapturePointService {
 	}
 
 	private DamageDto mapToDamageDto(CaptureDamage captureDamage) {
-
 		return DamageDto.builder()
+			.id(captureDamage.getDamageId())
 			.category(captureDamage.getDamageCategory().getCategoryName())
 			.status(captureDamage.getStatus().getNumber())
 			.updatedAt(captureDamage.getUpdatedAt())
