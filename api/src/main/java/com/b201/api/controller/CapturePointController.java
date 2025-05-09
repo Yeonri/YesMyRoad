@@ -11,7 +11,9 @@ import com.b201.api.dto.DamageDetailResponseDto;
 import com.b201.api.service.CapturePointService;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 @RestController
 @RequestMapping("/api/capture-points")
 @RequiredArgsConstructor
@@ -34,6 +36,7 @@ public class CapturePointController {
 	public ResponseEntity<DamageDetailResponseDto> getDamageDetails(
 		@PathVariable String publicId
 	) {
+		log.info("api/capture-points/{}", publicId);
 		return ResponseEntity.of(capturePointService.findDamageDetail(publicId));
 	}
 

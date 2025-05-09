@@ -11,6 +11,7 @@ import lombok.Getter;
 @AllArgsConstructor
 public class DamageDto {
 
+	private Integer id;
 	private String category;
 	private int status;
 	private LocalDateTime updatedAt;
