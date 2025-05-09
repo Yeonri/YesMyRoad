@@ -25,7 +25,7 @@ public class CaptureDamageController {
 	/**
 	 * 요청 바디로 받은 새 상태로 해당 파손 건의 상태를 변경합니다.
 	 */
-	@PatchMapping("/status/{id}")
+	@PatchMapping("/{id}")
 	@ResponseStatus(HttpStatus.NO_CONTENT)
 	public void updateStatus(
 		@PathVariable("id") Integer damageId,
