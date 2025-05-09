@@ -5,6 +5,9 @@ import useEmblaCarousel from 'embla-carousel-react'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
 import { useCallback, useEffect, useState } from 'react'
 
+import DefectStatsDamage from './defect-stats-damage'
+import DefectStatsRepair from './defect-stats-repair'
+
 export default function DefectStats() {
   const [emblaRef, emblaApi] = useEmblaCarousel()
   const [selectedIndex, setSelectedIndex] = useState(0)
@@ -35,39 +38,11 @@ export default function DefectStats() {
     <div className="relative w-full">
       <div className="overflow-hidden" ref={emblaRef}>
         <div className="flex">
-          {/* First Page */}
-          <div className="min-w-0 flex-[0_0_100%]">
-            <div className="grid grid-cols-3 grid-rows-2 gap-4">
-              {[1, 2, 3, 4, 5, 6].map((item) => (
-                <Card key={item} className="h-64">
-                  <CardHeader className="p-4">
-                    <CardTitle className="text-lg">Card {item}</CardTitle>
-                  </CardHeader>
-                  <CardContent className="p-4 pt-0">
-                    <p className="text-muted-foreground text-sm">
-                      Card content
-                    </p>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
+          <div className="min-w-0 flex-[0_0_100%] px-0.5">
+            <DefectStatsDamage />
           </div>
-          {/* Second Page */}
-          <div className="min-w-0 flex-[0_0_100%]">
-            <div className="grid grid-cols-3 grid-rows-2 gap-4">
-              {[7, 8, 9, 10, 11, 12].map((item) => (
-                <Card key={item} className="h-64">
-                  <CardHeader className="p-4">
-                    <CardTitle className="text-lg">Card {item}</CardTitle>
-                  </CardHeader>
-                  <CardContent className="p-4 pt-0">
-                    <p className="text-muted-foreground text-sm">
-                      Card content
-                    </p>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
+          <div className="min-w-0 flex-[0_0_100%] px-0.5">
+            <DefectStatsRepair />
           </div>
         </div>
       </div>

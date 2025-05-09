@@ -17,6 +17,8 @@ import { Bell, Menu, Search, Settings, User } from 'lucide-react'
 
 import { MobileNav } from './mobile-nav'
 
+const PUBLIC_ID = '23569766-0f5a-4f54-ba9b-dba4dbf0b922'
+
 export default function Header() {
   return (
     <header className="bg-background sticky top-0 z-50 flex h-16 items-center gap-4 border-b px-4 md:px-6">
@@ -46,9 +48,7 @@ export default function Header() {
       </Button>
       <Button
         onClick={async () => {
-          const response = await defectAPI.checkDetailedDefects(
-            '53121590-b15c-4cd7-a430-33fc5c29e41d',
-          )
+          const response = await defectAPI.checkDetailedDefects(PUBLIC_ID)
           console.log(response.data)
         }}
       >
