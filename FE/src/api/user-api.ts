@@ -43,6 +43,19 @@ export const userAPI = {
     }
   },
 
+  // 아이디 중복체크
+  checkIdDuplication: async (userId: string) => {
+    try {
+      const response = await apiClient.get(`/api/users/id`, {
+        params: { userId },
+      })
+      return { data: response.data, status: response.status }
+    } catch (error) {
+      console.error(`아이디 중복 확인에 실패하였습니다`)
+      throw error
+    }
+  },
+
   // 토큰 리프레시
   refresh: async () => {
     try {
