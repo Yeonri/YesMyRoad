@@ -12,6 +12,7 @@ import com.b201.api.dto.CategoryCountDto;
 import com.b201.api.dto.DailyStatusDto;
 import com.b201.api.dto.MonthlyStatusDto;
 import com.b201.api.dto.RegionCountDto;
+import com.b201.api.dto.TopRegionDto;
 import com.b201.api.dto.WeeklyStatusDto;
 import com.b201.api.service.DashboardService;
 
@@ -58,5 +59,10 @@ public class DashBoardController {
 	) {
 		List<RegionCountDto> list = dashboardService.getDistrictDistribution(cityName);
 		return ResponseEntity.ok(list);
+	}
+
+	@GetMapping("/top3")
+	public List<TopRegionDto> top3Regions() {
+		return dashboardService.getTop3Regions();
 	}
 }

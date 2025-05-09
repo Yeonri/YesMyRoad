@@ -2,6 +2,7 @@ package com.b201.api.repository;
 
 import java.util.List;
 
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -12,6 +13,7 @@ import com.b201.api.dto.CategoryCountDto;
 import com.b201.api.dto.DailyCountDto;
 import com.b201.api.dto.MonthlyDamageSummaryDto;
 import com.b201.api.dto.RegionCountDto;
+import com.b201.api.dto.TopRegionDto;
 
 @Repository
 public interface CaptureDamageRepository extends JpaRepository<CaptureDamage, Integer> {
@@ -83,4 +85,21 @@ public interface CaptureDamageRepository extends JpaRepository<CaptureDamage, In
 		@Param("parentName") String cityName
 	);
 
+	/**
+	 * 상위 N개 지역별 도로파손 통계 (완료된 건까지 모두 집계)
+	 */
+	@Query("""
+		  SELECT new com.b201.api.dto.TopRegionDto(
+		    r.regionName,
+		    COUNT(cd), 
+		    SUM(CASE WHEN cd.damageCategory.categoryName = '도로균열' THEN 1 ELSE 0 END),
+		    SUM(CASE WHEN cd.damageCategory.categoryName = '도로홀'  THEN 1 ELSE 0 END)
+		  )
+		  FROM CaptureDamage cd
+		  JOIN cd.capturePoint cp
+		  JOIN cp.region r
+		  GROUP BY r.regionName
+		  ORDER BY COUNT(cd) DESC
+		""")
+	List<TopRegionDto> findTopRegions(Pageable pageable);
 }

@@ -5,6 +5,7 @@ import java.time.LocalDate;
 import java.time.YearMonth;
 import java.util.List;
 
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
 import com.b201.api.dto.CategoryCountDto;
@@ -13,6 +14,7 @@ import com.b201.api.dto.DailyStatusDto;
 import com.b201.api.dto.MonthlyDamageSummaryDto;
 import com.b201.api.dto.MonthlyStatusDto;
 import com.b201.api.dto.RegionCountDto;
+import com.b201.api.dto.TopRegionDto;
 import com.b201.api.dto.WeeklyStatusDto;
 import com.b201.api.repository.CaptureDamageRepository;
 
@@ -120,6 +122,13 @@ public class DashboardService {
 	 */
 	public List<RegionCountDto> getDistrictDistribution(String cityName) {
 		return damageRepo.countByCity(cityName);
+	}
+
+	/**
+	 * 상위 3개 지역의 도로파손 통계
+	 */
+	public List<TopRegionDto> getTop3Regions() {
+		return damageRepo.findTopRegions(PageRequest.of(0, 3));
 	}
 
 }
