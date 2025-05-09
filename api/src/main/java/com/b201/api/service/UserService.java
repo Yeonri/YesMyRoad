@@ -55,7 +55,7 @@ public class UserService {
 	//아이디 중복 체크
 	public DuplicateIdDto isDuplicateUsername(String username) {
 		return DuplicateIdDto.builder()
-			.available(userRepository.findByUsername(username).isEmpty())
+			.available(userRepository.findByUsername(username).isEmpty() ? 1 : 0)
 			.build();
 	}
 

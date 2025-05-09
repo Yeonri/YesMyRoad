@@ -6,5 +6,5 @@ import lombok.Getter;
 @Getter
 @Builder
 public class DuplicateIdDto {
-	boolean available;
+	int available;
 }
