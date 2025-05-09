@@ -51,6 +51,11 @@ public class UserService {
 		userRepository.save(user);
 	}
 
+	//아이디 중복 체크
+	public boolean isDuplicateUsername(String username) {
+		return userRepository.findByUsername(username).isPresent();
+	}
+
 	//로그인 로직
 	public LoginResponseDto login(LoginRequestDto loginDto) {
 		User user = userRepository.findByUsername(loginDto.getId())
