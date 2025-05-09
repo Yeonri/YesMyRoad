@@ -11,9 +11,7 @@ export default function DefectStatsDamage() {
         <CardHeader className="p-4">
           <CardTitle className="text-md">유형별 도로파손 분포</CardTitle>
         </CardHeader>
-        <CardContent className="p-4 pt-0">
-
-        </CardContent>
+        <CardContent className="p-4 pt-0"></CardContent>
       </Card>
       {/* 일/월/년 도로파손 건수 */}
       <div className={`${CARD_HEIGHT} flex flex-col gap-4`}>
