@@ -1,6 +1,7 @@
 package com.b201.api.controller;
 
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -30,12 +31,12 @@ public class UserController {
 		return ResponseEntity.status(HttpStatus.CREATED).build();
 	}
 
-	@GetMapping("/id")
+	@GetMapping(
+		path = "/id",
+		produces = MediaType.APPLICATION_JSON_VALUE
+	)
 	public ResponseEntity<?> getUser(@RequestParam String userId) {
-		if (userService.isDuplicateUsername(userId)) {
-			return ResponseEntity.status(HttpStatus.CONFLICT).build();
-		}
-		return ResponseEntity.ok().build();
+		return ResponseEntity.ok().body(userService.isDuplicateUsername(userId));
 	}
 
 	@PostMapping("/login")
