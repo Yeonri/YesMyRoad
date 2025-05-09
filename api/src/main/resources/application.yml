@@ -14,15 +14,24 @@ spring:
   #jpa
   jpa:
     hibernate:
-      ddl-auto: create
+      ddl-auto: update
     properties:
       hibernate:
         dialect: org.hibernate.dialect.MySQLDialect
+    defer-datasource-initialization: true
 
   #한글 깨짐 이슈 방지
   sql:
     init:
       encoding: UTF-8
+      mode: always
+      data-locations: classpath:data.sql
+  
+  #redis 설정
+  data:
+    redis:
+      host: ${REDIS_HOST}
+      port: ${REDIS_PORT}
 
 server:
   error:
@@ -31,3 +40,8 @@ server:
 
 address:
   key: ${ADDRESS_API_KEY}
+
+jwt:
+  secret: ${JWT_SECRET}
+
+

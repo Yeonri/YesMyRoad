@@ -9,36 +9,33 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
 
 @Entity
-@Getter
-@Builder
-@AllArgsConstructor
 @NoArgsConstructor
-@Table(name = "users")
-public class User {
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
+@Getter
+@Table(name = "region")
+public class Region {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	@EqualsAndHashCode.Include
+	@Column(name = "region_id")
 	private Integer id;
 
-	@Column(nullable = false, unique = true, name = "user_id")
-	private String username;
+	@Column(name = "region_name", nullable = false, unique = true)
+	private String regionName;
 
-	@Column(nullable = false, name = "user_password")
-	private String password;
-
-	@Column(nullable = false, name = "user_name")
-	private String name;
-
-	@Setter
+	//상위 광역시/도가 없는 경우(null), 있으면 부모 Region
 	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "region_id", nullable = false)
-	private Region region;
+	@JoinColumn(name = "parent_region_id")
+	private Region parentRegion;
 
+	public Region(String regionName, Region parentRegion) {
+		this.regionName = regionName;
+		this.parentRegion = parentRegion;
+	}
 }

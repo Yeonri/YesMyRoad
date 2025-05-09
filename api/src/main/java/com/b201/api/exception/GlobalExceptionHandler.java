@@ -7,6 +7,8 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -16,9 +18,11 @@ import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExcep
 @RestControllerAdvice
 public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 
+	// Validation 오류 처리 (예: @Valid 실패)
 	@Override
 	protected ResponseEntity<Object> handleMethodArgumentNotValid(MethodArgumentNotValidException ex,
 		HttpHeaders headers, HttpStatusCode status, WebRequest request) {
+
 		List<ValidationError> errors = ex.getBindingResult()
 			.getFieldErrors()
 			.stream()
@@ -28,6 +32,31 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 		return ResponseEntity.badRequest().body(new ErrorResponse(errors));
 	}
 
+	// 사용자 존재하지 않음
+	@ExceptionHandler(UsernameNotFoundException.class)
+	public ResponseEntity<ErrorResponse> handleUsernameNotFound(UsernameNotFoundException ex) {
+		return ResponseEntity
+			.status(HttpStatus.UNAUTHORIZED)
+			.body(new ErrorResponse(ex.getMessage()));
+	}
+
+	// 비밀번호 불일치 등 인증 실패
+	@ExceptionHandler(BadCredentialsException.class)
+	public ResponseEntity<ErrorResponse> handleBadCredentials(BadCredentialsException ex) {
+		return ResponseEntity
+			.status(HttpStatus.UNAUTHORIZED)
+			.body(new ErrorResponse(ex.getMessage()));
+	}
+
+	// 중복 ID
+	@ExceptionHandler(DuplicateUsernameException.class)
+	public ResponseEntity<ErrorResponse> handleDuplicateUsername(DuplicateUsernameException ex) {
+		return ResponseEntity
+			.status(HttpStatus.BAD_REQUEST)
+			.body(new ErrorResponse(ex.getMessage()));
+	}
+
+	// 주소 조회 실패
 	@ExceptionHandler(AddressLookupException.class)
 	public ResponseEntity<ErrorResponse> handleAddressLookup(AddressLookupException ex) {
 		return ResponseEntity
@@ -35,6 +64,15 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 			.body(new ErrorResponse(ex.getMessage()));
 	}
 
+	//회원가입 시 잘못된 regionId를 매칭했을 때
+	@ExceptionHandler(IllegalArgumentException.class)
+	public ResponseEntity<ErrorResponse> handleIllegalArgument(IllegalArgumentException ex) {
+		return ResponseEntity
+			.status(HttpStatus.BAD_REQUEST)
+			.body(new ErrorResponse(ex.getMessage()));
+	}
+
+	// 기본 포맷
 	public static record ValidationError(String field, String defaultMessage) {
 	}
 
@@ -44,5 +82,6 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 		}
 	}
 }
+
 
 

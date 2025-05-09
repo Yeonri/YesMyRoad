@@ -48,6 +48,7 @@ public class CaptureDamage {
 	@JoinColumn(name = "category_id", nullable = false)
 	private DamageCategory damageCategory;
 
+	@Setter
 	@Enumerated(EnumType.STRING)
 	@Column(name = "status", nullable = false, length = 20)
 	private DamageStatus status;
