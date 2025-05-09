@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 
 import com.b201.api.domain.Region;
 import com.b201.api.domain.User;
+import com.b201.api.dto.DuplicateIdDto;
 import com.b201.api.dto.LoginRequestDto;
 import com.b201.api.dto.LoginResponseDto;
 import com.b201.api.dto.SignupDto;
@@ -52,8 +53,10 @@ public class UserService {
 	}
 
 	//아이디 중복 체크
-	public boolean isDuplicateUsername(String username) {
-		return userRepository.findByUsername(username).isPresent();
+	public DuplicateIdDto isDuplicateUsername(String username) {
+		return DuplicateIdDto.builder()
+			.available(userRepository.findByUsername(username).isEmpty())
+			.build();
 	}
 
 	//로그인 로직
