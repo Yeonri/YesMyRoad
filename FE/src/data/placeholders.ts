@@ -1,15 +1,56 @@
 // TODO: Replace these placeholder values with actual data from API endpoints
-
-import { Defect } from "@/store/defect-store"
+import { Defect } from '@/store/defect-store'
 
 // Mock data for defect locations
 export const defectLocations = [
-  { id: 1, lat: 36.355056, lng: 127.301378, type: 'pothole', severity: 'critical', title: '포트홀' },
-  { id: 2, lat: 36.357255, lng: 127.304379, type: 'crack', severity: 'high', title: '크랙' },
-  { id: 3, lat: 36.348676, lng: 127.297512, type: 'paint', severity: 'medium', title: '크랙' },
-  { id: 4, lat: 36.351986, lng: 127.298512, type: 'pothole', severity: 'high', title: '포트홀' },
-  { id: 5, lat: 36.363024, lng: 127.306758, type: 'crack', severity: 'low', title: '크랙' },
-  { id: 6, lat: 36.360445, lng: 127.300041, type: 'pothole', severity: 'critical', title: '포트홀' },
+  {
+    id: 1,
+    lat: 36.355056,
+    lng: 127.301378,
+    type: 'pothole',
+    severity: 'critical',
+    title: '포트홀',
+  },
+  {
+    id: 2,
+    lat: 36.357255,
+    lng: 127.304379,
+    type: 'crack',
+    severity: 'high',
+    title: '크랙',
+  },
+  {
+    id: 3,
+    lat: 36.348676,
+    lng: 127.297512,
+    type: 'paint',
+    severity: 'medium',
+    title: '크랙',
+  },
+  {
+    id: 4,
+    lat: 36.351986,
+    lng: 127.298512,
+    type: 'pothole',
+    severity: 'high',
+    title: '포트홀',
+  },
+  {
+    id: 5,
+    lat: 36.363024,
+    lng: 127.306758,
+    type: 'crack',
+    severity: 'low',
+    title: '크랙',
+  },
+  {
+    id: 6,
+    lat: 36.360445,
+    lng: 127.300041,
+    type: 'pothole',
+    severity: 'critical',
+    title: '포트홀',
+  },
 ]
 
 // Mock data for heatmap (more points)
@@ -101,7 +142,7 @@ export const defects = [
 ]
 
 // Mock data for recent alerts
-export const recentAlerts:Defect[] = [
+export const recentAlerts: Defect[] = [
   {
     id: 'DEF-1001',
     type: 'Pothole',

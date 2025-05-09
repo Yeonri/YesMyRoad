@@ -1,7 +1,7 @@
-"use client"
+'use client'
 
-import { useState } from "react"
-import { ChevronDown, ChevronUp, MoreHorizontal, Clock, MapPin } from "lucide-react"
+import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -9,75 +9,93 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import { Button } from "@/components/ui/button"
-import { Badge } from "@/components/ui/badge"
-import { useDefectStore } from "@/store/defect-store"
+} from '@/components/ui/dropdown-menu'
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table'
+import { useDefectStore } from '@/store/defect-store'
+import {
+  ChevronDown,
+  ChevronUp,
+  Clock,
+  MapPin,
+  MoreHorizontal,
+} from 'lucide-react'
+import { useState } from 'react'
 
 export default function DefectList() {
-  const [sortColumn, setSortColumn] = useState("detectedAt")
-  const [sortDirection, setSortDirection] = useState("desc")
+  const [sortColumn, setSortColumn] = useState('detectedAt')
+  const [sortDirection, setSortDirection] = useState('desc')
 
   // Get defects from Zustand store
   const { defects, defectType, severity } = useDefectStore()
 
   // Filter defects based on selected filters
   const filteredDefects = defects.filter((defect) => {
-    const matchesType = defectType === "all" || defect.type.toLowerCase() === defectType
-    const matchesSeverity = severity === "all" || defect.severity === severity
+    const matchesType =
+      defectType === 'all' || defect.type.toLowerCase() === defectType
+    const matchesSeverity = severity === 'all' || defect.severity === severity
     return matchesType && matchesSeverity
   })
 
   const handleSort = (column: string) => {
     if (sortColumn === column) {
-      setSortDirection(sortDirection === "asc" ? "desc" : "asc")
+      setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc')
     } else {
       setSortColumn(column)
-      setSortDirection("asc")
+      setSortDirection('asc')
     }
   }
 
   const sortedDefects = [...filteredDefects].sort((a, b) => {
-    if (sortDirection === "asc") {
-      return a[sortColumn as keyof typeof a]! > b[sortColumn as keyof typeof b]! ? 1 : -1
+    if (sortDirection === 'asc') {
+      return a[sortColumn as keyof typeof a]! > b[sortColumn as keyof typeof b]!
+        ? 1
+        : -1
     } else {
-      return a[sortColumn as keyof typeof a]! < b[sortColumn as keyof typeof b]! ? 1 : -1
+      return a[sortColumn as keyof typeof a]! < b[sortColumn as keyof typeof b]!
+        ? 1
+        : -1
     }
   })
 
   const formatDate = (dateString: string) => {
     const date = new Date(dateString)
-    return date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })
+    return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
   }
 
   const getSeverityColor = (severity: string) => {
     switch (severity) {
-      case "critical":
-        return "bg-red-500 text-white"
-      case "high":
-        return "bg-amber-500 text-white"
-      case "medium":
-        return "bg-blue-500 text-white"
-      case "low":
-        return "bg-green-500 text-white"
+      case 'critical':
+        return 'bg-red-500 text-white'
+      case 'high':
+        return 'bg-amber-500 text-white'
+      case 'medium':
+        return 'bg-blue-500 text-white'
+      case 'low':
+        return 'bg-green-500 text-white'
       default:
-        return "bg-gray-500 text-white"
+        return 'bg-gray-500 text-white'
     }
   }
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case "Pending":
-        return "bg-gray-100 text-gray-800"
-      case "Assigned":
-        return "bg-blue-100 text-blue-800"
-      case "In Progress":
-        return "bg-amber-100 text-amber-800"
-      case "Completed":
-        return "bg-green-100 text-green-800"
+      case 'Pending':
+        return 'bg-gray-100 text-gray-800'
+      case 'Assigned':
+        return 'bg-blue-100 text-blue-800'
+      case 'In Progress':
+        return 'bg-amber-100 text-amber-800'
+      case 'Completed':
+        return 'bg-green-100 text-green-800'
       default:
-        return "bg-gray-100 text-gray-800"
+        return 'bg-gray-100 text-gray-800'
     }
   }
 
@@ -93,11 +111,15 @@ export default function DefectList() {
                 variant="ghost"
                 size="sm"
                 className="flex items-center gap-1 p-0 font-medium"
-                onClick={() => handleSort("type")}
+                onClick={() => handleSort('type')}
               >
                 결함 유형
-                {sortColumn === "type" &&
-                  (sortDirection === "asc" ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />)}
+                {sortColumn === 'type' &&
+                  (sortDirection === 'asc' ? (
+                    <ChevronUp className="h-4 w-4" />
+                  ) : (
+                    <ChevronDown className="h-4 w-4" />
+                  ))}
               </Button>
             </TableHead>
             <TableHead>
@@ -105,11 +127,15 @@ export default function DefectList() {
                 variant="ghost"
                 size="sm"
                 className="flex items-center gap-1 p-0 font-medium"
-                onClick={() => handleSort("severity")}
+                onClick={() => handleSort('severity')}
               >
                 심각도
-                {sortColumn === "severity" &&
-                  (sortDirection === "asc" ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />)}
+                {sortColumn === 'severity' &&
+                  (sortDirection === 'asc' ? (
+                    <ChevronUp className="h-4 w-4" />
+                  ) : (
+                    <ChevronDown className="h-4 w-4" />
+                  ))}
               </Button>
             </TableHead>
             <TableHead>발생 위치</TableHead>
@@ -118,11 +144,15 @@ export default function DefectList() {
                 variant="ghost"
                 size="sm"
                 className="flex items-center gap-1 p-0 font-medium"
-                onClick={() => handleSort("detectedAt")}
+                onClick={() => handleSort('detectedAt')}
               >
                 작업 현황
-                {sortColumn === "detectedAt" &&
-                  (sortDirection === "asc" ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />)}
+                {sortColumn === 'detectedAt' &&
+                  (sortDirection === 'asc' ? (
+                    <ChevronUp className="h-4 w-4" />
+                  ) : (
+                    <ChevronDown className="h-4 w-4" />
+                  ))}
               </Button>
             </TableHead>
             <TableHead>
@@ -130,11 +160,15 @@ export default function DefectList() {
                 variant="ghost"
                 size="sm"
                 className="flex items-center gap-1 p-0 font-medium"
-                onClick={() => handleSort("status")}
+                onClick={() => handleSort('status')}
               >
                 작업 더보기
-                {sortColumn === "status" &&
-                  (sortDirection === "asc" ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />)}
+                {sortColumn === 'status' &&
+                  (sortDirection === 'asc' ? (
+                    <ChevronUp className="h-4 w-4" />
+                  ) : (
+                    <ChevronDown className="h-4 w-4" />
+                  ))}
               </Button>
             </TableHead>
             <TableHead className="w-[50px]"></TableHead>
@@ -147,19 +181,22 @@ export default function DefectList() {
               <TableCell>{defect.type}</TableCell>
               <TableCell>
                 <Badge className={getSeverityColor(defect.severity)}>
-                  {defect.severity.charAt(0).toUpperCase() + defect.severity.slice(1)}
+                  {defect.severity.charAt(0).toUpperCase() +
+                    defect.severity.slice(1)}
                 </Badge>
               </TableCell>
               <TableCell className="flex items-center gap-1">
-                <MapPin className="h-3 w-3 text-muted-foreground" />
+                <MapPin className="text-muted-foreground h-3 w-3" />
                 {defect.location}
               </TableCell>
               <TableCell className="flex items-center gap-1">
-                <Clock className="h-3 w-3 text-muted-foreground" />
+                <Clock className="text-muted-foreground h-3 w-3" />
                 {formatDate(defect.detectedAt)}
               </TableCell>
               <TableCell>
-                <Badge className={getStatusColor(defect.status!)}>{defect.status!}</Badge>
+                <Badge className={getStatusColor(defect.status!)}>
+                  {defect.status!}
+                </Badge>
               </TableCell>
               <TableCell>
                 <DropdownMenu>

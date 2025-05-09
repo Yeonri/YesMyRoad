@@ -1,9 +1,25 @@
 'use client'
 
-import { Breadcrumb, BreadcrumbItem, BreadcrumbList, BreadcrumbSeparator } from '@/components/ui/breadcrumb'
+import {
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbList,
+  BreadcrumbSeparator,
+} from '@/components/ui/breadcrumb'
 import { Button } from '@/components/ui/button'
-import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@/components/ui/command'
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+} from '@/components/ui/command'
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from '@/components/ui/popover'
 import address from '@/data/address.json'
 import { cn } from '@/lib/utils'
 import useAddressStore from '@/store/address-store'
@@ -31,7 +47,9 @@ const LocationHeader: React.FC = () => {
 
   // 시/도 변경시 도시 목록 업데이트 및 초기 도시 선택
   useEffect(() => {
-    const cities = Object.keys(addressData[selectedProvince] || {}).filter((city) => city !== '')
+    const cities = Object.keys(addressData[selectedProvince] || {}).filter(
+      (city) => city !== '',
+    )
     setAvailableCities(cities)
 
     if (cities.length > 0) {
@@ -120,7 +138,12 @@ const LocationHeader: React.FC = () => {
                         >
                           {province}
                           <Check
-                            className={cn('ml-auto', selectedProvince === province ? 'opacity-100' : 'opacity-0')}
+                            className={cn(
+                              'ml-auto',
+                              selectedProvince === province
+                                ? 'opacity-100'
+                                : 'opacity-0',
+                            )}
                           />
                         </CommandItem>
                       ))}
@@ -151,7 +174,10 @@ const LocationHeader: React.FC = () => {
                   </PopoverTrigger>
                   <PopoverContent className="w-[200px] p-0">
                     <Command>
-                      <CommandInput placeholder="시/군/구 검색..." className="h-9" />
+                      <CommandInput
+                        placeholder="시/군/구 검색..."
+                        className="h-9"
+                      />
                       <CommandList className="max-h-[200px] overflow-auto">
                         <CommandEmpty>검색 결과가 없습니다.</CommandEmpty>
                         <CommandGroup>
@@ -165,7 +191,14 @@ const LocationHeader: React.FC = () => {
                               }}
                             >
                               {city}
-                              <Check className={cn('ml-auto', selectedCity === city ? 'opacity-100' : 'opacity-0')} />
+                              <Check
+                                className={cn(
+                                  'ml-auto',
+                                  selectedCity === city
+                                    ? 'opacity-100'
+                                    : 'opacity-0',
+                                )}
+                              />
                             </CommandItem>
                           ))}
                         </CommandGroup>
@@ -212,7 +245,12 @@ const LocationHeader: React.FC = () => {
                             >
                               {district}
                               <Check
-                                className={cn('ml-auto', selectedDistrict === district ? 'opacity-100' : 'opacity-0')}
+                                className={cn(
+                                  'ml-auto',
+                                  selectedDistrict === district
+                                    ? 'opacity-100'
+                                    : 'opacity-0',
+                                )}
                               />
                             </CommandItem>
                           ))}

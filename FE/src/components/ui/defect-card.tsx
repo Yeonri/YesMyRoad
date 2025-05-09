@@ -1,22 +1,22 @@
 import { cn } from '@/lib/utils'
 import * as React from 'react'
 
-const Card = React.forwardRef<
+const DefectCard = React.forwardRef<
   HTMLDivElement,
   React.HTMLAttributes<HTMLDivElement>
 >(({ className, ...props }, ref) => (
   <div
     ref={ref}
     className={cn(
-      'bg-card text-card-foreground rounded-xl border shadow',
+      'bg-card text-card-foreground flex h-full flex-col rounded-xl border shadow',
       className,
     )}
     {...props}
   />
 ))
-Card.displayName = 'Card'
+DefectCard.displayName = 'DefectCard'
 
-const CardHeader = React.forwardRef<
+const DefectCardHeader = React.forwardRef<
   HTMLDivElement,
   React.HTMLAttributes<HTMLDivElement>
 >(({ className, ...props }, ref) => (
@@ -26,9 +26,9 @@ const CardHeader = React.forwardRef<
     {...props}
   />
 ))
-CardHeader.displayName = 'CardHeader'
+DefectCardHeader.displayName = 'DefectCardHeader'
 
-const CardTitle = React.forwardRef<
+const DefectCardTitle = React.forwardRef<
   HTMLDivElement,
   React.HTMLAttributes<HTMLDivElement>
 >(({ className, ...props }, ref) => (
@@ -38,9 +38,9 @@ const CardTitle = React.forwardRef<
     {...props}
   />
 ))
-CardTitle.displayName = 'CardTitle'
+DefectCardTitle.displayName = 'DefectCardTitle'
 
-const CardDescription = React.forwardRef<
+const DefectCardDescription = React.forwardRef<
   HTMLDivElement,
   React.HTMLAttributes<HTMLDivElement>
 >(({ className, ...props }, ref) => (
@@ -50,26 +50,41 @@ const CardDescription = React.forwardRef<
     {...props}
   />
 ))
-CardDescription.displayName = 'CardDescription'
+DefectCardDescription.displayName = 'DefectCardDescription'
 
-const CardContent = React.forwardRef<
-  HTMLDivElement,
-  React.HTMLAttributes<HTMLDivElement>
->(({ className, ...props }, ref) => (
-  <div ref={ref} className={cn('p-6 pt-0', className)} {...props} />
-))
-CardContent.displayName = 'CardContent'
-
-const CardFooter = React.forwardRef<
+const DefectCardContent = React.forwardRef<
   HTMLDivElement,
   React.HTMLAttributes<HTMLDivElement>
 >(({ className, ...props }, ref) => (
   <div
     ref={ref}
-    className={cn('flex items-center p-6 pt-0', className)}
+    className={cn(
+      // flex 컨테이너 내부에서 height 계산 위해 min-h-0 필수
+      'flex min-h-0 flex-1 flex-col overflow-hidden p-6 pt-0',
+      className,
+    )}
     {...props}
   />
 ))
-CardFooter.displayName = 'CardFooter'
+DefectCardContent.displayName = 'DefectCardContent'
 
-export { Card, CardHeader, CardFooter, CardTitle, CardDescription, CardContent }
+const DefectCardFooter = React.forwardRef<
+  HTMLDivElement,
+  React.HTMLAttributes<HTMLDivElement>
+>(({ className, ...props }, ref) => (
+  <div
+    ref={ref}
+    className={cn('flex flex-shrink-0 items-center p-6 pt-0', className)}
+    {...props}
+  />
+))
+DefectCardFooter.displayName = 'DefectCardFooter'
+
+export {
+  DefectCard,
+  DefectCardHeader,
+  DefectCardTitle,
+  DefectCardDescription,
+  DefectCardContent,
+  DefectCardFooter,
+}
