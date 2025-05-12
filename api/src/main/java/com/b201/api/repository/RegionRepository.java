@@ -11,5 +11,6 @@ import com.b201.api.domain.Region;
 public interface RegionRepository extends JpaRepository<Region, Integer> {
 	List<Region> findByParentRegionIsNull();
 
-	List<Region> findByParentRegionIsNotNull();
+	List<Region> findByParentRegion(Region parent);
+
 }

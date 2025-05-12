@@ -18,6 +18,7 @@ import com.b201.api.dto.dashboard.TopRegionDto;
 import com.b201.api.dto.maintenance.CompletionStatsDto;
 import com.b201.api.dto.maintenance.MaintenanceStatusDto;
 import com.b201.api.dto.maintenance.MonthlyMaintenanceStatusDto;
+import com.b201.api.dto.maintenance.RegionMaintenanceStatusDto;
 
 @Repository
 public interface CaptureDamageRepository extends JpaRepository<CaptureDamage, Integer> {
@@ -146,4 +147,23 @@ public interface CaptureDamageRepository extends JpaRepository<CaptureDamage, In
 												month(cd.createdAt)
 		""")
 	List<MonthlyMaintenanceStatusDto> getMonthlyMaintenanceStatsByPeriod();
+
+	@Query("""
+				select new com.b201.api.dto.maintenance.RegionMaintenanceStatusDto(
+					r.regionName,
+							new com.b201.api.dto.maintenance.MaintenanceStatusDto(
+									coalesce(sum(case when cd.status = 'REPORTED' then 1 else 0 end),0),
+											coalesce(sum(case when cd.status = 'RECEIVED' then 1 else 0 end),0),
+													coalesce(sum(case when cd.status = 'IN_PROGRESS' then 1 else 0 end),0),
+															coalesce(sum(case when cd.status = 'COMPLETED' then 1 else 0 end),0))
+				)
+				from Region r
+						left join CapturePoint cp
+								on cp.region = r
+										left join CaptureDamage cd
+												on cd.capturePoint = cp
+														where r.parentRegion.regionName = :city
+																group by r.regionName
+		""")
+	List<RegionMaintenanceStatusDto> getRegionMaintenanceStatsByPeriod(@Param("city") String city);
 }
