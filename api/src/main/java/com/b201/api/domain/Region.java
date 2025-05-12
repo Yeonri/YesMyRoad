@@ -26,7 +26,7 @@ public class Region {
 	@Column(name = "region_id")
 	private Integer id;
 
-	@Column(name = "region_name", nullable = false, unique = true)
+	@Column(name = "region_name", nullable = false)
 	private String regionName;
 
 	//상위 광역시/도가 없는 경우(null), 있으면 부모 Region
