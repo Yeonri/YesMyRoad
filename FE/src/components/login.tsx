@@ -318,7 +318,6 @@ const Login: React.FC = () => {
                       required
                     />
                   </div>
-
                   {/* 이름 및 지역 필드를 위한 아코디언 */}
                   <AccordionPrimitive.Root
                     type="multiple"
@@ -356,7 +355,6 @@ const Login: React.FC = () => {
                       </AccordionContent>
                     </AccordionPrimitive.Item>
                   </AccordionPrimitive.Root>
-
                   <CardFooter className="px-0 pt-6">
                     <Button
                       type="submit"
@@ -364,24 +362,68 @@ const Login: React.FC = () => {
                       disabled={isLoading}
                       onClick={async (e) => {
                         e.preventDefault()
+                        clearError() // 에러 초기화
 
-                        // isLoginTab일 때만 로그인 로직 실행
-                        if (isLoginTab) {
-                          const response = await userAPI.login({
-                            id: formData.id,
-                            password: formData.password,
-                          })
+                        try {
+                          // isLoginTab일 때만 로그인 로직 실행
+                          if (isLoginTab) {
+                            const response = await userAPI.login({
+                              id: formData.id,
+                              password: formData.password,
+                            })
 
-                          if (response.status === 200) {
-                            useUserStore.setState({ isAuthenticated: true })
-                            console.log('[인증 상태 업데이트] 로그인 성공')
+                            if (response.status === 200) {
+                              // 토큰 저장
+                              localStorage.setItem(
+                                'token',
+                                response.data.accessToken,
+                              )
+                              localStorage.setItem(
+                                'refreshToken',
+                                response.data.refreshToken,
+                              )
+                              localStorage.setItem(
+                                'userId',
+                                response.data.userId,
+                              )
+
+
+
+                              console.log('[인증 상태 업데이트] 로그인 성공')
+                              router.push('/') // 로그인 성공 시 리디렉션
+                            }
+                          } else {
+                            // 회원가입 로직
+                            if (!formData.name.trim()) {
+                              alert('이름을 입력해주세요')
+                              return
+                            }
+
+                            if (!formData.region) {
+                              alert('지역을 선택해주세요')
+                              return
+                            }
+
+                            const registerResponse = await userAPI.register({
+                              id: formData.id,
+                              password: formData.password,
+                              name: formData.name,
+                              region: formData.region,
+                            })
+
+                            if (registerResponse.status === 200) {
+                              alert(
+                                '회원가입이 완료되었습니다. 로그인해주세요.',
+                              )
+                              setIsLoginTab(true)
+                            }
                           }
-                          console.log(response.data)
-                          console.log(response.status)
-                        } else {
-                          // 회원가입 로직은 여기에 구현
-                          // 예: await userAPI.register({ ... })
-                        }
+                        } catch (err: any) {
+                          // 에러 처리
+                          console.error('API 호출 실패:', err)
+                          // 에러 메시지 설정 (useState로 관리한다고 가정)
+                          // setError(err.message || '로그인 중 오류가 발생했습니다');
+                        } 
                       }}
                     >
                       {isLoading
