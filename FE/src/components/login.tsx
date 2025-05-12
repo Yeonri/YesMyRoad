@@ -367,12 +367,17 @@ const Login: React.FC = () => {
 
                         // isLoginTab일 때만 로그인 로직 실행
                         if (isLoginTab) {
-                          // const response = await userAPI.login({
-                          //   id: formData.id,
-                          //   password: formData.password,
-                          // })
-                          // console.log(response.data)
-                          // console.log(response.status)
+                          const response = await userAPI.login({
+                            id: formData.id,
+                            password: formData.password,
+                          })
+
+                          if (response.status === 200) {
+                            useUserStore.setState({ isAuthenticated: true })
+                            console.log('[인증 상태 업데이트] 로그인 성공')
+                          }
+                          console.log(response.data)
+                          console.log(response.status)
                         } else {
                           // 회원가입 로직은 여기에 구현
                           // 예: await userAPI.register({ ... })
