@@ -8,14 +8,14 @@ import java.util.List;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
-import com.b201.api.dto.CategoryCountDto;
-import com.b201.api.dto.DailyCountDto;
-import com.b201.api.dto.DailyStatusDto;
-import com.b201.api.dto.MonthlyDamageSummaryDto;
-import com.b201.api.dto.MonthlyStatusDto;
-import com.b201.api.dto.RegionCountDto;
-import com.b201.api.dto.TopRegionDto;
-import com.b201.api.dto.WeeklyStatusDto;
+import com.b201.api.dto.dashboard.CategoryCountDto;
+import com.b201.api.dto.dashboard.DailyCountDto;
+import com.b201.api.dto.dashboard.DailyStatusDto;
+import com.b201.api.dto.dashboard.MonthlyDamageSummaryDto;
+import com.b201.api.dto.dashboard.MonthlyStatusDto;
+import com.b201.api.dto.dashboard.RegionCountDto;
+import com.b201.api.dto.dashboard.TopRegionDto;
+import com.b201.api.dto.dashboard.WeeklyStatusDto;
 import com.b201.api.repository.CaptureDamageRepository;
 
 import lombok.RequiredArgsConstructor;

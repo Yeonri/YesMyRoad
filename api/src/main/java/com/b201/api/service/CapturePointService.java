@@ -9,12 +9,12 @@ import org.springframework.transaction.annotation.Transactional;
 import com.b201.api.domain.CaptureDamage;
 import com.b201.api.domain.CapturePoint;
 import com.b201.api.dto.AddressDto;
-import com.b201.api.dto.CapturePointResponseDto;
-import com.b201.api.dto.DamageDetailResponseDto;
-import com.b201.api.dto.DamageDto;
-import com.b201.api.dto.FeatureDto;
-import com.b201.api.dto.GeometryDto;
-import com.b201.api.dto.PropertiesDto;
+import com.b201.api.dto.damage.DamageDetailResponseDto;
+import com.b201.api.dto.damage.DamageDto;
+import com.b201.api.dto.point.CapturePointResponseDto;
+import com.b201.api.dto.point.FeatureDto;
+import com.b201.api.dto.point.GeometryDto;
+import com.b201.api.dto.point.PropertiesDto;
 import com.b201.api.repository.CapturePointRepository;
 
 import lombok.RequiredArgsConstructor;

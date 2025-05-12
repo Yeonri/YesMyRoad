@@ -8,12 +8,12 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.b201.api.dto.CategoryCountDto;
-import com.b201.api.dto.DailyStatusDto;
-import com.b201.api.dto.MonthlyStatusDto;
-import com.b201.api.dto.RegionCountDto;
-import com.b201.api.dto.TopRegionDto;
-import com.b201.api.dto.WeeklyStatusDto;
+import com.b201.api.dto.dashboard.CategoryCountDto;
+import com.b201.api.dto.dashboard.DailyStatusDto;
+import com.b201.api.dto.dashboard.MonthlyStatusDto;
+import com.b201.api.dto.dashboard.RegionCountDto;
+import com.b201.api.dto.dashboard.TopRegionDto;
+import com.b201.api.dto.dashboard.WeeklyStatusDto;
 import com.b201.api.service.DashboardService;
 
 import lombok.RequiredArgsConstructor;

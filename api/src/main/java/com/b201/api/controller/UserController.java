@@ -10,8 +10,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.b201.api.dto.LoginRequestDto;
-import com.b201.api.dto.SignupDto;
+import com.b201.api.dto.user.LoginRequestDto;
+import com.b201.api.dto.user.SignupDto;
 import com.b201.api.service.UserService;
 
 import jakarta.servlet.http.HttpServletRequest;

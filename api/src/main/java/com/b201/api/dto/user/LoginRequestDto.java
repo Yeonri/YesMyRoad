@@ -1,4 +1,4 @@
-package com.b201.api.dto;
+package com.b201.api.dto.user;
 
 import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
