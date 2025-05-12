@@ -17,6 +17,7 @@ import com.b201.api.dto.dashboard.RegionCountDto;
 import com.b201.api.dto.dashboard.TopRegionDto;
 import com.b201.api.dto.maintenance.CompletionStatsDto;
 import com.b201.api.dto.maintenance.MaintenanceStatusDto;
+import com.b201.api.dto.maintenance.MonthlyMaintenanceStatusDto;
 
 @Repository
 public interface CaptureDamageRepository extends JpaRepository<CaptureDamage, Integer> {
@@ -128,4 +129,21 @@ public interface CaptureDamageRepository extends JpaRepository<CaptureDamage, In
 	CompletionStatsDto getCompletionStatsByPeriod(@Param("dailyAgo") LocalDateTime dailyAgo,
 		@Param("weeklyAgo") LocalDateTime weeklyAgo,
 		@Param("monthlyAgo") LocalDateTime monthlyAgo);
+
+	@Query("""
+		select new com.b201.api.dto.maintenance.MonthlyMaintenanceStatusDto(
+				year(cd.createdAt),
+						month(cd.createdAt),
+								sum(case when cd.status = 'REPORTED' then 1 else 0 end),
+										sum(case when cd.status = 'RECEIVED' then 1 else 0 end),
+												sum(case when cd.status = 'IN_PROGRESS' then 1 else 0 end),
+														sum(case when cd.status = 'COMPLETED' then 1 else 0 end)
+		)
+				from CaptureDamage cd
+						group by year(cd.createdAt),
+								month(cd.createdAt)
+										order by year(cd.createdAt),
+												month(cd.createdAt)
+		""")
+	List<MonthlyMaintenanceStatusDto> getMonthlyMaintenanceStatsByPeriod();
 }
