@@ -1,4 +1,4 @@
-package com.b201.api.dto;
+package com.b201.api.dto.point;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

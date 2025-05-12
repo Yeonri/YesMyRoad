@@ -1,4 +1,4 @@
-package com.b201.api.dto;
+package com.b201.api.dto.point;
 
 import java.util.List;
 
@@ -17,5 +17,5 @@ public class CapturePointResponseDto {
 	@Builder.Default
 	private final String type = "FeatureCollection";
 	private final List<FeatureDto> features;
-	
+
 }
