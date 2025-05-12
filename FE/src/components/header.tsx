@@ -15,6 +15,7 @@ import {
 } from '@/components/ui/dropdown-menu'
 import { Input } from '@/components/ui/input'
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet'
+import { useUserStore } from '@/store/user-store'
 import { Bell, Menu, Search, Settings, User } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 
@@ -24,6 +25,8 @@ const PUBLIC_ID = '23569766-0f5a-4f54-ba9b-dba4dbf0b922'
 
 export default function Header() {
   const router = useRouter() // 라우터 훅 사용
+  const { clearSession } = useUserStore()
+
   const handleLogout = async () => {
     const response = await userAPI.logout()
     if (response.status === 200) {
@@ -32,10 +35,11 @@ export default function Header() {
       localStorage.removeItem('refreshToken')
       localStorage.removeItem('userId')
 
+      clearSession()
       // console.log('로그아웃 성공')
 
       // 로그인 페이지로 리디렉션
-      router.push('/login')
+      router.push('/auth')
     }
   }
 

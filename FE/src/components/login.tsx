@@ -44,7 +44,7 @@ const AccordionContent: React.FC<AccordionContentProps> = ({
   )
 }
 
-const Login: React.FC = () => {
+const AuthForm: React.FC = () => {
   const router = useRouter()
   // Zustand 스토어에서 필요한 상태와 액션 가져오기
   const { login, register, isLoading, error, clearError, isAuthenticated } =
@@ -441,4 +441,4 @@ const Login: React.FC = () => {
   )
 }
 
-export default Login
+export default AuthForm
