@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.b201.api.dto.maintenance.CompletionStatsDto;
 import com.b201.api.dto.maintenance.MaintenanceStatusDto;
 import com.b201.api.dto.maintenance.MonthlyMaintenanceStatusDto;
+import com.b201.api.dto.maintenance.RegionMaintenanceStatusDto;
 import com.b201.api.service.MaintenanceService;
 
 import lombok.RequiredArgsConstructor;
@@ -38,5 +39,10 @@ public class MaintenanceController {
 	@GetMapping("/monthly-status")
 	public ResponseEntity<List<MonthlyMaintenanceStatusDto>> getMonthlyStats() {
 		return ResponseEntity.ok().body(maintenanceService.getMonthlyMaintenanceStatus());
+	}
+
+	@GetMapping("/districts")
+	public ResponseEntity<List<RegionMaintenanceStatusDto>> getDistricts() {
+		return ResponseEntity.ok().body(maintenanceService.getRegionMaintenanceStatus());
 	}
 }
