@@ -33,11 +33,6 @@ spring:
       host: ${REDIS_HOST}
       port: ${REDIS_PORT}
 
-server:
-  error:
-    include-stacktrace: never
-
-
 address:
   key: ${ADDRESS_API_KEY}
 

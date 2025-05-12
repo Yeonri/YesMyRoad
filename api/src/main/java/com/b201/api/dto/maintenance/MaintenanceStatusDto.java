@@ -10,11 +10,11 @@ import lombok.ToString;
 @AllArgsConstructor
 public class MaintenanceStatusDto {
 
-	long reported;
+	private long reported;
 
-	long received;
+	private long received;
 
-	long inProgress;
+	private long inProgress;
 
-	long completed;
+	private long completed;
 }
