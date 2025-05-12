@@ -1,11 +1,9 @@
-package com.b201.api.util;
+package com.b201.api.security;
 
 import java.security.Key;
 import java.util.Date;
 
 import org.springframework.stereotype.Component;
-
-import com.b201.api.config.JwtProperties;
 
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
@@ -59,7 +57,6 @@ public class JwtUtil {
 			.getBody()
 			.getSubject(); //subject (id) 추출
 	}
-
 
 	public long getExpirationTime(String token) {
 		Date expiration = Jwts.parserBuilder()

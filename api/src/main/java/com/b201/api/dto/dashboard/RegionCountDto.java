@@ -1,4 +1,4 @@
-package com.b201.api.dto;
+package com.b201.api.dto.dashboard;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;

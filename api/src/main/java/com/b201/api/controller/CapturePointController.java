@@ -6,8 +6,8 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.b201.api.dto.CapturePointResponseDto;
-import com.b201.api.dto.DamageDetailResponseDto;
+import com.b201.api.dto.damage.DamageDetailResponseDto;
+import com.b201.api.dto.point.CapturePointResponseDto;
 import com.b201.api.service.CapturePointService;
 
 import lombok.RequiredArgsConstructor;

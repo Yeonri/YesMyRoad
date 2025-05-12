@@ -10,14 +10,14 @@ import org.springframework.stereotype.Service;
 
 import com.b201.api.domain.Region;
 import com.b201.api.domain.User;
-import com.b201.api.dto.DuplicateIdDto;
-import com.b201.api.dto.LoginRequestDto;
-import com.b201.api.dto.LoginResponseDto;
-import com.b201.api.dto.SignupDto;
+import com.b201.api.dto.user.DuplicateIdDto;
+import com.b201.api.dto.user.LoginRequestDto;
+import com.b201.api.dto.user.LoginResponseDto;
+import com.b201.api.dto.user.SignupDto;
 import com.b201.api.exception.DuplicateUsernameException;
 import com.b201.api.repository.RegionRepository;
 import com.b201.api.repository.UserRepository;
-import com.b201.api.util.JwtUtil;
+import com.b201.api.security.JwtUtil;
 
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;

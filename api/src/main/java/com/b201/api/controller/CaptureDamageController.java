@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.b201.api.domain.CaptureDamage.DamageStatus;
-import com.b201.api.dto.StatusUpdateRequest;
+import com.b201.api.dto.damage.StatusUpdateRequest;
 import com.b201.api.service.CaptureDamageService;
 
 import lombok.RequiredArgsConstructor;

@@ -1,5 +1,6 @@
 package com.b201.api.repository;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 import org.springframework.data.domain.Pageable;
@@ -9,17 +10,19 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import com.b201.api.domain.CaptureDamage;
-import com.b201.api.dto.CategoryCountDto;
-import com.b201.api.dto.DailyCountDto;
-import com.b201.api.dto.MonthlyDamageSummaryDto;
-import com.b201.api.dto.RegionCountDto;
-import com.b201.api.dto.TopRegionDto;
+import com.b201.api.dto.dashboard.CategoryCountDto;
+import com.b201.api.dto.dashboard.DailyCountDto;
+import com.b201.api.dto.dashboard.MonthlyDamageSummaryDto;
+import com.b201.api.dto.dashboard.RegionCountDto;
+import com.b201.api.dto.dashboard.TopRegionDto;
+import com.b201.api.dto.maintenance.CompletionStatsDto;
+import com.b201.api.dto.maintenance.MaintenanceStatusDto;
 
 @Repository
 public interface CaptureDamageRepository extends JpaRepository<CaptureDamage, Integer> {
 
 	@Query("""
-		  SELECT new com.b201.api.dto.CategoryCountDto(
+		  SELECT new com.b201.api.dto.dashboard.CategoryCountDto(
 		           d.damageCategory.categoryName,
 		           COUNT(d)
 		         )
@@ -33,7 +36,7 @@ public interface CaptureDamageRepository extends JpaRepository<CaptureDamage, In
 	 * 일자별 파손 건수 집계
 	 */
 	@Query("""
-		  SELECT new com.b201.api.dto.DailyCountDto(
+		  SELECT new com.b201.api.dto.dashboard.DailyCountDto(
 		           DATE(d.capturePoint.captureTimestamp),
 		           COUNT(d)
 		         )
@@ -47,7 +50,7 @@ public interface CaptureDamageRepository extends JpaRepository<CaptureDamage, In
 	 * 월별 도로균열, 도로홀 분류 건수와 총합계
 	 */
 	@Query("""
-		  SELECT new com.b201.api.dto.MonthlyDamageSummaryDto(
+		  SELECT new com.b201.api.dto.dashboard.MonthlyDamageSummaryDto(
 		      YEAR(d.capturePoint.captureTimestamp),
 		          MONTH(d.capturePoint.captureTimestamp),
 		              SUM(CASE WHEN d.damageCategory.categoryName = '도로균열' THEN 1 ELSE 0 END),
@@ -67,7 +70,7 @@ public interface CaptureDamageRepository extends JpaRepository<CaptureDamage, In
 	 * 해당 광역시 이름으로 시작하는 regionName(구 단위)의 파손 건수를 집계
 	 */
 	@Query("""
-		  SELECT new com.b201.api.dto.RegionCountDto(
+		  SELECT new com.b201.api.dto.dashboard.RegionCountDto(
 		    r.regionName,
 		    COUNT(cd.damageId)
 		  )
@@ -89,11 +92,11 @@ public interface CaptureDamageRepository extends JpaRepository<CaptureDamage, In
 	 * 상위 N개 지역별 도로파손 통계 (완료된 건까지 모두 집계)
 	 */
 	@Query("""
-		  SELECT new com.b201.api.dto.TopRegionDto(
+		  SELECT new com.b201.api.dto.dashboard.TopRegionDto(
 		    r.regionName,
-		    COUNT(cd), 
-		    SUM(CASE WHEN cd.damageCategory.categoryName = '도로균열' THEN 1 ELSE 0 END),
-		    SUM(CASE WHEN cd.damageCategory.categoryName = '도로홀'  THEN 1 ELSE 0 END)
+				    count(cd),
+						    sum(case when cd.damageCategory.categoryName = '도로균열' then 1 ELSE 0 END),
+								    sum(case when cd.damageCategory.categoryName = '도로홀' then 1 ELSE 0 END)
 		  )
 		  FROM CaptureDamage cd
 		  JOIN cd.capturePoint cp
@@ -102,4 +105,28 @@ public interface CaptureDamageRepository extends JpaRepository<CaptureDamage, In
 		  ORDER BY COUNT(cd) DESC
 		""")
 	List<TopRegionDto> findTopRegions(Pageable pageable);
+
+	@Query("""
+			select new com.b201.api.dto.maintenance.MaintenanceStatusDto(
+					sum(case when cd.status = 'REPORTED' then 1 else 0 end),
+							sum(case when cd.status = 'RECEIVED' then 1 else 0 end),
+									sum(case when cd.status = 'IN_PROGRESS' then 1 else 0 end),
+											sum(case when cd.status = 'COMPLETED' then 1 else 0 end)
+			)
+			from CaptureDamage cd
+		""")
+	MaintenanceStatusDto countByStauts();
+
+	@Query("""
+			select new com.b201.api.dto.maintenance.CompletionStatsDto(
+					coalesce(sum(case when cd.updatedAt >= :dailyAgo then 1 else 0 end), 0),
+							coalesce(sum(case when cd.updatedAt >= :weeklyAgo then 1 else 0 end), 0),
+									coalesce(sum(case when cd.updatedAt >= :monthlyAgo then 1 else 0 end), 0)
+			)
+					from CaptureDamage cd
+							where cd.status = 'COMPLETED'
+		""")
+	CompletionStatsDto getCompletionStatsByPeriod(@Param("dailyAgo") LocalDateTime dailyAgo,
+		@Param("weeklyAgo") LocalDateTime weeklyAgo,
+		@Param("monthlyAgo") LocalDateTime monthlyAgo);
 }
