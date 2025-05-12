@@ -29,14 +29,15 @@ export default function Header() {
 
   const handleLogout = async () => {
     const response = await userAPI.logout()
+    console.log(response)
     if (response.status === 200) {
       // 로컬 스토리지에서 인증 관련 데이터 삭제
-      localStorage.removeItem('token')
+      localStorage.removeItem('accessToken')
       localStorage.removeItem('refreshToken')
       localStorage.removeItem('userId')
 
       clearSession()
-      // console.log('로그아웃 성공')
+      alert('로그아웃하였습니다')
 
       // 로그인 페이지로 리디렉션
       router.push('/auth')

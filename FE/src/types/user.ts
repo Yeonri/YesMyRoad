@@ -22,7 +22,7 @@ export interface RegisterFormData {
 // 서버로부터 받는 로그인 응답 데이터
 export interface LoginResponse {
   user: User
-  token: string
+  accessToken: string
   refreshToken: string
 }
 
