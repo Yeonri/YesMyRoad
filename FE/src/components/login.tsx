@@ -1,5 +1,6 @@
 'use client'
 
+import { userAPI } from '@/api/user-api'
 import background from '@/assets/background.png'
 import { Button } from '@/components/ui/button'
 import {
@@ -18,7 +19,7 @@ import { LoginFormData, RegisterFormData } from '@/types/user'
 import * as AccordionPrimitive from '@radix-ui/react-accordion'
 import Image from 'next/image'
 import { useRouter } from 'next/navigation'
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 
 // Accordion 컴포넌트의 Props 타입 정의
 interface AccordionContentProps
@@ -78,6 +79,43 @@ const Login: React.FC = () => {
     region: 0, // 숫자 타입으로 설정
   })
 
+  // 아이디 중복 확인용 플래그 변수
+  const [idAvailability, setIdAvailability] = useState<number>(-1)
+  // 초기 렌더링 감지용
+  const isInitialRender = useRef(true)
+
+  const handleCheckIdDuplication = async (
+    e: React.MouseEvent<HTMLButtonElement>,
+  ) => {
+    e.preventDefault()
+    if (formData.id.length !== 0) {
+      const response = await userAPI.checkIdDuplication(formData.id)
+      setIdAvailability(response.data.available)
+      console.log(`함수 실행: ${idAvailability}`)
+
+      // alert는 useEffect에서 처리
+    } else {
+      alert('아이디를 입력해주세요')
+    }
+  }
+
+  useEffect(() => {
+    // 초기 렌더링 시에는 알림 표시하지 않음
+    if (isInitialRender.current) {
+      isInitialRender.current = false
+      return
+    }
+
+    // idAvailability 값에 따라 알림 표시
+    if (idAvailability) {
+      alert('사용할 수 있는 아이디입니다')
+      console.log(`idAvailability: ${idAvailability}`)
+    } else {
+      alert('이미 존재하는 아이디입니다')
+      console.log(`idAvailability: ${idAvailability}`)
+    }
+  }, [idAvailability]) // idAvailability가 변경될 때마다 실행
+
   // 디버깅용 - 폼 데이터 변화 감지
   useEffect(() => {
     console.log('[폼 데이터 상태]:', formData)
@@ -90,7 +128,16 @@ const Login: React.FC = () => {
 
     const newValue = id === 'region' ? parseInt(value) || 0 : value // region은 숫자로 변환
     console.log(`[변환된 값] ${id}: ${newValue}, 타입: ${typeof newValue}`)
+    setFormData({ ...formData, [id]: newValue })
+  }
 
+  // 아이디 입력 필드 변경 핸들러
+  const handleIdInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { id, value } = e.target
+    console.log(`[입력 필드 변경] 필드: ${id}, 값: ${value}`)
+
+    const newValue = id === 'region' ? parseInt(value) || 0 : value // region은 숫자로 변환
+    console.log(`[변환된 값] ${id}: ${newValue}, 타입: ${typeof newValue}`)
     setFormData({ ...formData, [id]: newValue })
   }
 
@@ -162,6 +209,7 @@ const Login: React.FC = () => {
     const isLogin = value === 'account'
     console.log(`[탭 변경] ${isLogin ? '로그인' : '회원가입'} 탭으로 전환`)
     setIsLoginTab(isLogin)
+    setIdAvailability(-1)
 
     // 입력 필드 초기화
     setFormData({ id: '', password: '', name: '', region: 0 })
@@ -235,17 +283,31 @@ const Login: React.FC = () => {
                 )}
 
                 <form onSubmit={handleSubmit}>
-                  <div className="space-y-1">
+                  <div className="space-y-1 pt-0 pb-4">
                     <Label htmlFor="id">ID</Label>
-                    <Input
-                      id="id"
-                      placeholder="아이디를 입력해주세요"
-                      value={formData.id}
-                      onChange={handleInputChange}
-                      required
-                    />
+                    <div className="flex">
+                      <Input
+                        id="id"
+                        placeholder="아이디를 입력해주세요"
+                        value={formData.id}
+                        onChange={handleIdInputChange}
+                        required
+                        className={`${!isLoginTab && idAvailability === 1 ? 'border-green-500' : ''} ${!isLoginTab && idAvailability === 0 ? 'border-red-500' : ''}`}
+                      />
+                      {!isLoginTab && (
+                        <Button
+                          className="ml-5"
+                          onClick={(e) => {
+                            handleCheckIdDuplication(e)
+                            console.log(idAvailability)
+                          }}
+                        >
+                          중복 확인
+                        </Button>
+                      )}
+                    </div>
                   </div>
-                  <div className="space-y-1">
+                  <div className="space-y-1 pt-0 pb-4">
                     <Label htmlFor="password">비밀번호</Label>
                     <Input
                       id="password"
@@ -256,7 +318,6 @@ const Login: React.FC = () => {
                       required
                     />
                   </div>
-
                   {/* 이름 및 지역 필드를 위한 아코디언 */}
                   <AccordionPrimitive.Root
                     type="multiple"
@@ -294,13 +355,76 @@ const Login: React.FC = () => {
                       </AccordionContent>
                     </AccordionPrimitive.Item>
                   </AccordionPrimitive.Root>
-
                   <CardFooter className="px-0 pt-6">
                     <Button
                       type="submit"
                       className="w-full"
                       disabled={isLoading}
-                      onClick={() => console.log('[버튼 클릭] 폼 제출 시작')}
+                      onClick={async (e) => {
+                        e.preventDefault()
+                        clearError() // 에러 초기화
+
+                        try {
+                          // isLoginTab일 때만 로그인 로직 실행
+                          if (isLoginTab) {
+                            const response = await userAPI.login({
+                              id: formData.id,
+                              password: formData.password,
+                            })
+
+                            if (response.status === 200) {
+                              // 토큰 저장
+                              localStorage.setItem(
+                                'token',
+                                response.data.accessToken,
+                              )
+                              localStorage.setItem(
+                                'refreshToken',
+                                response.data.refreshToken,
+                              )
+                              localStorage.setItem(
+                                'userId',
+                                response.data.userId,
+                              )
+
+
+
+                              console.log('[인증 상태 업데이트] 로그인 성공')
+                              router.push('/') // 로그인 성공 시 리디렉션
+                            }
+                          } else {
+                            // 회원가입 로직
+                            if (!formData.name.trim()) {
+                              alert('이름을 입력해주세요')
+                              return
+                            }
+
+                            if (!formData.region) {
+                              alert('지역을 선택해주세요')
+                              return
+                            }
+
+                            const registerResponse = await userAPI.register({
+                              id: formData.id,
+                              password: formData.password,
+                              name: formData.name,
+                              region: formData.region,
+                            })
+
+                            if (registerResponse.status === 200) {
+                              alert(
+                                '회원가입이 완료되었습니다. 로그인해주세요.',
+                              )
+                              setIsLoginTab(true)
+                            }
+                          }
+                        } catch (err: any) {
+                          // 에러 처리
+                          console.error('API 호출 실패:', err)
+                          // 에러 메시지 설정 (useState로 관리한다고 가정)
+                          // setError(err.message || '로그인 중 오류가 발생했습니다');
+                        } 
+                      }}
                     >
                       {isLoading
                         ? '처리 중...'
