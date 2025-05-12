@@ -79,10 +79,9 @@ public interface CaptureDamageRepository extends JpaRepository<CaptureDamage, In
 		    ON cp.region = r
 		  LEFT JOIN CaptureDamage cd
 		    ON cd.capturePoint = cp
-		   AND cd.status <> com.b201.api.domain.CaptureDamage.DamageStatus.COMPLETED
+		   AND cd.status = 'COMPLETED'
 		  WHERE r.parentRegion.regionName = :parentName
 		  GROUP BY r.regionName
-		  ORDER BY r.regionName
 		""")
 	List<RegionCountDto> countByCity(
 		@Param("parentName") String cityName

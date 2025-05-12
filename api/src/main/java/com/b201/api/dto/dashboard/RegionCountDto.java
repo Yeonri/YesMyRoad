@@ -9,6 +9,6 @@ import lombok.Getter;
 @Getter
 @AllArgsConstructor
 public class RegionCountDto {
-	private String regionName;  // ex) "유성구"
-	private long count;         // 파손 건수
+	private String name;  // ex) "유성구"
+	private long value;         // 파손 건수
 }
