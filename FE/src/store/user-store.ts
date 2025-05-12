@@ -1,29 +1,15 @@
-import { userAPI } from '@/api/user-api'
-import {
-  AuthState,
-  LoginFormData,
-  LoginResponse,
-  RegisterFormData,
-} from '@/types/user'
+import { AuthState, User } from '@/types/user'
 import { create } from 'zustand'
 import { PersistOptions, createJSONStorage, persist } from 'zustand/middleware'
 
-// --- API 응답/에러 타입 ---
-type ApiResponse<T> = { data: T }
-interface ApiError extends Error {
-  message: string
-}
-
-// --- 스토어 상태 & 액션 타입 ---
+// 스토어 상태 & 액션 타입
 export type UserStoreType = AuthState & {
-  login: (form: LoginFormData) => Promise<void>
-  register: (form: RegisterFormData) => Promise<void>
-  logout: () => Promise<void>
-  refreshToken: () => Promise<void>
+  setAuthenticated: (isAuthenticated: boolean) => void
+  setUser: (user: User | null) => void
+  clearSession: () => void
   clearError: () => void
 }
 
-// --- 초기 상태 ---
 const initialState: AuthState = {
   user: null,
   isAuthenticated: false,
@@ -31,120 +17,38 @@ const initialState: AuthState = {
   error: null,
 }
 
-// --- 토큰 관리 유틸 ---
-const tokenUtils = {
-  set: (token: string, refreshToken: string) => {
-    localStorage.setItem('token', token)
-    localStorage.setItem('refreshToken', refreshToken)
-  },
-  remove: () => {
-    localStorage.removeItem('token')
-    localStorage.removeItem('refreshToken')
-  },
-}
-
-// --- Persist 미들웨어 옵션 ---
+// Persist 미들웨어 옵션
 const persistOptions: PersistOptions<
   UserStoreType,
   Pick<AuthState, 'user' | 'isAuthenticated'>
 > = {
-  name: 'user-storage', // 저장 key (필수) :contentReference[oaicite:4]{index=4}
-  storage: createJSONStorage(() => localStorage), // storage 구현 :contentReference[oaicite:5]{index=5}
+  name: 'user-storage', // 저장 key
+  storage: createJSONStorage(() => localStorage), // storage 구현
   partialize: (state) => ({
-    // 저장할 상태 부분 선택 (선택)
+    // 저장할 상태 부분 선택
     user: state.user,
     isAuthenticated: state.isAuthenticated,
   }),
 }
 
-// --- 스토어 생성: create<>()(persist(…)) 패턴 ---
+// 스토어 생성
 export const useUserStore = create<UserStoreType>()(
-  persist((set) => {
-    // 공통 비동기 헬퍼
-    const handleAsync = async <T>(
-      apiCall: () => Promise<ApiResponse<T>>,
-      onSuccess: (data: T) => Partial<AuthState>,
-      onError?: (err: ApiError) => Partial<AuthState>,
-    ): Promise<T> => {
-      set({ ...initialState, isLoading: true })
-      try {
-        const { data } = await apiCall()
-        set(onSuccess(data))
-        return data
-      } catch (e) {
-        const err = e as ApiError
-        set({
-          ...initialState,
-          isLoading: false,
-          error: err.message ?? '오류가 발생했습니다',
-        })
-        if (onError) set(onError(err))
-        throw err
-      }
-    }
-
-    return {
+  persist(
+    (set) => ({
       ...initialState,
 
-      login: async (form) => {
-        await handleAsync<LoginResponse>(
-          () => userAPI.login(form),
-          (data) => {
-            tokenUtils.set(data.token, data.refreshToken)
-            return { user: data.user, isAuthenticated: true, isLoading: false }
-          },
-        )
-      },
+      // 인증 상태 설정
+      setAuthenticated: (isAuthenticated: boolean) => set({ isAuthenticated }),
 
-      register: async (form) => {
-        await handleAsync<void>(
-          () => userAPI.register(form),
-          () => ({ isLoading: false }),
-        )
-      },
+      // 사용자 정보 설정
+      setUser: (user: User | null) => set({ user }),
 
-      logout: async () => {
-        await handleAsync<void>(
-          () => userAPI.logout(),
-          () => {
-            tokenUtils.remove()
-            return { ...initialState, isLoading: false }
-          },
-          () => {
-            tokenUtils.remove()
-            return { ...initialState, isLoading: false }
-          },
-        )
-      },
+      // 세션 초기화 (로그아웃 시 사용)
+      clearSession: () => set({ user: null, isAuthenticated: false }),
 
-      refreshToken: async () => {
-        await handleAsync<Partial<LoginResponse>>(
-          () => userAPI.refresh(),
-          (data) => {
-            if (data.token) {
-              tokenUtils.set(
-                data.token,
-                data.refreshToken ?? localStorage.getItem('refreshToken') ?? '',
-              )
-            }
-            return {
-              user: data.user ?? null,
-              isAuthenticated: !!data.user,
-              isLoading: false,
-            }
-          },
-          () => {
-            tokenUtils.remove()
-            return {
-              ...initialState,
-              error: '인증이 만료되었습니다',
-              isLoading: false,
-            }
-          },
-        )
-      },
-
+      // 에러 초기화
       clearError: () => set({ error: null }),
-    }
-  }, persistOptions),
+    }),
+    persistOptions,
+  ),
 )
