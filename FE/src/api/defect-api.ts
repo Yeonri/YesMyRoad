@@ -5,10 +5,10 @@ export const defectAPI = {
   checkDefects: async () => {
     try {
       const response = await apiClient.get('/api/capture-points')
-      return { data: response.data, status: response.status }
-    } catch (error) {
+      return { data: response.data, status: response.status, error: null}
+    } catch (error: any) {
       console.error(`손상 데이터 조회 실패: ${error}`)
-      throw error
+      return { data: null, status: error.response.status, error }
     }
   },
 
@@ -16,10 +16,10 @@ export const defectAPI = {
   checkDetailedDefects: async (publicId: string) => {
     try {
       const response = await apiClient.get(`/api/capture-points/${publicId}`)
-      return { data: response.data, status: response.status }
-    } catch (error) {
+      return { data: response.data, status: response.status, error: null}
+    } catch (error: any) {
       console.error(`손상 데이터 상세 조회 실패: ${error}`)
-      throw error
+      return { data: null, status: error.response.status, error }
     }
   },
 }

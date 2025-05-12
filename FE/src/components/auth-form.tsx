@@ -114,7 +114,7 @@ const AuthForm: React.FC<AuthFormProps> = ({ isLoginTab, onTabChange }) => {
       } else if (available === 0) {
         alert('이미 존재하는 아이디입니다')
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('아이디 중복 확인 실패:', error)
       alert('아이디 중복 확인에 실패했습니다.')
       setIdAvailability(-1)
