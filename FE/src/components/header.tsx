@@ -1,8 +1,9 @@
 'use client'
 
-// API 테스트용 임포트
 import { defectAPI } from '@/api/defect-api'
-import { userAPI } from '@/api/user-api' // 추가: userAPI 임포트
+// API 테스트
+
+import { userAPI } from '@/api/user-api'
 import { Button } from '@/components/ui/button'
 import {
   DropdownMenu,
@@ -15,37 +16,28 @@ import {
 import { Input } from '@/components/ui/input'
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet'
 import { Bell, Menu, Search, Settings, User } from 'lucide-react'
-import { useRouter } from 'next/navigation' // 추가: 라우터 임포트
+import { useRouter } from 'next/navigation'
 
 import { MobileNav } from './mobile-nav'
 
 const PUBLIC_ID = '23569766-0f5a-4f54-ba9b-dba4dbf0b922'
 
 export default function Header() {
-  const router = useRouter(); // 라우터 훅 사용
-
-  // 로그아웃 함수 구현 (Zustand 없이)
+  const router = useRouter() // 라우터 훅 사용
   const handleLogout = async () => {
-    try {
-      // API를 통한 로그아웃 요청
-      const response = await userAPI.logout();
-      
-      if (response.status === 200) {
-        // 로컬 스토리지에서 인증 관련 데이터 삭제
-        localStorage.removeItem('token');
-        localStorage.removeItem('refreshToken');
-        localStorage.removeItem('userId');
-        
-        console.log('로그아웃 성공');
-        
-        // 로그인 페이지로 리디렉션
-        router.push('/login');
-      }
-    } catch (error) {
-      console.error('로그아웃 실패:', error);
-      alert('로그아웃 중 오류가 발생했습니다. 다시 시도해주세요.');
+    const response = await userAPI.logout()
+    if (response.status === 200) {
+      // 로컬 스토리지에서 인증 관련 데이터 삭제
+      localStorage.removeItem('token')
+      localStorage.removeItem('refreshToken')
+      localStorage.removeItem('userId')
+
+      // console.log('로그아웃 성공')
+
+      // 로그인 페이지로 리디렉션
+      router.push('/login')
     }
-  };
+  }
 
   return (
     <header className="bg-background sticky top-0 z-50 flex h-16 items-center gap-4 border-b px-4 md:px-6">
@@ -124,7 +116,7 @@ export default function Header() {
           <DropdownMenuTrigger asChild>
             <Button variant="outline" size="icon">
               <User className="h-4 w-4" />
-              <span className="sr-only">유저저</span>
+              <span className="sr-only">유저</span>
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
