@@ -19,26 +19,17 @@ export default function TopThreeRegion(props: { cardHeight: string }) {
     xAxis: { type: 'value', max: 'dataMax' },
     yAxis: {
       type: 'category',
-      data: ['강남구', '서초구', '송파구'],
+      data: ['동구', '대덕구', '유성구'],
       inverse: true,
     },
     series: [
       {
-        realtimeSort: true,
         name: '포트홀',
         type: 'bar',
         stack: 'total',
         label: labelOption,
         emphasis: { focus: 'series' },
         data: [120, 132, 101],
-      },
-      {
-        name: '침하',
-        type: 'bar',
-        stack: 'total',
-        label: labelOption,
-        emphasis: { focus: 'series' },
-        data: [220, 182, 191],
       },
       {
         name: '균열',
@@ -48,27 +39,11 @@ export default function TopThreeRegion(props: { cardHeight: string }) {
         emphasis: { focus: 'series' },
         data: [150, 132, 201],
       },
-      {
-        name: '패임',
-        type: 'bar',
-        stack: 'total',
-        label: labelOption,
-        emphasis: { focus: 'series' },
-        data: [98, 77, 101],
-      },
-      {
-        name: '기타',
-        type: 'bar',
-        stack: 'total',
-        label: labelOption,
-        emphasis: { focus: 'series' },
-        data: [40, 30, 50],
-      },
     ],
   }
 
   return (
-    <Card className={cardHeight}>
+    <Card className={`col-span-3 ${cardHeight}`}>
       <CardHeader className="p-4">
         <CardTitle className="text-md">도로파손 분포 Top 3</CardTitle>
       </CardHeader>

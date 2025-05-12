@@ -387,8 +387,6 @@ const Login: React.FC = () => {
                                 response.data.userId,
                               )
 
-
-
                               console.log('[인증 상태 업데이트] 로그인 성공')
                               router.push('/') // 로그인 성공 시 리디렉션
                             }
@@ -423,7 +421,7 @@ const Login: React.FC = () => {
                           console.error('API 호출 실패:', err)
                           // 에러 메시지 설정 (useState로 관리한다고 가정)
                           // setError(err.message || '로그인 중 오류가 발생했습니다');
-                        } 
+                        }
                       }}
                     >
                       {isLoading
