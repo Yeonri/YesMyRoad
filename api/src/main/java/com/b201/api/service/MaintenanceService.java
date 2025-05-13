@@ -1,11 +1,14 @@
 package com.b201.api.service;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 import org.springframework.stereotype.Service;
 
 import com.b201.api.dto.maintenance.CompletionStatsDto;
 import com.b201.api.dto.maintenance.MaintenanceStatusDto;
+import com.b201.api.dto.maintenance.MonthlyMaintenanceStatusDto;
+import com.b201.api.dto.maintenance.RegionMaintenanceStatusDto;
 import com.b201.api.repository.CaptureDamageRepository;
 
 import lombok.RequiredArgsConstructor;
@@ -27,5 +30,13 @@ public class MaintenanceService {
 			now.minusWeeks(1),
 			now.minusMonths(1)
 		);
+	}
+
+	public List<MonthlyMaintenanceStatusDto> getMonthlyMaintenanceStatus() {
+		return captureDamageRepository.getMonthlyMaintenanceStatsByPeriod();
+	}
+
+	public List<RegionMaintenanceStatusDto> getRegionMaintenanceStatus() {
+		return captureDamageRepository.getRegionMaintenanceStatsByPeriod("대전광역시");
 	}
 }

@@ -10,9 +10,9 @@ import lombok.ToString;
 @ToString
 public class CompletionStatsDto {
 
-	long daily;
+	private long daily;
 
-	long weekly;
+	private long weekly;
 
-	long monthly;
+	private long monthly;
 }
