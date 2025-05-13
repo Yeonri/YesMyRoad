@@ -9,14 +9,16 @@ import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.log4j.Log4j2;
 
 @Component
 @RequiredArgsConstructor
+@Log4j2
 public class JwtUtil {
 
 	private final JwtProperties jwtProperties;
 	private static final long EXPIRATION_TIME = 30 * 60 * 1000; // 30분 (ms 단위)
-	private static final long EXPIRATION_REFRESH_TIME = 2 * 60 * 60 * 1000;
+	private static final long EXPIRATION_REFRESH_TIME = 2 * 60 * 60 * 1000; // 2시간
 
 	//secretKey 생성 메서드 token 생성,검증에 모두 사용됨.
 	private Key getSigningKey() {

@@ -15,9 +15,11 @@ import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
+import lombok.ToString;
 import lombok.extern.jackson.Jacksonized;
 
 @Getter
+@ToString
 @Builder
 @Jacksonized
 @AllArgsConstructor
@@ -41,6 +43,7 @@ public class AiResultDto {
 	private List<Detection> detections;
 
 	@Getter
+	@ToString
 	@JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
 	public static class Location {
 		@DecimalMin(value = "33.0", message = "위도는 33.0 이상이어야 합니다")
@@ -56,6 +59,7 @@ public class AiResultDto {
 	}
 
 	@Getter
+	@ToString
 	@JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
 	public static class ImageInfo {
 		@NotNull(message = "image_url은 필수입니다")
@@ -66,6 +70,7 @@ public class AiResultDto {
 	}
 
 	@Getter
+	@ToString
 	@JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
 	public static class Detection {
 		@NotNull(message = "category_name은 필수입니다")

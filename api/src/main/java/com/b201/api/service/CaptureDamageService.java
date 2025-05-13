@@ -9,7 +9,9 @@ import com.b201.api.repository.CaptureDamageRepository;
 
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class CaptureDamageService {
@@ -25,10 +27,17 @@ public class CaptureDamageService {
 	 */
 	@Transactional
 	public CaptureDamage changeStatus(Integer damageId, DamageStatus newStatus) {
+		log.info("[changeStatus] 호출됨, damageId={}, newStatus={}", damageId, newStatus);
+
 		CaptureDamage damage = damageRepo.findById(damageId)
-			.orElseThrow(() ->
-				new EntityNotFoundException("Damage not found: " + damageId));
+			.orElseThrow(() -> {
+				log.error("[changeStatus] 해당 ID의 파손 기록 없음: {}", damageId);
+				return new EntityNotFoundException("Damage not found: " + damageId);
+			});
+
 		damage.setStatus(newStatus);
+		log.debug("[changeStatus] 상태 업데이트 완료, damageId={}, status={}", damageId, newStatus);
+
 		return damage;
 	}
 }

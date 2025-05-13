@@ -29,9 +29,13 @@ public class CapturePointService {
 	private final CapturePointRepository capturePointRepository;
 
 	public CapturePointResponseDto findAllFeatures() {
+		log.info("[findAllFeatures] 호출됨");
+
 		List<FeatureDto> featureDtos = capturePointRepository.findAll().stream()
 			.map(this::mapToFeatureDto)
 			.toList();
+
+		log.debug("[findAllFeatures] 매핑된 feature 개수 = {}", featureDtos.size());
 
 		return CapturePointResponseDto.builder()
 			.features(featureDtos)   // features가 비어 있으면 []으로 직렬화됨
@@ -39,7 +43,6 @@ public class CapturePointService {
 	}
 
 	private FeatureDto mapToFeatureDto(CapturePoint capturePoint) {
-
 		double longitude = capturePoint.getLocation().getY();
 		double latitude = capturePoint.getLocation().getX();
 
@@ -53,11 +56,17 @@ public class CapturePointService {
 			.accuracyMeters(capturePoint.getAccuracyMeters())
 			.build();
 
-		return FeatureDto.builder().geometry(geometryDto).properties(propertiesDto).build();
+		log.trace("[mapToFeatureDto] publicId={} 변환 완료", capturePoint.getPublicId());
+		return FeatureDto.builder()
+			.geometry(geometryDto)
+			.properties(propertiesDto)
+			.build();
 	}
 
 	public Optional<DamageDetailResponseDto> findDamageDetail(String publicId) {
-		return capturePointRepository.findByPublicId(publicId)
+		log.info("[findDamageDetail] 호출됨, publicId={}", publicId);
+
+		Optional<DamageDetailResponseDto> result = capturePointRepository.findByPublicId(publicId)
 			.map(cp -> DamageDetailResponseDto.builder()
 				.risk(cp.getRisk())
 				.imageUrl(cp.getImageUrl())
@@ -65,14 +74,24 @@ public class CapturePointService {
 					.map(this::mapToDamageDto)
 					.toList())
 				.build());
+
+		result.ifPresentOrElse(
+			dto -> log.debug("[findDamageDetail] 조회된 damage 개수 = {}", dto.getDamages().size()),
+			() -> log.warn("[findDamageDetail] 해당 publicId의 데이터 없음: {}", publicId)
+		);
+
+		return result;
 	}
 
 	private DamageDto mapToDamageDto(CaptureDamage captureDamage) {
-		return DamageDto.builder()
+		DamageDto dto = DamageDto.builder()
 			.id(captureDamage.getDamageId())
 			.category(captureDamage.getDamageCategory().getCategoryName())
 			.status(captureDamage.getStatus().getNumber())
 			.updatedAt(captureDamage.getUpdatedAt())
 			.build();
+
+		log.trace("[mapToDamageDto] damageId={} 변환 완료", captureDamage.getDamageId());
+		return dto;
 	}
 }

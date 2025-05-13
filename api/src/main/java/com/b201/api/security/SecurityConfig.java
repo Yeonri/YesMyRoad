@@ -33,7 +33,7 @@ public class SecurityConfig {
 		config.addAllowedOriginPattern("http://localhost:3000");
 		config.addAllowedMethod("GET");
 		config.addAllowedMethod("POST");
-		config.addAllowedMethod("PUT");
+		config.addAllowedMethod("PATCH");
 		config.addAllowedMethod("DELETE");
 		config.addAllowedHeader("Content-Type");
 		config.addAllowedHeader("Authorization");

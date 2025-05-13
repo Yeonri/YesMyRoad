@@ -84,6 +84,7 @@ public class CaptureDamage {
 		this.status = status != null ? status : DamageStatus.REPORTED;
 	}
 
+	@Getter
 	public enum DamageStatus {
 		REPORTED(0), RECEIVED(1), IN_PROGRESS(2), COMPLETED(3);
 		private final int number;
@@ -92,9 +93,6 @@ public class CaptureDamage {
 			this.number = number;
 		}
 
-		public int getNumber() {
-			return number;
-		}
 	}
 
 }
