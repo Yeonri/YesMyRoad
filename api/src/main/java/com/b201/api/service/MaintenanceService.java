@@ -12,7 +12,9 @@ import com.b201.api.dto.maintenance.RegionMaintenanceStatusDto;
 import com.b201.api.repository.CaptureDamageRepository;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class MaintenanceService {
@@ -20,23 +22,35 @@ public class MaintenanceService {
 	private final CaptureDamageRepository captureDamageRepository;
 
 	public MaintenanceStatusDto getMaintenanceStatus() {
-		return captureDamageRepository.countByStauts();
+		log.info("[getMaintenanceStatus] 호출됨");
+		MaintenanceStatusDto status = captureDamageRepository.countByStauts();
+		log.debug("[getMaintenanceStatus] result = {}", status);
+		return status;
 	}
 
 	public CompletionStatsDto getCompletionStats() {
+		log.info("[getCompletionStats] 호출됨");
 		LocalDateTime now = LocalDateTime.now();
-		return captureDamageRepository.getCompletionStatsByPeriod(
+		CompletionStatsDto stats = captureDamageRepository.getCompletionStatsByPeriod(
 			now.minusDays(1),
 			now.minusWeeks(1),
 			now.minusMonths(1)
 		);
+		log.debug("[getCompletionStats] result = {}", stats);
+		return stats;
 	}
 
 	public List<MonthlyMaintenanceStatusDto> getMonthlyMaintenanceStatus() {
-		return captureDamageRepository.getMonthlyMaintenanceStatsByPeriod();
+		log.info("[getMonthlyMaintenanceStatus] 호출됨");
+		List<MonthlyMaintenanceStatusDto> list = captureDamageRepository.getMonthlyMaintenanceStatsByPeriod();
+		log.debug("[getMonthlyMaintenanceStatus] entries = {}", list.size());
+		return list;
 	}
 
 	public List<RegionMaintenanceStatusDto> getRegionMaintenanceStatus() {
-		return captureDamageRepository.getRegionMaintenanceStatsByPeriod("대전광역시");
+		log.info("[getRegionMaintenanceStatus] 호출됨");
+		List<RegionMaintenanceStatusDto> list = captureDamageRepository.getRegionMaintenanceStatsByPeriod("대전광역시");
+		log.debug("[getRegionMaintenanceStatus] entries = {}", list.size());
+		return list;
 	}
 }
