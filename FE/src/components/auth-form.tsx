@@ -8,6 +8,7 @@ import { cn } from '@/lib/utils'
 import { useUserStore } from '@/store/user-store'
 import { LoginFormData, LoginResponse, RegisterFormData } from '@/types/user'
 import * as AccordionPrimitive from '@radix-ui/react-accordion'
+import { isAxiosError } from 'axios'
 import { useRouter } from 'next/navigation'
 import React, { useEffect, useState } from 'react'
 
@@ -16,6 +17,16 @@ interface AccordionContentProps
   extends React.ComponentPropsWithoutRef<typeof AccordionPrimitive.Content> {
   className?: string
   children: React.ReactNode
+}
+
+// 에러 응답 타입 정의
+interface ErrorField {
+  field: string | null
+  defaultMessage: string
+}
+
+interface ErrorResponse {
+  errors: ErrorField[]
 }
 
 const AccordionContent: React.FC<AccordionContentProps> = ({
@@ -51,6 +62,10 @@ const AuthForm: React.FC<AuthFormProps> = ({ isLoginTab, onTabChange }) => {
   const [isLoading, setIsLoading] = useState(false)
   // 성공 상태를 위한 지역 state 추가
   const [isSuccess, setIsSuccess] = useState(false)
+  // 폼 에러 메시지 관리
+  const [formErrors, setFormErrors] = useState<{ [key: string]: string }>({})
+  // 일반 에러 메시지 (필드에 매핑되지 않는 에러)
+  const [generalError, setGeneralError] = useState<string>('')
 
   // 로그인 상태가 변경될 때 리디렉션
   useEffect(() => {
@@ -83,6 +98,8 @@ const AuthForm: React.FC<AuthFormProps> = ({ isLoginTab, onTabChange }) => {
     clearError()
     setIsLoading(false)
     setIsSuccess(false)
+    setFormErrors({})
+    setGeneralError('')
 
     // 탭에 따라 아코디언 상태 업데이트
     if (isLoginTab) {
@@ -114,7 +131,7 @@ const AuthForm: React.FC<AuthFormProps> = ({ isLoginTab, onTabChange }) => {
       } else if (available === 0) {
         alert('이미 존재하는 아이디입니다')
       }
-    } catch (error: any) {
+    } catch (error) {
       console.error('아이디 중복 확인 실패:', error)
       alert('아이디 중복 확인에 실패했습니다.')
       setIdAvailability(-1)
@@ -132,6 +149,14 @@ const AuthForm: React.FC<AuthFormProps> = ({ isLoginTab, onTabChange }) => {
       setIdAvailability(-1) // ID가 변경되면 중복확인 상태 초기화
     }
 
+    // 에러 메시지 초기화
+    if (formErrors[id]) {
+      setFormErrors((prev) => ({ ...prev, [id]: '' }))
+    }
+    if (generalError) {
+      setGeneralError('')
+    }
+
     const newValue = id === 'region' ? parseInt(value) || 0 : value // region은 숫자로 변환
     setFormData({ ...formData, [id]: newValue })
   }
@@ -147,10 +172,29 @@ const AuthForm: React.FC<AuthFormProps> = ({ isLoginTab, onTabChange }) => {
     }
   }
 
+  // 서버 에러 처리 함수
+  const handleServerErrors = (errorResponse: ErrorResponse) => {
+    const newFormErrors: { [key: string]: string } = {}
+    let newGeneralError = ''
+
+    errorResponse.errors.forEach((err) => {
+      if (err.field) {
+        newFormErrors[err.field] = err.defaultMessage
+      } else {
+        newGeneralError = err.defaultMessage
+      }
+    })
+
+    setFormErrors(newFormErrors)
+    setGeneralError(newGeneralError)
+  }
+
   // 폼 제출 핸들러
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     clearError() // 이전 오류 초기화
+    setFormErrors({})
+    setGeneralError('')
     setIsLoading(true) // 로딩 상태 활성화
 
     try {
@@ -181,27 +225,27 @@ const AuthForm: React.FC<AuthFormProps> = ({ isLoginTab, onTabChange }) => {
 
           // useEffect에서 isAuthenticated가 변경되면 리디렉션이 일어나므로
           // 여기서 추가 지연 시간을 두어 성공 UI를 표시
-          setTimeout(() => {
-            // 이 시점에서는 이미 리디렉션이 시작되었을 가능성이 높음
-          }, 1000)
+          // setTimeout(() => {
+          //   // 이 시점에서는 이미 리디렉션이 시작되었을 가능성이 높음
+          // }, 1000)
         }
       } else {
         // 회원가입 로직 - 이미 RegisterFormData 타입 사용 중
         if (!formData.name.trim()) {
-          alert('이름을 입력해주세요')
+          setFormErrors((prev) => ({ ...prev, name: '이름을 입력해주세요' }))
           setIsLoading(false)
           return
         }
 
         if (!formData.region) {
-          alert('지역을 선택해주세요')
+          setFormErrors((prev) => ({ ...prev, region: '지역을 선택해주세요' }))
           setIsLoading(false)
           return
         }
 
         // 아이디 중복 확인 여부 검사
         if (idAvailability !== 1) {
-          alert('아이디 중복 확인을 먼저 진행해주세요')
+          setGeneralError('아이디 중복 확인을 먼저 진행해주세요')
           setIsLoading(false)
           return
         }
@@ -224,17 +268,30 @@ const AuthForm: React.FC<AuthFormProps> = ({ isLoginTab, onTabChange }) => {
           setIsSuccess(false)
         }
       }
-    } catch (error: any) {
-      console.error('API 호출 실패:', error)
+    } catch (error) {
+      // console.error('API 호출 실패:', error)
 
       // 에러 메시지 표시 (개선된 에러 처리)
-      const errorMessage =
-        error.response?.data?.message ||
-        (isLoginTab
-          ? '로그인 중 오류가 발생했습니다.'
-          : '회원가입 중 오류가 발생했습니다.')
+      if (isAxiosError(error) && error.response?.data) {
+        try {
+          // 서버 응답에서 에러 형식 파싱
+          const errorData = error.response.data as ErrorResponse
+          if (errorData.errors) {
+            handleServerErrors(errorData)
+          } else {
+            setGeneralError('알 수 없는 오류가 발생했습니다')
+          }
+        } catch (e) {
+          setGeneralError(`요청 처리 중 오류가 발생했습니다: ${e}`)
+        }
+      } else {
+        setGeneralError(
+          isLoginTab
+            ? '로그인 중 오류가 발생했습니다'
+            : '회원가입 중 오류가 발생했습니다',
+        )
+      }
 
-      alert(errorMessage)
       setIsLoading(false) // 에러 발생 시 로딩 상태 비활성화
     }
   }
@@ -250,12 +307,29 @@ const AuthForm: React.FC<AuthFormProps> = ({ isLoginTab, onTabChange }) => {
     return isLoginTab ? '로그인' : '회원가입'
   }
 
+  // 로그인 버튼 비활성화 조건
+  const isLoginButtonDisabled = (): boolean => {
+    // 처리 중이거나 이미 성공한 상태면 무조건 비활성화
+    if (isLoading || isSuccess) return true
+
+    if (isLoginTab) {
+      // ID 또는 비밀번호가 비어 있거나 공백만 있으면 비활성화
+      if (!formData.id.trim() || !formData.password.trim()) {
+        return true
+      }
+      // 그 외(로그인 실패 후 재시도 등)는 활성화
+    }
+
+    // 회원가입 탭일 경우 별도 로직에서 처리하므로 기본 false
+    return false
+  }
+
   return (
     <>
-      {/* 오류 메시지 표시 */}
-      {error && (
+      {/* 일반 에러 메시지 표시 */}
+      {(generalError || error) && (
         <div className="mb-4 rounded border border-red-400 bg-red-100 px-4 py-3 text-red-700">
-          {error}
+          {generalError || error}
         </div>
       )}
 
@@ -270,7 +344,7 @@ const AuthForm: React.FC<AuthFormProps> = ({ isLoginTab, onTabChange }) => {
               onChange={handleInputChange}
               required
               disabled={isLoading || isSuccess}
-              className={`${!isLoginTab && idAvailability === 1 ? 'border-green-500' : ''} ${!isLoginTab && idAvailability === 0 ? 'border-red-500' : ''}`}
+              className={`${!isLoginTab && idAvailability === 1 ? 'border-green-500' : ''} ${!isLoginTab && idAvailability === 0 ? 'border-red-500' : ''} ${formErrors.id ? 'border-red-500' : ''}`}
             />
             {!isLoginTab && (
               <Button
@@ -282,6 +356,10 @@ const AuthForm: React.FC<AuthFormProps> = ({ isLoginTab, onTabChange }) => {
               </Button>
             )}
           </div>
+          {/* ID 필드 에러 메시지 */}
+          {formErrors.id && (
+            <div className="mt-1 text-sm text-red-600">{formErrors.id}</div>
+          )}
           {/* ID 중복 확인 상태 표시 */}
           {!isLoginTab && (
             <div className="mt-1 text-sm">
@@ -312,7 +390,14 @@ const AuthForm: React.FC<AuthFormProps> = ({ isLoginTab, onTabChange }) => {
             onChange={handleInputChange}
             required
             disabled={isLoading || isSuccess}
+            className={formErrors.password ? 'border-red-500' : ''}
           />
+          {/* 비밀번호 필드 에러 메시지 */}
+          {formErrors.password && (
+            <div className="mt-1 text-sm text-red-600">
+              {formErrors.password}
+            </div>
+          )}
         </div>
 
         {/* 이름 및 지역 필드를 위한 아코디언 */}
@@ -333,7 +418,14 @@ const AuthForm: React.FC<AuthFormProps> = ({ isLoginTab, onTabChange }) => {
                   value={formData.name}
                   onChange={handleInputChange}
                   disabled={isLoading || isSuccess}
+                  className={formErrors.name ? 'border-red-500' : ''}
                 />
+                {/* 이름 필드 에러 메시지 */}
+                {formErrors.name && (
+                  <div className="mt-1 text-sm text-red-600">
+                    {formErrors.name}
+                  </div>
+                )}
               </div>
             </AccordionContent>
           </AccordionPrimitive.Item>
@@ -349,7 +441,14 @@ const AuthForm: React.FC<AuthFormProps> = ({ isLoginTab, onTabChange }) => {
                   value={formData.region || ''}
                   onChange={handleInputChange}
                   disabled={isLoading || isSuccess}
+                  className={formErrors.region ? 'border-red-500' : ''}
                 />
+                {/* 지역 필드 에러 메시지 */}
+                {formErrors.region && (
+                  <div className="mt-1 text-sm text-red-600">
+                    {formErrors.region}
+                  </div>
+                )}
               </div>
             </AccordionContent>
           </AccordionPrimitive.Item>
@@ -359,7 +458,7 @@ const AuthForm: React.FC<AuthFormProps> = ({ isLoginTab, onTabChange }) => {
           <Button
             type="submit"
             className={`w-full ${isSuccess ? 'bg-green-600 hover:bg-green-700' : ''}`}
-            disabled={isLoading || isSuccess}
+            disabled={isLoginButtonDisabled()}
           >
             {getButtonText()}
           </Button>

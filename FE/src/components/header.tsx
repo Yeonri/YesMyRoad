@@ -1,8 +1,10 @@
 'use client'
 
-import { defectAPI } from '@/api/defect-api'
+// import { coodAPI } from '@/api/coordinate-api'
+// import { defectAPI } from '@/api/defect-api'
+// import { maintenanceAPI } from '@/api/maintenance-api'
+// import { statisticAPI } from '@/api/statistic-api'
 // API 테스트
-
 import { userAPI } from '@/api/user-api'
 import { Button } from '@/components/ui/button'
 import {
@@ -21,7 +23,7 @@ import { useRouter } from 'next/navigation'
 
 import { MobileNav } from './mobile-nav'
 
-const PUBLIC_ID = '23569766-0f5a-4f54-ba9b-dba4dbf0b922'
+// const PUBLIC_ID = '23569766-0f5a-4f54-ba9b-dba4dbf0b922'
 
 export default function Header() {
   const router = useRouter() // 라우터 훅 사용
@@ -64,19 +66,41 @@ export default function Header() {
       {/* API 연동 테스트용 버튼 */}
       <Button
         onClick={async () => {
-          const response = await defectAPI.checkDefects()
-          console.log(response.data)
+          // alert(`모든 api 연동 완료`)
+          // const response = await coodAPI.getDefects() // 통과
+
+          // const response = await statisticAPI.getDamageReportByType() // 통과
+          // const response = await statisticAPI.getDamageDailyReport() // 통과
+          // const response = await statisticAPI.getDamageWeeklyReport() // 통과
+          // const response = await statisticAPI.getDamageMonthlyReport() // 통과
+          // const response = await statisticAPI.getSummarizedDamageMonthlyReport() // 통과
+          // const response = await statisticAPI.getLocationallyDamageMap("대전광역시") // 통과
+          // const response = await statisticAPI.getTop3Damagedlocations() // 통과
+
+          // const response = await maintenanceAPI.getMaintenanceOverview() // 통과
+          // const response = await maintenanceAPI.getMaintenanceCompletionStats() // 통과
+          // const response = await maintenanceAPI.getMonthlyMaintenanceStatus() // 통과
+          // const response = await maintenanceAPI.getLocallyMaintenanceStatus() // 통과
+
+          // const response = await defectAPI.updateRoadDamageStatus(1, 'REPORTED')
+          // const response = await defectAPI.updateRoadDamageStatus(1, 'RECEIVED')
+          // const response = await defectAPI.updateRoadDamageStatus(1, 'IN_PROGRESS')
+          // const response = await defectAPI.updateRoadDamageStatus(1, 'COMPLETED')
+
+          const response = await userAPI.refresh()
+
+          console.log(response)
+
+          if (response.status === 200) {
+            alert(`토큰 재설정 성공: ${response.status}`)
+            console.log(response.data)
+          } else {
+            alert(`토큰 재설정 실패: ${response.status}`)
+            console.log(response.error)
+          }
         }}
       >
-        손상 데이터 조회 테스트
-      </Button>
-      <Button
-        onClick={async () => {
-          const response = await defectAPI.checkDetailedDefects(PUBLIC_ID)
-          console.log(response.data)
-        }}
-      >
-        손상 데이터 상세 조회 테스트
+        API 테스트
       </Button>
       {/* API 연동 테스트용 버튼 */}
 
