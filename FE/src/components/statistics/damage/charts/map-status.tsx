@@ -1,26 +1,21 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { daejeon } from '@/data/geojson/sig_daejeon'
 import * as echarts from 'echarts'
-import { useEffect, useRef, useState } from 'react'
+import ReactECharts from 'echarts-for-react'
+import { useEffect, useState } from 'react'
 
-export default function MapStatus(cardHeight: string) {
+export default function MapStatus(props: { cardHeight: string }) {
+  const { cardHeight = 'h-80' } = props
+
   const [isMapRegistered, setIsMapRegistered] = useState(false)
-  const chartRef = useRef<HTMLDivElement>(null)
-  const chartInstance = useRef<echarts.ECharts | null>(null)
+  const [option, setOption] = useState<echarts.EChartsOption>({})
 
   useEffect(() => {
     if (!isMapRegistered) {
       echarts.registerMap('daejeon', daejeon)
       setIsMapRegistered(true)
-    }
-  }, [isMapRegistered])
 
-  useEffect(() => {
-    if (isMapRegistered && chartRef.current) {
-      if (!chartInstance.current) {
-        chartInstance.current = echarts.init(chartRef.current)
-      }
-      const option: echarts.EChartsOption = {
+      setOption({
         tooltip: { trigger: 'item', formatter: '{b}<br/>{c} (건)' },
         toolbox: {
           show: true,
@@ -56,26 +51,23 @@ export default function MapStatus(cardHeight: string) {
             ],
           },
         ],
-      }
-      chartInstance.current.setOption(option)
-      // 리사이즈 대응
-      const handleResize = () => chartInstance.current?.resize()
-      window.addEventListener('resize', handleResize)
-      return () => {
-        window.removeEventListener('resize', handleResize)
-        chartInstance.current?.dispose()
-        chartInstance.current = null
-      }
+      })
     }
   }, [isMapRegistered])
 
   return (
-    <Card className={`col-span-2 ${cardHeight}`}>
+    <Card className={`col-span-3 grow ${cardHeight}`}>
       <CardHeader className="p-4">
         <CardTitle className="text-md">구역별 도로 파손 현황</CardTitle>
       </CardHeader>
       <CardContent className="p-4 pt-0">
-        <div ref={chartRef} className="h-[400px] w-full" />
+        {isMapRegistered && (
+          <ReactECharts
+            option={option}
+            style={{ height: '300px', width: '100%' }}
+            opts={{ renderer: 'canvas' }}
+          />
+        )}
       </CardContent>
     </Card>
   )

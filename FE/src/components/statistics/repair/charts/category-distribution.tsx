@@ -10,20 +10,17 @@ export default function CategoryDistribution(props: { cardHeight: string }) {
     legend: { top: '5%', left: 'center', textStyle: { fontSize: 12 } },
     series: [
       {
-        name: '도로파손 유형',
+        name: '도로보수 유형',
         type: 'pie',
         radius: ['40%', '70%'],
         avoidLabelOverlap: false,
         itemStyle: { borderRadius: 10, borderColor: '#fff', borderWidth: 2 },
         label: { show: false, position: 'center' },
         emphasis: { label: { show: true, fontSize: 16, fontWeight: 'bold' } },
-        labelLine: { show: false },
         data: [
-          { value: 35, name: '포트홀' },
-          { value: 20, name: '침하' },
-          { value: 15, name: '균열' },
-          { value: 10, name: '패임' },
-          { value: 5, name: '기타' },
+          { value: 30, name: '미완료', itemStyle: { color: '#ee6666' } },
+          { value: 25, name: '진행중', itemStyle: { color: '#fac858' } },
+          { value: 15, name: '완료', itemStyle: { color: '#91cc75' } },
         ],
       },
     ],
@@ -32,7 +29,7 @@ export default function CategoryDistribution(props: { cardHeight: string }) {
   return (
     <Card className={`col-span-2 ${cardHeight}`}>
       <CardHeader className="p-4">
-        <CardTitle className="text-md">유형별 도로파손 분포</CardTitle>
+        <CardTitle className="text-md">대전시 도로보수 진행현황</CardTitle>
       </CardHeader>
       <CardContent className="p-4 pt-0">
         <ReactECharts option={option} />
