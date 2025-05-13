@@ -31,6 +31,7 @@ public class SecurityConfig {
 		CorsConfiguration config = new CorsConfiguration();
 		config.addAllowedOriginPattern("https://k12b201.p.ssafy.io");
 		config.addAllowedOriginPattern("http://localhost:3000");
+		config.addAllowedOriginPattern("http://45.12.114.100:12956");
 		config.addAllowedMethod("GET");
 		config.addAllowedMethod("POST");
 		config.addAllowedMethod("PATCH");
