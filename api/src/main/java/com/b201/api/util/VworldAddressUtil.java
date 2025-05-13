@@ -7,7 +7,10 @@ import org.springframework.web.client.RestClientException;
 
 import com.fasterxml.jackson.databind.JsonNode;
 
+import lombok.extern.slf4j.Slf4j;
+
 @Component
+@Slf4j
 public class VworldAddressUtil {
 
 	private final String apiKey;
@@ -23,6 +26,7 @@ public class VworldAddressUtil {
 	 * JSON 문자열을 리턴합니다.
 	 */
 	public String changePointToAddress(double lng, double lat) {
+		log.info("[changePointToAddress] 호출됨, longitude={}, latitude={}", lng, lat);
 		String point = lng + "," + lat;
 
 		JsonNode root = addressRestClient.get()
@@ -41,6 +45,7 @@ public class VworldAddressUtil {
 			.body(JsonNode.class);
 
 		if (root == null) {
+			log.error("[changePointToAddress] API 반환값이 null입니다.");
 			throw new RestClientException("API returned null response");
 		}
 
@@ -49,10 +54,13 @@ public class VworldAddressUtil {
 			.path("response")
 			.path("result");
 		if (result.isEmpty()) {
+			log.warn("[changePointToAddress] 잘못된 좌표값, result가 비어있음: {}", point);
 			throw new RestClientException("잘못된 좌표값입니다.");
 		}
 		JsonNode first = result.get(0);
 
-		return first.path("text").asText("");
+		String address = first.path("text").asText("");
+		log.debug("[changePointToAddress] 변환된 주소: {}", address);
+		return address;
 	}
 }
