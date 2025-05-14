@@ -2,13 +2,29 @@
 
 import { userAPI } from '@/api/user-api'
 import { Button } from '@/components/ui/button'
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+} from '@/components/ui/command'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from '@/components/ui/popover'
+// 지역 ID 데이터 임포트
+import regionIdMap from '@/data/region-id.json'
 import { cn } from '@/lib/utils'
 import { useUserStore } from '@/store/user-store'
 import { LoginFormData, LoginResponse, RegisterFormData } from '@/types/user'
 import * as AccordionPrimitive from '@radix-ui/react-accordion'
 import { isAxiosError } from 'axios'
+import { Check, ChevronsUpDown } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import React, { useEffect, useState } from 'react'
 
@@ -66,6 +82,8 @@ const AuthForm: React.FC<AuthFormProps> = ({ isLoginTab, onTabChange }) => {
   const [formErrors, setFormErrors] = useState<{ [key: string]: string }>({})
   // 일반 에러 메시지 (필드에 매핑되지 않는 에러)
   const [generalError, setGeneralError] = useState<string>('')
+  // 지역 선택기 상태
+  const [openRegion, setOpenRegion] = useState(false)
 
   // 로그인 상태가 변경될 때 리디렉션
   useEffect(() => {
@@ -434,15 +452,67 @@ const AuthForm: React.FC<AuthFormProps> = ({ isLoginTab, onTabChange }) => {
             <AccordionContent>
               <div className="space-y-1">
                 <Label htmlFor="region">지역</Label>
-                <Input
-                  id="region"
-                  type="number"
-                  placeholder="지역을 선택해주세요"
-                  value={formData.region || ''}
-                  onChange={handleInputChange}
-                  disabled={isLoading || isSuccess}
-                  className={formErrors.region ? 'border-red-500' : ''}
-                />
+                <Popover open={openRegion} onOpenChange={setOpenRegion}>
+                  <PopoverTrigger asChild>
+                    <Button
+                      id="region"
+                      variant="outline"
+                      role="combobox"
+                      aria-expanded={openRegion}
+                      className={`w-full justify-between ${
+                        formErrors.region ? 'border-red-500' : ''
+                      }`}
+                      disabled={isLoading || isSuccess}
+                    >
+                      {formData.region
+                        ? Object.entries(regionIdMap).find(
+                            ([_, value]) => value === formData.region,
+                          )?.[0] || '지역을 선택해주세요'
+                        : '지역을 선택해주세요'}
+                      <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-full p-0">
+                    <Command>
+                      <CommandInput placeholder="지역 검색..." />
+                      <CommandList>
+                        <CommandEmpty>검색 결과가 없습니다.</CommandEmpty>
+                        <CommandGroup>
+                          {Object.entries(regionIdMap).map(
+                            ([regionName, regionId]) => (
+                              <CommandItem
+                                key={regionId}
+                                value={regionName}
+                                onSelect={() => {
+                                  // 지역 선택 시 region ID 값 설정
+                                  setFormData({ ...formData, region: regionId })
+                                  // 지역 관련 에러 메시지 초기화
+                                  if (formErrors.region) {
+                                    setFormErrors((prev) => ({
+                                      ...prev,
+                                      region: '',
+                                    }))
+                                  }
+                                  setOpenRegion(false)
+                                }}
+                              >
+                                <Check
+                                  className={cn(
+                                    'mr-2 h-4 w-4',
+                                    formData.region === regionId
+                                      ? 'opacity-100'
+                                      : 'opacity-0',
+                                  )}
+                                />
+                                {regionName}
+                              </CommandItem>
+                            ),
+                          )}
+                        </CommandGroup>
+                      </CommandList>
+                    </Command>
+                  </PopoverContent>
+                </Popover>
                 {/* 지역 필드 에러 메시지 */}
                 {formErrors.region && (
                   <div className="mt-1 text-sm text-red-600">
