@@ -7,7 +7,7 @@ import { useEffect, useState } from 'react'
 // 보호할 경로 목록
 const protectedRoutes = ['/']
 // 인증된 사용자가 접근하면 리다이렉션할 경로
-const authRoutes = ['/login']
+const authRoutes = ['/auth']
 
 export default function ClientLayout({
   children,
@@ -30,7 +30,7 @@ export default function ClientLayout({
       console.log(
         '[인증 보호] 인증되지 않은 사용자가 보호된 경로에 접근: 로그인 페이지로 리다이렉션',
       )
-      router.push('/login')
+      router.push('/auth')
     } else if (authRoutes.includes(pathname) && isAuthenticated) {
       console.log(
         '[인증 보호] 인증된 사용자가 로그인 페이지에 접근: 메인 페이지로 리다이렉션',
@@ -48,7 +48,7 @@ export default function ClientLayout({
         console.log(
           '[인증 상태 변경] 인증되지 않은 사용자가 보호된 경로에 접근: 로그인 페이지로 리다이렉션',
         )
-        router.push('/login')
+        router.push('/auth')
       } else if (authRoutes.includes(pathname) && isAuthenticated) {
         console.log(
           '[인증 상태 변경] 인증된 사용자가 로그인 페이지에 접근: 메인 페이지로 리다이렉션',

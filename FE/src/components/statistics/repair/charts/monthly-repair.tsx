@@ -1,0 +1,126 @@
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import * as echarts from 'echarts'
+import ReactECharts from 'echarts-for-react'
+import { useEffect, useRef, useState } from 'react'
+
+export default function MonthlyRepair(props: { cardHeight: string }) {
+  const { cardHeight = 'h-80' } = props
+  const chartRef = useRef<ReactECharts>(null)
+  const [chartOption, setChartOption] = useState<echarts.EChartsOption>({})
+
+  const rawData: number[][] = [
+    [320, 132, 101, 134, 90, 230, 210, 175, 280, 115, 195, 245],
+    [220, 182, 191, 234, 290, 330, 310, 275, 215, 340, 185, 260],
+    [150, 212, 201, 154, 190, 330, 410, 240, 180, 370, 295, 225],
+  ]
+
+  const totalData: number[] = []
+  for (let i = 0; i < rawData[0].length; ++i) {
+    let sum = 0
+    for (let j = 0; j < rawData.length; ++j) {
+      sum += rawData[j][i]
+    }
+    totalData.push(sum)
+  }
+
+  useEffect(() => {
+    if (chartRef.current) {
+      const chartInstance = chartRef.current.getEchartsInstance()
+      const grid = { left: 100, right: 100, top: 50, bottom: 50 }
+      const gridWidth = chartInstance.getWidth() - grid.left - grid.right
+      const gridHeight = chartInstance.getHeight() - grid.top - grid.bottom
+      const categoryWidth = gridWidth / rawData[0].length
+      const barWidth = categoryWidth * 0.6
+      const barPadding = (categoryWidth - barWidth) / 2
+      const color = ['#ee6666', '#fac858', '#91cc75']
+
+      const series: echarts.BarSeriesOption[] = [
+        '미완료',
+        '진행중',
+        '완료',
+      ].map((name, sid) => {
+        return {
+          name,
+          type: 'bar',
+          stack: 'total',
+          barWidth: '60%',
+          label: {
+            show: true,
+            formatter: (params: any) =>
+              Math.round(params.value * 1000) / 10 + '%',
+          },
+          data: rawData[sid].map((d, did) =>
+            totalData[did] <= 0 ? 0 : d / totalData[did],
+          ),
+          itemStyle: { color: color[sid] },
+        }
+      })
+
+      const elements = []
+      for (let j = 1, jlen = rawData[0].length; j < jlen; ++j) {
+        const leftX = grid.left + categoryWidth * j - barPadding
+        const rightX = leftX + barPadding * 2
+        let leftY = grid.top + gridHeight
+        let rightY = leftY
+        for (let i = 0, len = series.length; i < len; ++i) {
+          const points = []
+          const leftBarHeight =
+            (rawData[i][j - 1] / totalData[j - 1]) * gridHeight
+          points.push([leftX, leftY])
+          points.push([leftX, leftY - leftBarHeight])
+          const rightBarHeight = (rawData[i][j] / totalData[j]) * gridHeight
+          points.push([rightX, rightY - rightBarHeight])
+          points.push([rightX, rightY])
+          points.push([leftX, leftY])
+
+          leftY -= leftBarHeight
+          rightY -= rightBarHeight
+
+          elements.push({
+            type: 'polygon',
+            shape: { points },
+            style: { fill: color[i], opacity: 0.25 },
+          })
+        }
+      }
+
+      const option: echarts.EChartsOption = {
+        legend: { selectedMode: false },
+        grid,
+        yAxis: { type: 'value' },
+        xAxis: {
+          type: 'category',
+          data: [
+            '1월',
+            '2월',
+            '3월',
+            '4월',
+            '5월',
+            '6월',
+            '7월',
+            '8월',
+            '9월',
+            '10월',
+            '11월',
+            '12월',
+          ],
+        },
+        series,
+        graphic: { elements },
+      }
+
+      setChartOption(option)
+    }
+  }, [rawData, totalData])
+
+  return (
+    <Card className={`col-span-2 ${cardHeight}`}>
+      <CardHeader className="p-4">
+        <CardTitle className="text-md">월별 도로보수 현황</CardTitle>
+      </CardHeader>
+      <CardContent className="p-4 pt-0">
+        <ReactECharts ref={chartRef} option={chartOption} />
+      </CardContent>
+    </Card>
+  )
+}

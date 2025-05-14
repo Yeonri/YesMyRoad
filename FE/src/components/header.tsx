@@ -1,7 +1,11 @@
 'use client'
 
-// API 테스트용 임포트
-import { defectAPI } from '@/api/defect-api'
+// import { coodAPI } from '@/api/coordinate-api'
+// import { defectAPI } from '@/api/defect-api'
+// import { maintenanceAPI } from '@/api/maintenance-api'
+// import { statisticAPI } from '@/api/statistic-api'
+// API 테스트
+import { userAPI } from '@/api/user-api'
 import { Button } from '@/components/ui/button'
 import {
   DropdownMenu,
@@ -13,13 +17,35 @@ import {
 } from '@/components/ui/dropdown-menu'
 import { Input } from '@/components/ui/input'
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet'
+import { useUserStore } from '@/store/user-store'
 import { Bell, Menu, Search, Settings, User } from 'lucide-react'
+import { useRouter } from 'next/navigation'
 
 import { MobileNav } from './mobile-nav'
 
-const PUBLIC_ID = '23569766-0f5a-4f54-ba9b-dba4dbf0b922'
+// const PUBLIC_ID = '23569766-0f5a-4f54-ba9b-dba4dbf0b922'
 
 export default function Header() {
+  const router = useRouter() // 라우터 훅 사용
+  const { clearSession } = useUserStore()
+
+  const handleLogout = async () => {
+    const response = await userAPI.logout()
+    console.log(response)
+    if (response.status === 200) {
+      // 로컬 스토리지에서 인증 관련 데이터 삭제
+      localStorage.removeItem('accessToken')
+      localStorage.removeItem('refreshToken')
+      localStorage.removeItem('userId')
+
+      clearSession()
+      alert('로그아웃하였습니다')
+
+      // 로그인 페이지로 리디렉션
+      router.push('/auth')
+    }
+  }
+
   return (
     <header className="bg-background sticky top-0 z-50 flex h-16 items-center gap-4 border-b px-4 md:px-6">
       <Sheet>
@@ -40,19 +66,41 @@ export default function Header() {
       {/* API 연동 테스트용 버튼 */}
       <Button
         onClick={async () => {
-          const response = await defectAPI.checkDefects()
-          console.log(response.data)
+          // alert(`모든 api 연동 완료`)
+          // const response = await coodAPI.getDefects() // 통과
+
+          // const response = await statisticAPI.getDamageReportByType() // 통과
+          // const response = await statisticAPI.getDamageDailyReport() // 통과
+          // const response = await statisticAPI.getDamageWeeklyReport() // 통과
+          // const response = await statisticAPI.getDamageMonthlyReport() // 통과
+          // const response = await statisticAPI.getSummarizedDamageMonthlyReport() // 통과
+          // const response = await statisticAPI.getLocationallyDamageMap("대전광역시") // 통과
+          // const response = await statisticAPI.getTop3Damagedlocations() // 통과
+
+          // const response = await maintenanceAPI.getMaintenanceOverview() // 통과
+          // const response = await maintenanceAPI.getMaintenanceCompletionStats() // 통과
+          // const response = await maintenanceAPI.getMonthlyMaintenanceStatus() // 통과
+          // const response = await maintenanceAPI.getLocallyMaintenanceStatus() // 통과
+
+          // const response = await defectAPI.updateRoadDamageStatus(1, 'REPORTED')
+          // const response = await defectAPI.updateRoadDamageStatus(1, 'RECEIVED')
+          // const response = await defectAPI.updateRoadDamageStatus(1, 'IN_PROGRESS')
+          // const response = await defectAPI.updateRoadDamageStatus(1, 'COMPLETED')
+
+          const response = await userAPI.refresh()
+
+          console.log(response)
+
+          if (response.status === 200) {
+            alert(`토큰 재설정 성공: ${response.status}`)
+            console.log(response.data)
+          } else {
+            alert(`토큰 재설정 실패: ${response.status}`)
+            console.log(response.error)
+          }
         }}
       >
-        손상 데이터 조회 테스트
-      </Button>
-      <Button
-        onClick={async () => {
-          const response = await defectAPI.checkDetailedDefects(PUBLIC_ID)
-          console.log(response.data)
-        }}
-      >
-        손상 데이터 상세 조회 테스트
+        API 테스트
       </Button>
       {/* API 연동 테스트용 버튼 */}
 
@@ -97,7 +145,7 @@ export default function Header() {
           <DropdownMenuTrigger asChild>
             <Button variant="outline" size="icon">
               <User className="h-4 w-4" />
-              <span className="sr-only">유저저</span>
+              <span className="sr-only">유저</span>
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
@@ -106,7 +154,7 @@ export default function Header() {
             <DropdownMenuItem>프로필</DropdownMenuItem>
             <DropdownMenuItem>설정</DropdownMenuItem>
             <DropdownMenuSeparator />
-            <DropdownMenuItem>로그아웃</DropdownMenuItem>
+            <DropdownMenuItem onClick={handleLogout}>로그아웃</DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
       </div>

@@ -5,8 +5,8 @@ import useEmblaCarousel from 'embla-carousel-react'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
 import { useCallback, useEffect, useState } from 'react'
 
-import DefectStatsDamage from './defect-stats-damage'
-import DefectStatsRepair from './defect-stats-repair'
+import DefectStatsDamage from './statistics/damage/defect-stats-damage'
+import DefectStatsRepair from './statistics/repair/defect-stats-repair'
 
 export default function DefectStats() {
   const [emblaRef, emblaApi] = useEmblaCarousel()
