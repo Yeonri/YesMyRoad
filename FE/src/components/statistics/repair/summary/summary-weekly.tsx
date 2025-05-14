@@ -1,17 +1,18 @@
-import { statisticAPI } from '@/api/statistic-api'
+// import { statisticAPI } from '@/api/statistic-api'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { RepairWeeklyReportType } from '@/types/stats-api'
-import { useEffect, useState } from 'react'
+// import { useEffect, useState } from 'react'
+import { useState } from 'react'
 
 export default function SummaryWeekly() {
   const [weeklyReport, setWeeklyReport] =
     useState<RepairWeeklyReportType | null>(null)
 
-  useEffect(() => {
-    statisticAPI.getRepairWeeklyReport().then((response) => {
-      setWeeklyReport(response.data.totalCount)
-    })
-  }, [])
+  // useEffect(() => {
+  //   statisticAPI.getRepairWeeklyReport().then((response) => {
+  //     setWeeklyReport(response.data.totalCount)
+  //   })
+  // }, [])
 
   return (
     <Card className="grow">

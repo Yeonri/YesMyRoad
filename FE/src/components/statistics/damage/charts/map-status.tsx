@@ -12,7 +12,9 @@ export default function MapStatus(props: { cardHeight: string }) {
 
   useEffect(() => {
     if (!isMapRegistered) {
-      echarts.registerMap('daejeon', daejeon)
+      // 타입 캐스팅으로 Echarts의 GeoJSON 타입에 맞게 강제 변환
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      echarts.registerMap('daejeon', daejeon as any)
       setIsMapRegistered(true)
 
       setOption({

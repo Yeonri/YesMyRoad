@@ -9,7 +9,11 @@ interface DaejeonGeoJson {
 interface Feature {
   type: 'Feature'
   properties: { id: string; name_eng: string; name: string }
-  geometry: { type: string; coordinates: number[][][][] }
+  geometry: {
+    type: string
+    coordinates: number[][][][]
+    encodeOffsets?: number[][]
+  }
 }
 
 export const daejeon: DaejeonGeoJson = {
