@@ -22,7 +22,7 @@ export default function SummaryDaily() {
       <CardContent className="p-4 pt-0">
         {dailyReport && (
           <div className="flex flex-col gap-2">
-            <p className="text-lg font-bold">{dailyReport.totalCount}</p>
+            <p className="text-lg font-bold">{dailyReport.count}</p>
           </div>
         )}
       </CardContent>

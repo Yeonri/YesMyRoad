@@ -9,7 +9,7 @@ export default function SummaryWeekly() {
 
   useEffect(() => {
     statisticAPI.getDamageWeeklyReport().then((response) => {
-      setWeeklyReport(response.data.totalCount)
+      setWeeklyReport(response.data)
     })
   }, [])
 
@@ -21,7 +21,7 @@ export default function SummaryWeekly() {
       <CardContent className="p-4 pt-0">
         {weeklyReport && (
           <div className="flex flex-col gap-2">
-            <p className="text-lg font-bold">{weeklyReport.totalCount}</p>
+            <p className="text-lg font-bold">{weeklyReport.count}</p>
           </div>
         )}
       </CardContent>
