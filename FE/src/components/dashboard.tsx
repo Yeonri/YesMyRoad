@@ -1,3 +1,4 @@
+// src/components/dashboard.tsx
 'use client'
 
 import LocationHeader from '@/components/location-header'
@@ -50,6 +51,8 @@ import DefectStats from './defect-stats'
 import Header from './header'
 import RecentAlerts from './recent-alerts'
 
+// src/components/dashboard.tsx
+
 export default function Dashboard() {
   // Get state and actions from Zustand store
   const {
@@ -66,22 +69,30 @@ export default function Dashboard() {
     fetchRecentAlerts,
     fetchDefectStats,
     fetchDefectTrends,
+    fetchGeoJSONData, // fetchGeoDataAndDetails 대신 fetchGeoJSONData 사용
   } = useDefectStore()
 
   // Fetch data on component mount
   useEffect(() => {
-    // TODO: Replace with actual API calls when backend is ready
+    console.log('Dashboard - 데이터 로드 시작')
+
+    // 기존 API 호출
     fetchDefects()
     fetchDefectLocations()
     fetchRecentAlerts()
     fetchDefectStats()
     fetchDefectTrends()
+
+    // GeoJSON 데이터만 먼저 로드
+    fetchGeoJSONData()
+    console.log('Dashboard - GeoJSON 데이터 로드 요청 완료')
   }, [
     fetchDefects,
     fetchDefectLocations,
     fetchRecentAlerts,
     fetchDefectStats,
     fetchDefectTrends,
+    fetchGeoJSONData, // 의존성 배열에 fetchGeoJSONData 추가
   ])
 
   const [selectedTab, selectTab] = useState('map')
