@@ -1,27 +1,33 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import * as echarts from 'echarts'
 import ReactECharts from 'echarts-for-react'
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 
 export default function MonthlyRepair(props: { cardHeight: string }) {
   const { cardHeight = 'h-80' } = props
   const chartRef = useRef<ReactECharts>(null)
   const [chartOption, setChartOption] = useState<echarts.EChartsOption>({})
 
-  const rawData: number[][] = [
-    [320, 132, 101, 134, 90, 230, 210, 175, 280, 115, 195, 245],
-    [220, 182, 191, 234, 290, 330, 310, 275, 215, 340, 185, 260],
-    [150, 212, 201, 154, 190, 330, 410, 240, 180, 370, 295, 225],
-  ]
+  const rawData = useMemo(
+    () => [
+      [320, 132, 101, 134, 90, 230, 210, 175, 280, 115, 195, 245],
+      [220, 182, 191, 234, 290, 330, 310, 275, 215, 340, 185, 260],
+      [150, 212, 201, 154, 190, 330, 410, 240, 180, 370, 295, 225],
+    ],
+    [],
+  )
 
-  const totalData: number[] = []
-  for (let i = 0; i < rawData[0].length; ++i) {
-    let sum = 0
-    for (let j = 0; j < rawData.length; ++j) {
-      sum += rawData[j][i]
+  const totalData = useMemo(() => {
+    const result: number[] = []
+    for (let i = 0; i < rawData[0].length; ++i) {
+      let sum = 0
+      for (let j = 0; j < rawData.length; ++j) {
+        sum += rawData[j][i]
+      }
+      result.push(sum)
     }
-    totalData.push(sum)
-  }
+    return result
+  }, [rawData])
 
   useEffect(() => {
     if (chartRef.current) {
@@ -46,8 +52,8 @@ export default function MonthlyRepair(props: { cardHeight: string }) {
           barWidth: '60%',
           label: {
             show: true,
-            formatter: (params: any) =>
-              Math.round(params.value * 1000) / 10 + '%',
+            formatter: (params: echarts.DefaultLabelFormatterCallbackParams) =>
+              Math.round((params.value as number) * 1000) / 10 + '%',
           },
           data: rawData[sid].map((d, did) =>
             totalData[did] <= 0 ? 0 : d / totalData[did],

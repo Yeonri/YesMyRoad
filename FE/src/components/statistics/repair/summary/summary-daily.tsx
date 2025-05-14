@@ -1,18 +1,19 @@
-import { statisticAPI } from '@/api/statistic-api'
+// import { statisticAPI } from '@/api/statistic-api'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { RepairDailyReportType } from '@/types/stats-api'
-import { useEffect, useState } from 'react'
+// import { useEffect, useState } from 'react'
+import { useState } from 'react'
 
 export default function SummaryDaily() {
   const [dailyReport, setDailyReport] = useState<RepairDailyReportType | null>(
     null,
   )
 
-  useEffect(() => {
-    statisticAPI.getRepairDailyReport().then((response) => {
-      setDailyReport(response.data)
-    })
-  }, [])
+  // useEffect(() => {
+  //   statisticAPI.getRepairDailyReport().then((response) => {
+  //     setDailyReport(response.data)
+  //   })
+  // }, [])
 
   return (
     <Card className="grow">

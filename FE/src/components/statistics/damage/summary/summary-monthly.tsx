@@ -21,7 +21,7 @@ export default function SummaryMonthly() {
       <CardContent className="p-4 pt-0">
         {monthlyReport && (
           <div className="flex flex-col gap-2">
-            <p className="text-lg font-bold">{monthlyReport.totalCount}</p>
+            <p className="text-lg font-bold">{monthlyReport.count}</p>
           </div>
         )}
       </CardContent>
