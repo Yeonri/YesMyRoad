@@ -14,11 +14,10 @@ spring:
   #jpa
   jpa:
     hibernate:
-      ddl-auto: create
+      ddl-auto: none
     properties:
       hibernate:
         dialect: org.hibernate.dialect.MySQLDialect
-    defer-datasource-initialization: true
 
   #한글 깨짐 이슈 방지
   sql:
