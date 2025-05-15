@@ -28,10 +28,10 @@ public class CapturePointService {
 
 	private final CapturePointRepository capturePointRepository;
 
-	public CapturePointResponseDto findAllFeatures() {
-		log.info("[findAllFeatures] 호출됨");
+	public CapturePointResponseDto findAllFeatures(String regionName) {
+		log.info("[findAllFeatures] 호출됨 : {}", regionName);
 
-		List<FeatureDto> featureDtos = capturePointRepository.findAll().stream()
+		List<FeatureDto> featureDtos = capturePointRepository.findAllByRegionName(regionName).stream()
 			.map(this::mapToFeatureDto)
 			.toList();
 
