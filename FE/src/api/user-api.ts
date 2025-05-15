@@ -53,7 +53,7 @@ export const userAPI = {
 
   // 아이디 중복체크
   checkIdDuplication: (userId: string) =>
-    apiCaller('get', '/api/users/id', { params: { userId } }),
+    apiCaller('get', '/api/users/id', undefined, { params: { userId } }),
 
   // 토큰 유효성 검증 및 갱신
   validateSession: async () => {
