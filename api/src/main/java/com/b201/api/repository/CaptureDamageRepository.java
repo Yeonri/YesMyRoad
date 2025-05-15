@@ -23,34 +23,37 @@ import com.b201.api.dto.maintenance.RegionMaintenanceStatusDto;
 @Repository
 public interface CaptureDamageRepository extends JpaRepository<CaptureDamage, Integer> {
 
+	// 카테고리별 도로 손상 집계 현황
 	@Query("""
 		  SELECT new com.b201.api.dto.dashboard.CategoryCountDto(
 		           d.damageCategory.categoryName,
 		           COUNT(d)
 		         )
 		    FROM CaptureDamage d
-			WHERE d.status <> com.b201.api.domain.CaptureDamage.DamageStatus.COMPLETED
+				    join d.capturePoint.region r
+						    join r.parentRegion pr
+								    where d.status = 'COMPLETED'
+										    and pr.regionName = :regionName
 		   GROUP BY d.damageCategory.categoryName
 		""")
-	List<CategoryCountDto> countByCategoryName();
+	List<CategoryCountDto> countByCategoryName(@Param("regionName") String regionName);
 
-	/**
-	 * 일자별 파손 건수 집계
-	 */
+	// 일자별 파손 집계
 	@Query("""
 		  SELECT new com.b201.api.dto.dashboard.DailyCountDto(
 		           DATE(d.capturePoint.captureTimestamp),
 		           COUNT(d)
 		         )
 		    FROM CaptureDamage d
+				    join d.capturePoint.region r
+						    join r.parentRegion pr
+								    where pr.regionName = :regionName
 		   GROUP BY DATE(d.capturePoint.captureTimestamp)
 		   ORDER BY DATE(d.capturePoint.captureTimestamp)
 		""")
-	List<DailyCountDto> countDaily();
+	List<DailyCountDto> countDaily(@Param("regionName") String regionName);
 
-	/**
-	 * 월별 도로균열, 도로홀 분류 건수와 총합계
-	 */
+	// 월별 도로균열, 도로홀 분류 건수와 총합계
 	@Query("""
 		  SELECT new com.b201.api.dto.dashboard.MonthlyDamageSummaryDto(
 		      YEAR(d.capturePoint.captureTimestamp),

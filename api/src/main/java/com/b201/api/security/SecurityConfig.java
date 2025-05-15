@@ -2,8 +2,10 @@ package com.b201.api.security;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
+import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
@@ -19,6 +21,7 @@ import lombok.RequiredArgsConstructor;
 public class SecurityConfig {
 
 	private final JwtAuthenticationFilter jwtAuthenticationFilter;
+	private final CustomUserDetailsService customUserDetailsService;
 
 	//비밀번호 암호용
 	@Bean
@@ -50,13 +53,24 @@ public class SecurityConfig {
 		http
 			.cors(cors -> cors.configurationSource(corsConfigurationSource())) //cors 설정
 			.csrf(AbstractHttpConfigurer::disable) //jwt 인증방식은 세션 인증 방식이 아니므로 csrf 설정이 불필요
+			.sessionManagement(sm ->
+				sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+			)
+			.authenticationProvider(authenticationProvider())
 			.authorizeHttpRequests(auth -> auth
 				.requestMatchers("/api/users/**", "/api/detect").permitAll()
 				.anyRequest().authenticated())
-
 			// JwtAuthenticationFilter를 UsernamePasswordAuthenticationFilter(Spring Security 기본 로그인 필터) 앞에 등록
 			.addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
 		return http.build();
+	}
+
+	@Bean
+	public DaoAuthenticationProvider authenticationProvider() {
+		DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider();
+		authProvider.setUserDetailsService(customUserDetailsService);
+		authProvider.setPasswordEncoder(passwordEncoder());
+		return authProvider;
 	}
 }

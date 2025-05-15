@@ -29,20 +29,20 @@ public class DashboardService {
 	private final CaptureDamageRepository damageRepo;
 
 	// 유형별 도로 파손 분포 수
-	public List<CategoryCountDto> getCategoryDistribution() {
-		log.info("[getCategoryDistribution] 호출됨");
-		List<CategoryCountDto> list = damageRepo.countByCategoryName();
-		log.debug("[getCategoryDistribution] 분류 개수 = {}", list.size());
+	public List<CategoryCountDto> getCategoryDistribution(String regionName) {
+		log.info("[getCategoryDistribution] 호출됨, regionName={}", regionName);
+		List<CategoryCountDto> list = damageRepo.countByCategoryName(regionName);
+		log.debug("[getCategoryDistribution] 분류 개수={}", list.size());
 		return list;
 	}
 
 	// 오늘자 파손 건수 + 전일 대비 증감율
-	public DailyStatusDto getDailyStatusWithChangeRate() {
+	public DailyStatusDto getDailyStatusWithChangeRate(String regionName) {
 		log.info("[getDailyStatusWithChangeRate] 호출됨");
 		LocalDate today = LocalDate.now();
 		LocalDate yesterday = today.minusDays(1);
 
-		List<DailyCountDto> raw = damageRepo.countDaily();
+		List<DailyCountDto> raw = damageRepo.countDaily(regionName);
 
 		long todayCount = raw.stream()
 			.filter(d -> d.getDay().equals(today))
@@ -64,13 +64,13 @@ public class DashboardService {
 	}
 
 	// 이번 주(월요일~) 파손 건수 합계 + 전주 대비 증감율
-	public WeeklyStatusDto getWeeklyStatusWithChangeRate() {
+	public WeeklyStatusDto getWeeklyStatusWithChangeRate(String regionName) {
 		log.info("[getWeeklyStatusWithChangeRate] 호출됨");
 		LocalDate today = LocalDate.now();
 		LocalDate thisMon = today.with(DayOfWeek.MONDAY);
 		LocalDate lastMon = thisMon.minusWeeks(1);
 
-		List<DailyCountDto> raw = damageRepo.countDaily();
+		List<DailyCountDto> raw = damageRepo.countDaily(regionName);
 
 		long thisWeekSum = raw.stream()
 			.filter(d -> !d.getDay().isBefore(thisMon) && !d.getDay().isAfter(today))
@@ -92,13 +92,13 @@ public class DashboardService {
 	}
 
 	// 이번 달 파손 건수 합계 + 전월 대비 증감율
-	public MonthlyStatusDto getMonthlyStatusWithChangeRate() {
+	public MonthlyStatusDto getMonthlyStatusWithChangeRate(String regionName) {
 		log.info("[getMonthlyStatusWithChangeRate] 호출됨");
 		LocalDate today = LocalDate.now();
 		YearMonth thisYm = YearMonth.from(today);
 		YearMonth lastYm = thisYm.minusMonths(1);
 
-		List<DailyCountDto> raw = damageRepo.countDaily();
+		List<DailyCountDto> raw = damageRepo.countDaily(regionName);
 
 		long thisMonthSum = raw.stream()
 			.filter(d -> YearMonth.from(d.getDay()).equals(thisYm))
