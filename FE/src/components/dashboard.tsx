@@ -50,6 +50,7 @@ import DefectMap from './defect-map'
 import DefectStats from './defect-stats'
 import Header from './header'
 import RecentAlerts from './recent-alerts'
+import { statisticAPI } from '@/api/statistic-api'
 
 export default function Dashboard() {
   // Get state and actions from Zustand store
@@ -68,12 +69,14 @@ export default function Dashboard() {
     // updateDefectStats,
     // updateDefectTrends,
     updateGeoJSONData,
+    // getGeoJSONData,
     // updateDetailedDefect,
   } = useDefectStore()
 
   const [selectedTab, selectTab] = useState('map')
 
   // const [isLoading, setIsLoading] = useState(false)
+  // const [recentlyIn, setRecentlyIn] = useState('D')
 
   const loadData = async () => {
     console.log(`데이터 로딩 시작`)
@@ -82,13 +85,38 @@ export default function Dashboard() {
       console.log(
         `GeoJSON 데이터 로드 성공: ${response.data.features!.length || 0} 개의 데이터`,
       )
+      console.log(response.data.features!)
+
       updateGeoJSONData(response.data)
+      // const dd = getGeoJSONData()
+      // if(dd){
+      //   console.log('이거 나오면 store까지 잘 들어간 것:', dd.features)
+      // }
+    }
+  }
+
+  const getReportByTimeRange = async () => {
+    if (timeRange === 'D') {
+      const response = await statisticAPI.getDamageDailyReport()
+      console.log(response.data)
+    } else if (timeRange === 'W') {
+      const response = await statisticAPI.getDamageWeeklyReport()
+      console.log(response.data)
+    }
+    else {
+      const response = await statisticAPI.getDamageMonthlyReport()
+      console.log(response.data)
     }
   }
 
   useEffect(() => {
     loadData()
   }, [])
+
+  useEffect(() => {
+    console.log(`timeRange: ${timeRange}`)
+    getReportByTimeRange()
+  }, [timeRange])
 
   return (
     <div className="bg-muted/40 flex min-h-screen w-full flex-col">
@@ -141,10 +169,10 @@ export default function Dashboard() {
                 <SelectValue placeholder="Time Range" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="1h">1시간 이내</SelectItem>
-                <SelectItem value="24h">24시간 이내</SelectItem>
-                <SelectItem value="7d">7일 이내</SelectItem>
-                <SelectItem value="30d">30일 이내</SelectItem>
+                {/* <SelectItem value="1h">1시간 이내</SelectItem> */}
+                <SelectItem value="D">24시간 이내</SelectItem>
+                <SelectItem value="W">7일 이내</SelectItem>
+                <SelectItem value="M">30일 이내</SelectItem>
               </SelectContent>
             </Select>
             <Select
@@ -275,7 +303,15 @@ export default function Dashboard() {
                 <LocationHeader />
               )}
             </div>
-            <Button onClick={() => loadData()}>결함 현황 새로고침</Button>
+            <Button onClick={() => loadData()}>
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8" />
+                <path d="M21 3v5h-5" />
+                <path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16" />
+                <path d="M3 21v-5h5" />
+              </svg>
+              결함 현황 새로고침
+            </Button>
           </div>
           <TabsContent value="map" className="space-y-4">
             <div className="grid gap-4 md:grid-cols-3">

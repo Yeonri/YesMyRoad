@@ -1,5 +1,6 @@
 'use client'
 
+import { coodAPI } from '@/api/coordinate-api'
 import { defectAPI } from '@/api/defect-api'
 import { Button } from '@/components/ui/button'
 import {
@@ -35,67 +36,22 @@ export default function DefectList() {
   const [sortDirection, setSortDirection] = useState('desc')
 
   // Get defects from Zustand store
-  const { defects, defectType, severity, detailedDefect, getGeoJSONData } =
+  const { defects, defectType, severity, getGeoJSONData } =
     useDefectStore()
 
   // 상세 데이터 로깅을 위한 useEffect 추가
   useEffect(() => {
     const geoJSONData = getGeoJSONData()
-    console.log('DefectList - detailedDefect 데이터:', geoJSONData)
+    // console.log('DefectList - detailedDefect 데이터:', geoJSONData)
+    geoJSONData?.features.map((data) => {
+      console.log(data.properties.publicId)
+      // 퍼블릭 id 추출 성공, 이걸 바탕으로 작업 현황 변환 가능
+      // 근데 화면상의 ID가 퍼블릭 id인가?? 그걸 모르겠네
+      // 일단 퍼블릭 id 말고도 다른것도 추출 가능
+
+      // defect-store에 이 정보들도 담아두자
+    })
   }, [])
-
-  // // useMemo를 사용하여 상세 손상 정보 캐싱
-  // const cachedDetailedDefect = useMemo(() => {
-  //   console.log('캐싱 - DetailedDefect 계산됨')
-  //   return detailedDefect
-  // }, [detailedDefect])
-
-  // // useMemo를 사용하여 GeoJSON 데이터 캐싱
-  // const cachedGeoJSONData = useMemo(() => {
-  //   console.log('캐싱 - GeoJSON 계산됨')
-  //   return geoJSONData
-  // }, [geoJSONData])
-
-  // 캐싱된 GeoJSON 데이터를 사용하여 UI에 표시할 정보 가공
-  // const pointsInfo = useMemo(() => {
-  //   if (!cachedGeoJSONData) {
-  //     console.log('pointsInfo - GeoJSON 데이터 없음')
-  //     return null
-  //   }
-
-  //   const result = {
-  //     totalPoints: cachedGeoJSONData.features.length,
-  //     points: cachedGeoJSONData.features.map((feature) => ({
-  //       id: feature.properties.publicId,
-  //       coordinates: feature.geometry.coordinates,
-  //       address: feature.properties.address.street,
-  //       accuracy: feature.properties.accuracyMeters,
-  //     })),
-  //   }
-
-  //   console.log('pointsInfo - 계산 완료:', result)
-  //   return result
-  // }, [cachedGeoJSONData])
-
-  // 캐싱된 상세 손상 정보를 사용하여 UI에 표시할 정보 가공
-  // const damageInfo = useMemo(() => {
-  //   if (!cachedDetailedDefect) {
-  //     console.log('damageInfo - 상세 손상 정보 없음')
-  //     return null
-  //   }
-
-  //   const result = {
-  //     imageUrl: cachedDetailedDefect.imageUrl,
-  //     risk: cachedDetailedDefect.risk,
-  //     damageCount: cachedDetailedDefect.damages.length,
-  //     categories: [
-  //       ...new Set(cachedDetailedDefect.damages.map((d) => d.category)),
-  //     ],
-  //   }
-
-  //   console.log('damageInfo - 계산 완료:', result)
-  //   return result
-  // }, [cachedDetailedDefect])
 
   // Filter defects based on selected filters
   const filteredDefects = defects.filter((defect) => {

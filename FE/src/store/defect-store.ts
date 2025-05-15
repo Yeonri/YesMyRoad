@@ -15,7 +15,7 @@ import { create } from 'zustand'
 // Define types for our store
 export type DefectType = 'pothole' | 'crack' | 'paint' | 'all'
 export type SeverityType = 'critical' | 'high' | 'medium' | 'low' | 'all'
-export type TimeRangeType = '1h' | '24h' | '7d' | '30d'
+export type TimeRangeType = 'D' | 'W' | 'M'
 export type ProcessStatus = 'Pending' | 'Assigned' | 'In Progress' | 'Completed'
 
 export type Defect = {
@@ -125,7 +125,7 @@ export type DefectStoreState = {
 
 export const useDefectStore = create<DefectStoreState>((set, get) => ({
   // Initial filter states
-  timeRange: '24h',
+  timeRange: 'D',
   defectType: 'all',
   severity: 'all',
   detailedDefect: null,
