@@ -1,18 +1,19 @@
 // import { statisticAPI } from '@/api/statistic-api'
+import { statisticAPI } from '@/api/statistic-api'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { RepairMonthlyReportType } from '@/types/stats-api'
 // import { useEffect, useState } from 'react'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 
 export default function SummaryMonthly() {
   const [monthlyReport, setMonthlyReport] =
     useState<RepairMonthlyReportType | null>(null)
 
-  // useEffect(() => {
-  //   statisticAPI.getRepairMonthlyReport().then((response) => {
-  //     setMonthlyReport(response.data)
-  //   })
-  // }, [])
+  useEffect(() => {
+    statisticAPI.getRepairMonthlyReport().then((response) => {
+      setMonthlyReport(response.data)
+    })
+  }, [])
 
   return (
     <Card className="grow">

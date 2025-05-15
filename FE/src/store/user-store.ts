@@ -1,3 +1,4 @@
+// src/store/user-store.ts
 import { AuthState, User } from '@/types/user'
 import { create } from 'zustand'
 import { PersistOptions, createJSONStorage, persist } from 'zustand/middleware'

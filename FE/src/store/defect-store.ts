@@ -1,4 +1,5 @@
 // src/store/defect-store.ts
+import { coodAPI } from '@/api/coordinate-api'
 import {
   dashboardMetrics,
   defectLocations,
@@ -10,7 +11,6 @@ import {
   severityData,
   trendData,
 } from '@/data/placeholders'
-import { coodAPI } from '@/api/coordinate-api'
 import { create } from 'zustand'
 
 // Define types for our store
@@ -57,24 +57,15 @@ export type DetailedDefect = {
 // GeoJSON 데이터를 위한 타입 정의
 export type FeaturePoint = {
   type: string
-  geometry: {
-    type: string
-    coordinates: number[]
-  }
+  geometry: { type: string; coordinates: number[] }
   properties: {
     publicId: string
-    address: {
-      street: string
-    }
+    address: { street: string }
     accuracyMeters: number
   }
 }
 
-export type GeoJSONData = {
-  type: string
-  features: FeaturePoint[]
-}
-
+export type GeoJSONData = { type: string; features: FeaturePoint[] }
 
 export type DefectStoreState = {
   // Filter states
@@ -131,7 +122,7 @@ export type DefectStoreState = {
   fetchGeoDataAndDetails: () => Promise<void>
 }
 
-export const useDefectStore = create<DefectStoreState>((set, get) => ({
+export const useDefectStore = create<DefectStoreState>((set) => ({
   // Initial filter states
   timeRange: '24h',
   defectType: 'all',
@@ -221,24 +212,23 @@ export const useDefectStore = create<DefectStoreState>((set, get) => ({
   // 복합 액션: GeoJSON 데이터를 가져온 후 첫 번째 항목의 상세 정보 가져오기
   fetchGeoDataAndDetails: async () => {
     // 1. 먼저 GeoJSON 데이터 가져오기
-    const response = await coodAPI.getDefects();
-    set({ geoJSONData: response.data });
-    
+    const response = await coodAPI.getDefects()
+    set({ geoJSONData: response.data })
+
     // 2. 첫 번째 점의 publicId 추출
     if (response.data?.features?.length > 0) {
-      const firstPointId = response.data.features[0].properties.publicId;
-      
+      const firstPointId = response.data.features[0].properties.publicId
+
       // 3. 추출한 publicId로 상세 정보 가져오기
-      const detailResponse = await coodAPI.getDetailedDefects(firstPointId);
-      set({ detailedDefect: detailResponse.data });
-      
+      const detailResponse = await coodAPI.getDetailedDefects(firstPointId)
+      set({ detailedDefect: detailResponse.data })
+
       console.log('GeoJSON 데이터와 상세 정보 로드 완료:', {
         geoFeatures: response.data.features.length,
-        detailDamages: detailResponse.data.damages.length
-      });
+        detailDamages: detailResponse.data.damages.length,
+      })
     } else {
-      console.warn('GeoJSON 데이터에 features가 없습니다.');
+      console.warn('GeoJSON 데이터에 features가 없습니다.')
     }
-  }
-
+  },
 }))

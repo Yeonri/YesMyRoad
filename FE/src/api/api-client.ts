@@ -1,10 +1,15 @@
 // src/api/api-client.ts
+import { useUserStore } from '@/store/user-store'
 import axios, {
   AxiosError,
   AxiosInstance,
   AxiosResponse,
   InternalAxiosRequestConfig,
 } from 'axios'
+// 추가된 import
+import router from 'next/router'
+
+import { userAPI } from './user-api'
 
 const baseURL = 'https://k12b201.p.ssafy.io'
 
@@ -20,6 +25,21 @@ interface QueueItem {
   reject: (reason: unknown) => void
 }
 let refreshQueue: QueueItem[] = []
+
+// Zustand 스토어 접근 함수 (React 컴포넌트 외부에서 사용하기 위함)
+const getStoreState = () => {
+  return useUserStore.getState()
+}
+
+// 로그아웃 처리 함수 추가
+const handleLogout = async () => {
+  const response = await userAPI.logout()
+
+  alert('로그아웃하였습니다')
+  router.push('/auth')
+  // userAPI.logout() 내부에서 이미 토큰 제거와 상태 초기화를 수행하므로
+  // 여기서는 사용자 피드백 및 리다이렉션만 처리
+}
 
 // 직접 토큰 리프레시 함수 구현
 const refreshTokens = async (): Promise<string> => {
@@ -49,8 +69,8 @@ const refreshTokens = async (): Promise<string> => {
 
     return response.data.accessToken
   } catch (error) {
-    localStorage.removeItem('accessToken')
-    localStorage.removeItem('refreshToken')
+    // 토큰 리프레시 실패 시 로그아웃 처리
+    handleLogout()
     throw error
   }
 }
@@ -71,7 +91,7 @@ const processQueue = (
   refreshQueue = []
 }
 
-// request interceptor
+// request interceptor (기존과 동일)
 apiClient.interceptors.request.use(
   (config: InternalAxiosRequestConfig): InternalAxiosRequestConfig => {
     if (config.url === '/api/users/refresh') {
@@ -112,11 +132,9 @@ apiClient.interceptors.response.use(
     if (error.response?.status === 401 && !originalRequest._retry) {
       // 리프레시 요청 자체가 401인 경우 - 리프레시 토큰도 만료됨
       if (originalRequest.url === '/api/users/refresh') {
-        localStorage.removeItem('accessToken')
-        localStorage.removeItem('refreshToken')
+        // 로그아웃 함수 호출로 일관된 처리
+        handleLogout()
         alert('세션이 만료되었습니다. 다시 로그인해주세요.')
-        // 로그인 페이지로 리다이렉트 (선택 사항)
-        // window.location.href = '/login'
         return Promise.reject(error)
       }
 

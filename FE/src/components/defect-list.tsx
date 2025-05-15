@@ -32,6 +32,12 @@ import {
 import { useEffect, useMemo } from 'react'
 import { useState } from 'react'
 
+// src/components/defect-list.tsx
+
+// src/components/defect-list.tsx
+
+// src/components/defect-list.tsx
+
 export default function DefectList() {
   const [sortColumn, setSortColumn] = useState('detectedAt')
   const [sortDirection, setSortDirection] = useState('desc')

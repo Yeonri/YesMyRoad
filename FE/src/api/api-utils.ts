@@ -7,7 +7,6 @@ type HttpMethod = 'get' | 'post' | 'put' | 'delete' | 'patch'
 const apiCaller = async (
   method: HttpMethod,
   url: string,
-  errorMessage: string,
   data?: unknown,
   config?: AxiosRequestConfig,
 ) => {
