@@ -6,6 +6,7 @@ import java.util.Collections;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
@@ -24,17 +25,18 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
 	private final JwtUtil jwtUtil;
 	private final StringRedisTemplate stringRedisTemplate;
+	private final CustomUserDetailsService customUserDetailsService;
 
 	@Override
 	protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response,
 		FilterChain filterChain) throws ServletException, IOException {
 
-		String requestURI = request.getRequestURI();
-		log.debug("[JwtFilter] 요청 URI: {}", requestURI);
+		String uri = request.getRequestURI();
+		log.debug("[JwtFilter] 요청 URI: {}", uri);
 
 		// 회원가입, 로그인 등은 JWT 인증 없이 허용
-		if (requestURI.startsWith("/api/users") || requestURI.startsWith("/api/detect")) {
-			log.trace("[JwtFilter] 인증 스킵 URI: {}", requestURI);
+		if (uri.startsWith("/api/users") || uri.startsWith("/api/detect")) {
+			log.trace("[JwtFilter] 인증 스킵 URI: {}", uri);
 			filterChain.doFilter(request, response);
 			return;
 		}
@@ -70,10 +72,11 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
 			// username이 존재하고 현재 인증되지 않은 경우
 			if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
-
+				UserDetails userDetails = customUserDetailsService.loadUserByUsername(username);
+				
 				// 사용자 인증 객체 생성
 				UsernamePasswordAuthenticationToken authentication =
-					new UsernamePasswordAuthenticationToken(username, null, Collections.emptyList());
+					new UsernamePasswordAuthenticationToken(userDetails, null, Collections.emptyList());
 
 				// 현재 요청 정보를 사용자 인증 객체에 포함시킴 (IP, 세션 ID 등)
 				authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));

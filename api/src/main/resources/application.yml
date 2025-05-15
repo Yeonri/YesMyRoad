@@ -14,7 +14,7 @@ spring:
   #jpa
   jpa:
     hibernate:
-      ddl-auto: none
+      ddl-auto: create
     properties:
       hibernate:
         dialect: org.hibernate.dialect.MySQLDialect
@@ -39,4 +39,6 @@ address:
 jwt:
   secret: ${JWT_SECRET}
 
-
+logging:
+  level:
+    com.b201.api: debug
