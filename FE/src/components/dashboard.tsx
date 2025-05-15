@@ -1,5 +1,6 @@
 'use client'
 
+import { coodAPI } from '@/api/coordinate-api'
 import LocationHeader from '@/components/location-header'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -61,30 +62,33 @@ export default function Dashboard() {
     setSeverity,
     severityCounts,
     dashboardMetrics,
-    fetchDefects,
-    fetchDefectLocations,
-    fetchRecentAlerts,
-    fetchDefectStats,
-    fetchDefectTrends,
+    // updateDefects,
+    // updateDefectLocations,
+    // updateRecentAlerts,
+    // updateDefectStats,
+    // updateDefectTrends,
+    updateGeoJSONData,
+    // updateDetailedDefect,
   } = useDefectStore()
 
-  // Fetch data on component mount
-  useEffect(() => {
-    // TODO: Replace with actual API calls when backend is ready
-    fetchDefects()
-    fetchDefectLocations()
-    fetchRecentAlerts()
-    fetchDefectStats()
-    fetchDefectTrends()
-  }, [
-    fetchDefects,
-    fetchDefectLocations,
-    fetchRecentAlerts,
-    fetchDefectStats,
-    fetchDefectTrends,
-  ])
-
   const [selectedTab, selectTab] = useState('map')
+
+  // const [isLoading, setIsLoading] = useState(false)
+
+  const loadData = async () => {
+    console.log(`데이터 로딩 시작`)
+    const response = await coodAPI.getDefects()
+    if (response.status === 200 && response.data) {
+      console.log(
+        `GeoJSON 데이터 로드 성공: ${response.data.features!.length || 0} 개의 데이터`,
+      )
+      updateGeoJSONData(response.data)
+    }
+  }
+
+  useEffect(() => {
+    loadData()
+  }, [])
 
   return (
     <div className="bg-muted/40 flex min-h-screen w-full flex-col">
@@ -245,27 +249,33 @@ export default function Dashboard() {
         </div>
 
         <Tabs defaultValue="map" className="space-y-4">
-          <div className="flex gap-5">
-            <TabsList>
-              <TabsTrigger value="map" onClick={() => selectTab('map')}>
-                지도
-              </TabsTrigger>
-              <TabsTrigger value="heatmap" onClick={() => selectTab('hitmap')}>
-                히트맵
-              </TabsTrigger>
-              <TabsTrigger value="list" onClick={() => selectTab('list')}>
-                리스트
-              </TabsTrigger>
-              <TabsTrigger
-                value="analytics"
-                onClick={() => selectTab('indicators')}
-              >
-                통계
-              </TabsTrigger>
-            </TabsList>
-            {(selectedTab === 'map' || selectedTab === 'hitmap') && (
-              <LocationHeader />
-            )}
+          <div className="flex justify-between">
+            <div className="flex gap-5">
+              <TabsList>
+                <TabsTrigger value="map" onClick={() => selectTab('map')}>
+                  지도
+                </TabsTrigger>
+                <TabsTrigger
+                  value="heatmap"
+                  onClick={() => selectTab('hitmap')}
+                >
+                  히트맵
+                </TabsTrigger>
+                <TabsTrigger value="list" onClick={() => selectTab('list')}>
+                  리스트
+                </TabsTrigger>
+                <TabsTrigger
+                  value="analytics"
+                  onClick={() => selectTab('indicators')}
+                >
+                  통계
+                </TabsTrigger>
+              </TabsList>
+              {(selectedTab === 'map' || selectedTab === 'hitmap') && (
+                <LocationHeader />
+              )}
+            </div>
+            <Button onClick={() => loadData()}>결함 현황 새로고침</Button>
           </div>
           <TabsContent value="map" className="space-y-4">
             <div className="grid gap-4 md:grid-cols-3">
