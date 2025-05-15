@@ -1,3 +1,4 @@
+// src/store/defect-store.ts
 import {
   dashboardMetrics,
   defectLocations,
@@ -15,6 +16,7 @@ import { create } from 'zustand'
 export type DefectType = 'pothole' | 'crack' | 'paint' | 'all'
 export type SeverityType = 'critical' | 'high' | 'medium' | 'low' | 'all'
 export type TimeRangeType = '1h' | '24h' | '7d' | '30d'
+export type ProcessStatus = 'Pending' | 'Assigned' | 'In Progress' | 'Completed'
 
 export type Defect = {
   id: string
@@ -37,11 +39,41 @@ export type DefectLocation = {
 
 export type HeatmapLocation = { lat: number; lng: number }
 
+// 상세 손상 정보를 위한 타입 정의
+export type DamageItem = {
+  id: number
+  category: string
+  status: number
+  updatedAt: string
+}
+
+export type DetailedDefect = {
+  imageUrl: string
+  risk: number
+  damages: DamageItem[]
+}
+
+// GeoJSON 데이터를 위한 타입 정의
+export type FeaturePoint = {
+  type: string
+  geometry: { type: string; coordinates: number[] }
+  properties: {
+    publicId: string
+    address: { street: string }
+    accuracyMeters: number
+  }
+}
+
+export type GeoJSONData = { type: string; features: FeaturePoint[] }
+
 export type DefectStoreState = {
   // Filter states
   timeRange: TimeRangeType
   defectType: DefectType
   severity: SeverityType
+
+  detailedDefect: DetailedDefect | null
+  geoJSONData: GeoJSONData | null
 
   // Data states
   defectLocations: DefectLocation[]
@@ -78,19 +110,26 @@ export type DefectStoreState = {
   setDefectType: (defectType: DefectType) => void
   setSeverity: (severity: SeverityType) => void
 
-  // TODO: Add actions to fetch data from API
-  fetchDefects: () => Promise<void>
-  fetchDefectLocations: () => Promise<void>
-  fetchRecentAlerts: () => Promise<void>
-  fetchDefectStats: () => Promise<void>
-  fetchDefectTrends: () => Promise<void>
+  // 상태 업데이트 함수 (API 호출 없이 상태만 업데이트)
+  updateDefects: (newDefects: Defect[]) => void
+  updateDefectLocations: (newLocations: DefectLocation[]) => void
+  updateRecentAlerts: (newAlerts: Defect[]) => void
+  updateDefectStats: (typeData: { value: number; name: string }[], sevData: { value: number; name: string }[]) => void
+  updateDefectTrends: (newTrends: any) => void
+  updateDetailedDefect: (defect: DetailedDefect | null) => void
+  updateGeoJSONData: (data: GeoJSONData | null) => void
+
+  // 상태 조회 함수
+  getGeoJSONData: () => GeoJSONData | null
 }
 
-export const useDefectStore = create<DefectStoreState>((set) => ({
+export const useDefectStore = create<DefectStoreState>((set, get) => ({
   // Initial filter states
   timeRange: '24h',
   defectType: 'all',
   severity: 'all',
+  detailedDefect: null,
+  geoJSONData: null,
 
   // Initial data states with placeholder data
   defectLocations,
@@ -108,54 +147,15 @@ export const useDefectStore = create<DefectStoreState>((set) => ({
   setDefectType: (defectType) => set({ defectType }),
   setSeverity: (severity) => set({ severity }),
 
-  // TODO: Implement these functions to fetch data from API endpoints
-  fetchDefects: async () => {
-    // TODO: Replace with actual API call
-    // const response = await fetch('/api/defects')
-    // const data = await response.json()
-    // set({ defects: data })
+  // 상태 업데이트 함수들 (API 호출 없이 상태만 업데이트)
+  updateDefects: (newDefects) => set({ defects: newDefects }),
+  updateDefectLocations: (newLocations) => set({ defectLocations: newLocations }),
+  updateRecentAlerts: (newAlerts) => set({ recentAlerts: newAlerts }),
+  updateDefectStats: (typeData, sevData) => set({ defectTypeData: typeData, severityData: sevData }),
+  updateDefectTrends: (newTrends) => set({ trendData: newTrends }),
+  updateDetailedDefect: (defect) => set({ detailedDefect: defect }),
+  updateGeoJSONData: (data) => set({ geoJSONData: data }),
 
-    // Using placeholder data for now
-    set({ defects })
-  },
-
-  fetchDefectLocations: async () => {
-    // TODO: Replace with actual API call
-    // const response = await fetch('/api/defect-locations')
-    // const data = await response.json()
-    // set({ defectLocations: data })
-
-    // Using placeholder data for now
-    set({ defectLocations })
-  },
-
-  fetchRecentAlerts: async () => {
-    // TODO: Replace with actual API call
-    // const response = await fetch('/api/alerts')
-    // const data = await response.json()
-    // set({ recentAlerts: data })
-
-    // Using placeholder data for now
-    set({ recentAlerts })
-  },
-
-  fetchDefectStats: async () => {
-    // TODO: Replace with actual API call
-    // const response = await fetch('/api/stats')
-    // const data = await response.json()
-    // set({ defectTypeData: data.typeData, severityData: data.severityData })
-
-    // Using placeholder data for now
-    set({ defectTypeData, severityData })
-  },
-
-  fetchDefectTrends: async () => {
-    // TODO: Replace with actual API call
-    // const response = await fetch('/api/trends')
-    // const data = await response.json()
-    // set({ trendData: data })
-
-    // Using placeholder data for now
-    set({ trendData })
-  },
+  // 상태 조회 함수 - geoJSONData 반환
+  getGeoJSONData: () => get().geoJSONData
 }))

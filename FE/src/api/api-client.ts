@@ -1,4 +1,6 @@
 // src/api/api-client.ts
+import TokenService from '@/services/token-service'
+import { useUserStore } from '@/store/user-store'
 import axios, {
   AxiosError,
   AxiosInstance,
@@ -21,38 +23,22 @@ interface QueueItem {
 }
 let refreshQueue: QueueItem[] = []
 
-// 직접 토큰 리프레시 함수 구현
-const refreshTokens = async (): Promise<string> => {
-  try {
-    const refreshToken = localStorage.getItem('refreshToken')
-    if (!refreshToken) {
-      throw new Error('리프레시 토큰이 없습니다')
-    }
+// 스토어 접근 함수
+const getStoreState = () => {
+  return useUserStore.getState()
+}
 
-    const response = await axios.post(
-      `${baseURL}/api/users/refresh`,
-      {},
-      {
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${refreshToken}`,
-        },
-      },
-    )
+// 로그아웃 처리 함수
+const handleLogout = () => {
+  // 토큰 제거
+  TokenService.clearTokens()
 
-    if (response.data.accessToken) {
-      localStorage.setItem('accessToken', response.data.accessToken)
-    }
-    if (response.data.refreshToken) {
-      localStorage.setItem('refreshToken', response.data.refreshToken)
-    }
+  // 사용자 정보 초기화
+  const { clearUser } = getStoreState()
+  clearUser()
 
-    return response.data.accessToken
-  } catch (error) {
-    localStorage.removeItem('accessToken')
-    localStorage.removeItem('refreshToken')
-    throw error
-  }
+  // 로그인 페이지로 리다이렉션
+  window.location.href = '/auth'
 }
 
 // 대기 중인 요청 처리 함수
@@ -75,12 +61,12 @@ const processQueue = (
 apiClient.interceptors.request.use(
   (config: InternalAxiosRequestConfig): InternalAxiosRequestConfig => {
     if (config.url === '/api/users/refresh') {
-      const refreshToken = localStorage.getItem('refreshToken')
+      const refreshToken = TokenService.getRefreshToken()
       if (refreshToken) {
         config.headers['Authorization'] = `Bearer ${refreshToken}`
       }
     } else {
-      const accessToken = localStorage.getItem('accessToken')
+      const accessToken = TokenService.getAccessToken()
       if (accessToken) {
         config.headers['Authorization'] = `Bearer ${accessToken}`
       }
@@ -92,7 +78,7 @@ apiClient.interceptors.request.use(
   },
 )
 
-//  response interceptor
+// response interceptor
 apiClient.interceptors.response.use(
   (response: AxiosResponse) => response,
   async (error: AxiosError) => {
@@ -100,7 +86,7 @@ apiClient.interceptors.response.use(
       _retry?: boolean
     }
 
-    // (1) 로그인·회원가입 요청은 토큰 리프레시 로직 스킵
+    // 로그인·회원가입 요청은 토큰 리프레시 로직 스킵
     if (
       originalRequest.url?.endsWith('/api/users/login') ||
       originalRequest.url?.endsWith('/api/users/signup')
@@ -108,15 +94,12 @@ apiClient.interceptors.response.use(
       return Promise.reject(error)
     }
 
-    // (2) 기존 401 처리 로직
+    // 401 처리 로직
     if (error.response?.status === 401 && !originalRequest._retry) {
       // 리프레시 요청 자체가 401인 경우 - 리프레시 토큰도 만료됨
       if (originalRequest.url === '/api/users/refresh') {
-        localStorage.removeItem('accessToken')
-        localStorage.removeItem('refreshToken')
+        handleLogout()
         alert('세션이 만료되었습니다. 다시 로그인해주세요.')
-        // 로그인 페이지로 리다이렉트 (선택 사항)
-        // window.location.href = '/login'
         return Promise.reject(error)
       }
 
@@ -128,16 +111,22 @@ apiClient.interceptors.response.use(
 
         return new Promise<AxiosResponse | void>(async (resolve, reject) => {
           try {
-            // 직접 구현한 리프레시 함수 호출
-            const newToken = await refreshTokens()
+            // 토큰 갱신 시도
+            const refreshSuccess = await TokenService.refreshTokens()
             isRefreshing = false
 
-            // 대기 중인 요청 처리
-            processQueue(null, newToken)
+            if (refreshSuccess) {
+              // 대기 중인 요청 처리
+              processQueue(null, TokenService.getAccessToken())
 
-            // 원래 요청 재시도
-            originalRequest.headers['Authorization'] = `Bearer ${newToken}`
-            resolve(apiClient(originalRequest))
+              // 원래 요청 재시도
+              originalRequest.headers['Authorization'] =
+                `Bearer ${TokenService.getAccessToken()}`
+              resolve(apiClient(originalRequest))
+            } else {
+              processQueue(new Error('토큰 갱신 실패'), null)
+              reject(error)
+            }
           } catch (refreshError) {
             isRefreshing = false
             processQueue(
