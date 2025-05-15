@@ -1,5 +1,4 @@
 // src/store/defect-store.ts
-import { coodAPI } from '@/api/coordinate-api'
 import {
   dashboardMetrics,
   defectLocations,
@@ -111,18 +110,20 @@ export type DefectStoreState = {
   setDefectType: (defectType: DefectType) => void
   setSeverity: (severity: SeverityType) => void
 
-  // TODO: Add actions to fetch data from API
-  fetchDefects: () => Promise<void>
-  fetchDefectLocations: () => Promise<void>
-  fetchRecentAlerts: () => Promise<void>
-  fetchDefectStats: () => Promise<void>
-  fetchDefectTrends: () => Promise<void>
-  fetchDetailedDefect: (publicId: string) => Promise<void>
-  fetchGeoJSONData: () => Promise<void>
-  fetchGeoDataAndDetails: () => Promise<void>
+  // 상태 업데이트 함수 (API 호출 없이 상태만 업데이트)
+  updateDefects: (newDefects: Defect[]) => void
+  updateDefectLocations: (newLocations: DefectLocation[]) => void
+  updateRecentAlerts: (newAlerts: Defect[]) => void
+  updateDefectStats: (typeData: { value: number; name: string }[], sevData: { value: number; name: string }[]) => void
+  updateDefectTrends: (newTrends: any) => void
+  updateDetailedDefect: (defect: DetailedDefect | null) => void
+  updateGeoJSONData: (data: GeoJSONData | null) => void
+
+  // 상태 조회 함수
+  getGeoJSONData: () => GeoJSONData | null
 }
 
-export const useDefectStore = create<DefectStoreState>((set) => ({
+export const useDefectStore = create<DefectStoreState>((set, get) => ({
   // Initial filter states
   timeRange: '24h',
   defectType: 'all',
@@ -146,89 +147,15 @@ export const useDefectStore = create<DefectStoreState>((set) => ({
   setDefectType: (defectType) => set({ defectType }),
   setSeverity: (severity) => set({ severity }),
 
-  // TODO: Implement these functions to fetch data from API endpoints
-  fetchDefects: async () => {
-    // TODO: Replace with actual API call
-    // const response = await fetch('/api/defects')
-    // const data = await response.json()
-    // set({ defects: data })
+  // 상태 업데이트 함수들 (API 호출 없이 상태만 업데이트)
+  updateDefects: (newDefects) => set({ defects: newDefects }),
+  updateDefectLocations: (newLocations) => set({ defectLocations: newLocations }),
+  updateRecentAlerts: (newAlerts) => set({ recentAlerts: newAlerts }),
+  updateDefectStats: (typeData, sevData) => set({ defectTypeData: typeData, severityData: sevData }),
+  updateDefectTrends: (newTrends) => set({ trendData: newTrends }),
+  updateDetailedDefect: (defect) => set({ detailedDefect: defect }),
+  updateGeoJSONData: (data) => set({ geoJSONData: data }),
 
-    // Using placeholder data for now
-    set({ defects })
-  },
-
-  fetchDefectLocations: async () => {
-    // TODO: Replace with actual API call
-    // const response = await fetch('/api/defect-locations')
-    // const data = await response.json()
-    // set({ defectLocations: data })
-
-    // Using placeholder data for now
-    set({ defectLocations })
-  },
-
-  fetchRecentAlerts: async () => {
-    // TODO: Replace with actual API call
-    // const response = await fetch('/api/alerts')
-    // const data = await response.json()
-    // set({ recentAlerts: data })
-
-    // Using placeholder data for now
-    set({ recentAlerts })
-  },
-
-  fetchDefectStats: async () => {
-    // TODO: Replace with actual API call
-    // const response = await fetch('/api/stats')
-    // const data = await response.json()
-    // set({ defectTypeData: data.typeData, severityData: data.severityData })
-
-    // Using placeholder data for now
-    set({ defectTypeData, severityData })
-  },
-
-  fetchDefectTrends: async () => {
-    // TODO: Replace with actual API call
-    // const response = await fetch('/api/trends')
-    // const data = await response.json()
-    // set({ trendData: data })
-
-    // Using placeholder data for now
-    set({ trendData })
-  },
-
-  // 상세 손상 정보 조회 액션 구현
-  fetchDetailedDefect: async (publicId: string) => {
-    const response = await coodAPI.getDetailedDefects(publicId)
-    set({ detailedDefect: response.data })
-  },
-
-  // GeoJSON 데이터 조회 액션 구현
-  fetchGeoJSONData: async () => {
-    const response = await coodAPI.getDefects()
-    set({ geoJSONData: response.data })
-  },
-
-  // 복합 액션: GeoJSON 데이터를 가져온 후 첫 번째 항목의 상세 정보 가져오기
-  fetchGeoDataAndDetails: async () => {
-    // 1. 먼저 GeoJSON 데이터 가져오기
-    const response = await coodAPI.getDefects()
-    set({ geoJSONData: response.data })
-
-    // 2. 첫 번째 점의 publicId 추출
-    if (response.data?.features?.length > 0) {
-      const firstPointId = response.data.features[0].properties.publicId
-
-      // 3. 추출한 publicId로 상세 정보 가져오기
-      const detailResponse = await coodAPI.getDetailedDefects(firstPointId)
-      set({ detailedDefect: detailResponse.data })
-
-      console.log('GeoJSON 데이터와 상세 정보 로드 완료:', {
-        geoFeatures: response.data.features.length,
-        detailDamages: detailResponse.data.damages.length,
-      })
-    } else {
-      console.warn('GeoJSON 데이터에 features가 없습니다.')
-    }
-  },
+  // 상태 조회 함수 - geoJSONData 반환
+  getGeoJSONData: () => get().geoJSONData
 }))

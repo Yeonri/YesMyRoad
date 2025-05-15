@@ -35,13 +35,14 @@ export default function DefectList() {
   const [sortDirection, setSortDirection] = useState('desc')
 
   // Get defects from Zustand store
-  const { defects, defectType, severity, detailedDefect, geoJSONData } =
+  const { defects, defectType, severity, detailedDefect, getGeoJSONData } =
     useDefectStore()
 
   // 상세 데이터 로깅을 위한 useEffect 추가
   useEffect(() => {
-    console.log('DefectList - detailedDefect 데이터:', detailedDefect)
-  }, [detailedDefect])
+    const geoJSONData = getGeoJSONData()
+    console.log('DefectList - detailedDefect 데이터:', geoJSONData)
+  }, [])
 
   // // useMemo를 사용하여 상세 손상 정보 캐싱
   // const cachedDetailedDefect = useMemo(() => {
