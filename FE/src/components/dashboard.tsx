@@ -1,4 +1,3 @@
-// src/components/dashboard.tsx
 'use client'
 
 import LocationHeader from '@/components/location-header'
@@ -50,14 +49,6 @@ import DefectMap from './defect-map'
 import DefectStats from './defect-stats'
 import Header from './header'
 import RecentAlerts from './recent-alerts'
-
-// src/components/dashboard.tsx
-
-// src/components/dashboard.tsx
-
-// src/components/dashboard.tsx
-
-// src/components/dashboard.tsx
 
 export default function Dashboard() {
   // Get state and actions from Zustand store

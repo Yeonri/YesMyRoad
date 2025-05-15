@@ -9,11 +9,11 @@ export default function SummaryMonthly() {
   const [monthlyReport, setMonthlyReport] =
     useState<RepairMonthlyReportType | null>(null)
 
-  useEffect(() => {
-    statisticAPI.getRepairMonthlyReport().then((response) => {
-      setMonthlyReport(response.data)
-    })
-  }, [])
+  // useEffect(() => {
+  //   statisticAPI.getRepairMonthlyReport().then((response) => {
+  //     setMonthlyReport(response.data)
+  //   })
+  // }, [])
 
   return (
     <Card className="grow">

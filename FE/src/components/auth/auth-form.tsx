@@ -21,7 +21,7 @@ import {
 import regionIdMap from '@/data/region-id.json'
 import { cn } from '@/lib/utils'
 import { useUserStore } from '@/store/user-store'
-import { LoginFormData, LoginResponse, RegisterFormData } from '@/types/user'
+import { LoginFormData, RegisterFormData } from '@/types/user'
 import * as AccordionPrimitive from '@radix-ui/react-accordion'
 import { isAxiosError } from 'axios'
 import { Check, ChevronsUpDown } from 'lucide-react'
@@ -67,12 +67,14 @@ interface AuthFormProps {
   onTabChange: (isLogin: boolean) => void
 }
 
-const AuthForm: React.FC<AuthFormProps> = ({ isLoginTab, onTabChange }) => {
+const AuthForm: React.FC<AuthFormProps> = ({
+  isLoginTab,
+  onTabChange,
+}) => {
   const router = useRouter()
 
   // Zustand 스토어에서 필요한 상태와 액션 가져오기
-  const { error, clearError, isAuthenticated, setAuthenticated, setUser } =
-    useUserStore()
+  const { error, clearError } = useUserStore()
 
   // 로딩 상태를 위한 지역 state 추가
   const [isLoading, setIsLoading] = useState(false)
@@ -84,14 +86,6 @@ const AuthForm: React.FC<AuthFormProps> = ({ isLoginTab, onTabChange }) => {
   const [generalError, setGeneralError] = useState<string>('')
   // 지역 선택기 상태
   const [openRegion, setOpenRegion] = useState(false)
-
-  // 로그인 상태가 변경될 때 리디렉션
-  useEffect(() => {
-    if (isAuthenticated) {
-      // 이미 인증된 상태면 대시보드로 이동
-      router.push('/')
-    }
-  }, [isAuthenticated, router])
 
   // 초기 탭 상태에 따라 아코디언 상태 설정 (항상 배열로 초기화)
   const [accordionValues, setAccordionValues] = useState<string[]>(
@@ -224,28 +218,16 @@ const AuthForm: React.FC<AuthFormProps> = ({ isLoginTab, onTabChange }) => {
           password: formData.password,
         }
 
+        // 로그인 요청 (토큰 저장 및 사용자 정보 설정은 API 함수 내부에서 처리)
         const response = await userAPI.login(loginData)
 
         if (response.status === 200) {
           // 성공 상태 설정
           setIsSuccess(true)
 
-          // 응답 데이터를 LoginResponse 타입으로 처리
-          const loginResponse: LoginResponse = response.data
-
-          // 1. localStorage에 토큰 저장 (타입에 맞게 필드명 사용)
-          localStorage.setItem('accessToken', loginResponse.accessToken)
-          localStorage.setItem('refreshToken', loginResponse.refreshToken)
-
-          // 2. Zustand 스토어 업데이트 (User 타입 사용)
-          setUser(loginResponse.user) // 사용자 정보 업데이트 (User 객체 전체)
-          setAuthenticated(true) // 인증 상태 업데이트
-
-          // useEffect에서 isAuthenticated가 변경되면 리디렉션이 일어나므로
-          // 여기서 추가 지연 시간을 두어 성공 UI를 표시
-          // setTimeout(() => {
-          //   // 이 시점에서는 이미 리디렉션이 시작되었을 가능성이 높음
-          // }, 1000)
+          // 성공 메시지 및 리디렉션
+          alert('로그인 성공! 대시보드로 이동합니다.')
+          router.push('/')
         }
       } else {
         // 회원가입 로직 - 이미 RegisterFormData 타입 사용 중

@@ -17,7 +17,6 @@ import {
 } from '@/components/ui/dropdown-menu'
 import { Input } from '@/components/ui/input'
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet'
-import { useUserStore } from '@/store/user-store'
 import { Bell, Menu, Search, Settings, User } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 
@@ -27,7 +26,7 @@ import { MobileNav } from './mobile-nav'
 
 export default function Header() {
   const router = useRouter() // 라우터 훅 사용
-  const { clearSession } = useUserStore()
+  // const { clearSession } = useUserStore()
 
   const handleLogout = async () => {
     const response = await userAPI.logout()
@@ -38,7 +37,7 @@ export default function Header() {
       localStorage.removeItem('refreshToken')
       localStorage.removeItem('userId')
 
-      clearSession()
+      // clearSession()
       alert('로그아웃하였습니다')
 
       // 로그인 페이지로 리디렉션
@@ -62,47 +61,6 @@ export default function Header() {
       <div className="flex items-center gap-2">
         <div className="hidden font-bold md:flex">YES, MY ROAD</div>
       </div>
-
-      {/* API 연동 테스트용 버튼 */}
-      <Button
-        onClick={async () => {
-          // alert(`모든 api 연동 완료`)
-          // const response = await coodAPI.getDefects() // 통과
-
-          // const response = await statisticAPI.getDamageReportByType() // 통과
-          // const response = await statisticAPI.getDamageDailyReport() // 통과
-          // const response = await statisticAPI.getDamageWeeklyReport() // 통과
-          // const response = await statisticAPI.getDamageMonthlyReport() // 통과
-          // const response = await statisticAPI.getSummarizedDamageMonthlyReport() // 통과
-          // const response = await statisticAPI.getLocationallyDamageMap("대전광역시") // 통과
-          // const response = await statisticAPI.getTop3Damagedlocations() // 통과
-
-          // const response = await maintenanceAPI.getMaintenanceOverview() // 통과
-          // const response = await maintenanceAPI.getMaintenanceCompletionStats() // 통과
-          // const response = await maintenanceAPI.getMonthlyMaintenanceStatus() // 통과
-          // const response = await maintenanceAPI.getLocallyMaintenanceStatus() // 통과
-
-          // const response = await defectAPI.updateRoadDamageStatus(1, 'REPORTED')
-          // const response = await defectAPI.updateRoadDamageStatus(1, 'RECEIVED')
-          // const response = await defectAPI.updateRoadDamageStatus(1, 'IN_PROGRESS')
-          // const response = await defectAPI.updateRoadDamageStatus(1, 'COMPLETED')
-
-          const response = await userAPI.refresh()
-
-          console.log(response)
-
-          if (response.status === 200) {
-            alert(`토큰 재설정 성공: ${response.status}`)
-            console.log(response.data)
-          } else {
-            alert(`토큰 재설정 실패: ${response.status}`)
-            console.log(response.error)
-          }
-        }}
-      >
-        API 테스트
-      </Button>
-      {/* API 연동 테스트용 버튼 */}
 
       <div className="flex flex-1 items-center gap-4 md:gap-2 lg:gap-4">
         <form className="ml-auto flex-1 md:flex-initial">

@@ -1,7 +1,5 @@
-// src/components/defect-list.tsx
 'use client'
 
-// import { coodAPI } from '@/api/coordinate-api'
 import { defectAPI } from '@/api/defect-api'
 import { Button } from '@/components/ui/button'
 import {
@@ -29,14 +27,8 @@ import {
   MapPin,
   MoreHorizontal,
 } from 'lucide-react'
-import { useEffect, useMemo } from 'react'
+import { useEffect } from 'react'
 import { useState } from 'react'
-
-// src/components/defect-list.tsx
-
-// src/components/defect-list.tsx
-
-// src/components/defect-list.tsx
 
 export default function DefectList() {
   const [sortColumn, setSortColumn] = useState('detectedAt')
@@ -51,58 +43,58 @@ export default function DefectList() {
     console.log('DefectList - detailedDefect 데이터:', detailedDefect)
   }, [detailedDefect])
 
-  // useMemo를 사용하여 상세 손상 정보 캐싱
-  const cachedDetailedDefect = useMemo(() => {
-    console.log('캐싱 - DetailedDefect 계산됨')
-    return detailedDefect
-  }, [detailedDefect])
+  // // useMemo를 사용하여 상세 손상 정보 캐싱
+  // const cachedDetailedDefect = useMemo(() => {
+  //   console.log('캐싱 - DetailedDefect 계산됨')
+  //   return detailedDefect
+  // }, [detailedDefect])
 
-  // useMemo를 사용하여 GeoJSON 데이터 캐싱
-  const cachedGeoJSONData = useMemo(() => {
-    console.log('캐싱 - GeoJSON 계산됨')
-    return geoJSONData
-  }, [geoJSONData])
+  // // useMemo를 사용하여 GeoJSON 데이터 캐싱
+  // const cachedGeoJSONData = useMemo(() => {
+  //   console.log('캐싱 - GeoJSON 계산됨')
+  //   return geoJSONData
+  // }, [geoJSONData])
 
   // 캐싱된 GeoJSON 데이터를 사용하여 UI에 표시할 정보 가공
-  const pointsInfo = useMemo(() => {
-    if (!cachedGeoJSONData) {
-      console.log('pointsInfo - GeoJSON 데이터 없음')
-      return null
-    }
+  // const pointsInfo = useMemo(() => {
+  //   if (!cachedGeoJSONData) {
+  //     console.log('pointsInfo - GeoJSON 데이터 없음')
+  //     return null
+  //   }
 
-    const result = {
-      totalPoints: cachedGeoJSONData.features.length,
-      points: cachedGeoJSONData.features.map((feature) => ({
-        id: feature.properties.publicId,
-        coordinates: feature.geometry.coordinates,
-        address: feature.properties.address.street,
-        accuracy: feature.properties.accuracyMeters,
-      })),
-    }
+  //   const result = {
+  //     totalPoints: cachedGeoJSONData.features.length,
+  //     points: cachedGeoJSONData.features.map((feature) => ({
+  //       id: feature.properties.publicId,
+  //       coordinates: feature.geometry.coordinates,
+  //       address: feature.properties.address.street,
+  //       accuracy: feature.properties.accuracyMeters,
+  //     })),
+  //   }
 
-    console.log('pointsInfo - 계산 완료:', result)
-    return result
-  }, [cachedGeoJSONData])
+  //   console.log('pointsInfo - 계산 완료:', result)
+  //   return result
+  // }, [cachedGeoJSONData])
 
   // 캐싱된 상세 손상 정보를 사용하여 UI에 표시할 정보 가공
-  const damageInfo = useMemo(() => {
-    if (!cachedDetailedDefect) {
-      console.log('damageInfo - 상세 손상 정보 없음')
-      return null
-    }
+  // const damageInfo = useMemo(() => {
+  //   if (!cachedDetailedDefect) {
+  //     console.log('damageInfo - 상세 손상 정보 없음')
+  //     return null
+  //   }
 
-    const result = {
-      imageUrl: cachedDetailedDefect.imageUrl,
-      risk: cachedDetailedDefect.risk,
-      damageCount: cachedDetailedDefect.damages.length,
-      categories: [
-        ...new Set(cachedDetailedDefect.damages.map((d) => d.category)),
-      ],
-    }
+  //   const result = {
+  //     imageUrl: cachedDetailedDefect.imageUrl,
+  //     risk: cachedDetailedDefect.risk,
+  //     damageCount: cachedDetailedDefect.damages.length,
+  //     categories: [
+  //       ...new Set(cachedDetailedDefect.damages.map((d) => d.category)),
+  //     ],
+  //   }
 
-    console.log('damageInfo - 계산 완료:', result)
-    return result
-  }, [cachedDetailedDefect])
+  //   console.log('damageInfo - 계산 완료:', result)
+  //   return result
+  // }, [cachedDetailedDefect])
 
   // Filter defects based on selected filters
   const filteredDefects = defects.filter((defect) => {
