@@ -2,6 +2,7 @@ package com.b201.api.service;
 
 import java.time.DayOfWeek;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.YearMonth;
 import java.util.List;
 
@@ -9,7 +10,6 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
 import com.b201.api.dto.dashboard.CategoryCountDto;
-import com.b201.api.dto.dashboard.DailyCountDto;
 import com.b201.api.dto.dashboard.DailyStatusDto;
 import com.b201.api.dto.dashboard.MonthlyDamageSummaryDto;
 import com.b201.api.dto.dashboard.MonthlyStatusDto;
@@ -38,21 +38,29 @@ public class DashboardService {
 
 	// 오늘자 파손 건수 + 전일 대비 증감율
 	public DailyStatusDto getDailyStatusWithChangeRate(String regionName) {
-		log.info("[getDailyStatusWithChangeRate] 호출됨");
+		log.info("[getDailyStatusWithChangeRate] 호출됨, regionName={}", regionName);
+
 		LocalDate today = LocalDate.now();
 		LocalDate yesterday = today.minusDays(1);
 
-		List<DailyCountDto> raw = damageRepo.countDaily(regionName);
+		// 1) 오늘 0시부터 지금까지
+		LocalDateTime todayStart = today.atStartOfDay();
+		LocalDateTime now = LocalDateTime.now();
+		long todayCount = damageRepo.countBetween(
+			regionName,
+			todayStart,
+			now
+		);
 
-		long todayCount = raw.stream()
-			.filter(d -> d.getDay().equals(today))
-			.mapToLong(DailyCountDto::getCount)
-			.findFirst().orElse(0L);
-		long yesterdayCount = raw.stream()
-			.filter(d -> d.getDay().equals(yesterday))
-			.mapToLong(DailyCountDto::getCount)
-			.findFirst().orElse(0L);
+		// 2) 어제 0시부터 오늘 0시까지
+		LocalDateTime yesterdayStart = yesterday.atStartOfDay();
+		long yesterdayCount = damageRepo.countBetween(
+			regionName,
+			yesterdayStart,
+			todayStart
+		);
 
+		// 3) 증감율 계산
 		double rate = 0.0;
 		if (yesterdayCount > 0) {
 			rate = (todayCount - yesterdayCount) * 100.0 / yesterdayCount;
@@ -65,21 +73,14 @@ public class DashboardService {
 
 	// 이번 주(월요일~) 파손 건수 합계 + 전주 대비 증감율
 	public WeeklyStatusDto getWeeklyStatusWithChangeRate(String regionName) {
-		log.info("[getWeeklyStatusWithChangeRate] 호출됨");
+		log.info("[getWeeklyStatusWithChangeRate] 호출됨, regionName={}", regionName);
 		LocalDate today = LocalDate.now();
 		LocalDate thisMon = today.with(DayOfWeek.MONDAY);
 		LocalDate lastMon = thisMon.minusWeeks(1);
 
-		List<DailyCountDto> raw = damageRepo.countDaily(regionName);
+		long thisWeekSum = damageRepo.countBetween(regionName, thisMon.atStartOfDay(), LocalDateTime.now());
 
-		long thisWeekSum = raw.stream()
-			.filter(d -> !d.getDay().isBefore(thisMon) && !d.getDay().isAfter(today))
-			.mapToLong(DailyCountDto::getCount)
-			.sum();
-		long lastWeekSum = raw.stream()
-			.filter(d -> !d.getDay().isBefore(lastMon) && d.getDay().isBefore(thisMon))
-			.mapToLong(DailyCountDto::getCount)
-			.sum();
+		long lastWeekSum = damageRepo.countBetween(regionName, lastMon.atStartOfDay(), thisMon.atStartOfDay());
 
 		double rate = 0.0;
 		if (lastWeekSum > 0) {
@@ -93,37 +94,47 @@ public class DashboardService {
 
 	// 이번 달 파손 건수 합계 + 전월 대비 증감율
 	public MonthlyStatusDto getMonthlyStatusWithChangeRate(String regionName) {
-		log.info("[getMonthlyStatusWithChangeRate] 호출됨");
+		log.info("[getMonthlyStatusWithChangeRate] 호출됨, regionName={}", regionName);
+
 		LocalDate today = LocalDate.now();
-		YearMonth thisYm = YearMonth.from(today);
-		YearMonth lastYm = thisYm.minusMonths(1);
+		LocalDate firstDayThisMon = today.withDayOfMonth(1);
+		LocalDate firstDayLastMon = firstDayThisMon.minusMonths(1);
 
-		List<DailyCountDto> raw = damageRepo.countDaily(regionName);
+		// 이번 달: 1일 0시부터 지금까지
+		LocalDateTime thisStart = firstDayThisMon.atStartOfDay();
+		LocalDateTime now = LocalDateTime.now();
+		long thisMonthCount = damageRepo.countBetween(
+			regionName,
+			thisStart,
+			now
+		);
 
-		long thisMonthSum = raw.stream()
-			.filter(d -> YearMonth.from(d.getDay()).equals(thisYm))
-			.mapToLong(DailyCountDto::getCount)
-			.sum();
-		long lastMonthSum = raw.stream()
-			.filter(d -> YearMonth.from(d.getDay()).equals(lastYm))
-			.mapToLong(DailyCountDto::getCount)
-			.sum();
+		// 지난 달: 지난달 1일 0시부터 이번 달 1일 0시까지
+		LocalDateTime lastStart = firstDayLastMon.atStartOfDay();
+		LocalDateTime lastEnd = firstDayThisMon.atStartOfDay();
+		long lastMonthCount = damageRepo.countBetween(
+			regionName,
+			lastStart,
+			lastEnd
+		);
 
+		// 증감율 계산
 		double rate = 0.0;
-		if (lastMonthSum > 0) {
-			rate = (thisMonthSum - lastMonthSum) * 100.0 / lastMonthSum;
+		if (lastMonthCount > 0) {
+			rate = (thisMonthCount - lastMonthCount) * 100.0 / lastMonthCount;
 		}
 
-		log.debug("[getMonthlyStatusWithChangeRate] thisMonthSum={}, lastMonthSum={}, rate={}",
-			thisMonthSum, lastMonthSum, rate);
-		return new MonthlyStatusDto(thisYm, thisMonthSum, rate);
+		log.debug("[getMonthlyStatusWithChangeRate] thisMonthCount={}, lastMonthCount={}, rate={}",
+			thisMonthCount, lastMonthCount, rate);
+
+		return new MonthlyStatusDto(YearMonth.from(firstDayThisMon), thisMonthCount, rate);
 	}
 
 	/**
 	 * 월별 도로파손 누적 탐지 현황
 	 */
 	public List<MonthlyDamageSummaryDto> getMonthlyDamageSummary(String regionName) {
-		log.info("[getMonthlyDamageSummary] 호출됨");
+		log.info("[getMonthlyDamageSummary] 호출됨, regionName={}", regionName);
 		List<MonthlyDamageSummaryDto> list = damageRepo.findMonthlyDamageSummary(regionName);
 		log.debug("[getMonthlyDamageSummary] summary 개수 = {}", list.size());
 		return list;
@@ -133,7 +144,7 @@ public class DashboardService {
 	 * 특정 광역시의 구 단위 파손 분포
 	 */
 	public List<RegionCountDto> getDistrictDistribution(String cityName) {
-		log.info("[getDistrictDistribution] 호출됨, cityName={}", cityName);
+		log.info("[getDistrictDistribution] 호출됨, regionName={}", cityName);
 		List<RegionCountDto> list = damageRepo.countByCity(cityName);
 		log.debug("[getDistrictDistribution] 구 단위 분포 개수 = {}", list.size());
 		return list;
@@ -143,7 +154,7 @@ public class DashboardService {
 	 * 상위 3개 지역의 도로파손 통계
 	 */
 	public List<TopRegionDto> getTop3Regions(String regionName) {
-		log.info("[getTop3Regions] 호출됨");
+		log.info("[getTop3Regions] 호출됨, regionName={}", regionName);
 		List<TopRegionDto> list = damageRepo.findTopRegions(regionName, PageRequest.of(0, 3));
 		log.debug("[getTop3Regions] top regions 개수 = {}", list.size());
 		return list;
