@@ -18,7 +18,7 @@ public class JwtUtil {
 
 	private final JwtProperties jwtProperties;
 	private static final long EXPIRATION_TIME = 30 * 60 * 1000; // 30분 (ms 단위)
-	private static final long EXPIRATION_REFRESH_TIME = 2 * 60 * 60 * 1000; // 2시간
+	private static final long EXPIRATION_REFRESH_TIME = 14 * 24 * 60 * 60 * 1000; // 2주
 
 	// secretKey 생성 메서드 token 생성,검증에 모두 사용됨.
 	private Key getSigningKey() {
