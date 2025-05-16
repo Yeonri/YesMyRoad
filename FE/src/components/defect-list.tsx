@@ -117,7 +117,7 @@ export default function DefectList() {
       queryKey: ['defectDetail', defect.publicId],
       queryFn: async () => {
         const response = await coodAPI.getDetailedDefects(defect.publicId)
-        console.log('good!: ', response.data)
+        console.log('good!: ', response.data.damages)
 
         return { publicId: defect.publicId, data: response.data }
       },
@@ -132,6 +132,8 @@ export default function DefectList() {
     let hasUpdates = false
 
     detailsQueries.forEach((query) => {
+      console.log('Q: ', query.data)
+
       if (query.isSuccess && query.data) {
         const { publicId, data } = query.data
         if (!detailsMap[publicId]) {
@@ -297,7 +299,7 @@ export default function DefectList() {
                   ))}
               </Button>
             </TableHead>
-            <TableHead>발생 위치</TableHead>
+            <TableHead>발생 위치 및 시각</TableHead>
             <TableHead>
               <Button
                 variant="ghost"

@@ -75,6 +75,7 @@ export default function Dashboard() {
   } = useDefectStore()
 
   const [selectedTab, selectTab] = useState('map')
+  const [selectedFilter, selectFilter] = useState('timeRange')
 
   // TanStack Query 사용하여 데이터 로드
   const {
@@ -96,17 +97,15 @@ export default function Dashboard() {
   })
 
   // 통계 데이터 로드 (timeRange 변경에 따라 자동으로 재요청)
-  const {
-    // data: reportData
-  } = useQuery({
+  const { data: reportData } = useQuery({
     queryKey: ['reports', timeRange],
     queryFn: async () => {
       if (timeRange === 'D') {
-        return statisticAPI.getDamageDailyReport()
+        return await statisticAPI.getDamageDailyReport()
       } else if (timeRange === 'W') {
-        return statisticAPI.getDamageWeeklyReport()
+        return await statisticAPI.getDamageWeeklyReport()
       } else {
-        return statisticAPI.getDamageMonthlyReport()
+        return await statisticAPI.getDamageMonthlyReport()
       }
     },
     // timeRange가 변경될 때마다 자동으로 재요청
@@ -199,6 +198,21 @@ export default function Dashboard() {
                 <SelectItem value="low">낮음</SelectItem>
               </SelectContent>
             </Select>
+            <Select
+              value={severity}
+              onValueChange={(value) => setSeverity(value as SeverityType)}
+            >
+              <SelectTrigger className="h-8 w-[130px]">
+                <SelectValue placeholder="Severity" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">전체</SelectItem>
+                <SelectItem value="critical">심각</SelectItem>
+                <SelectItem value="high">높음</SelectItem>
+                <SelectItem value="medium">중간</SelectItem>
+                <SelectItem value="low">낮음</SelectItem>
+              </SelectContent>
+            </Select>
             <Button variant="outline" size="sm" className="h-8 gap-1">
               <Filter className="h-3.5 w-3.5" />
               <span>필터 더보기</span>
@@ -214,10 +228,15 @@ export default function Dashboard() {
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">
-                {dashboardMetrics.totalDefects}
+                {reportData?.data.count || 0}
               </div>
               <p className="text-muted-foreground text-xs">
-                지난 주 대비 {dashboardMetrics.totalDefectsChange}
+                {{ D: '어제', W: '지난 주', M: '지난 달' }[timeRange] || ''}{' '}
+                대비{' '}
+                {reportData?.data.status === 204
+                  ? '-'
+                  : reportData?.data.changeRate}{' '}
+                % 증가
               </p>
             </CardContent>
           </Card>

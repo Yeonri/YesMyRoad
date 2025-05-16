@@ -43,14 +43,14 @@ export const statisticAPI = {
     ),
 
   // 지역별 도로파손 분포 지도
-  getLocationallyDamageMap: (city: string) =>
-    apiCaller(
-      'get',
-      '/api/dashboard/districts',
-      '지역별 도로파손 분포 지도 조회 실패',
-      undefined,
-      { params: { city } },
-    ),
+  // getLocationallyDamageMap: (city: string) =>
+  //   apiCaller(
+  //     'get',
+  //     '/api/dashboard/districts',
+  //     '지역별 도로파손 분포 지도 조회 실패',
+  //     undefined,
+  //     { params: { city } },
+  //   ),
 
   // 도로파손 분포 Top3 지역
   getTop3Damagedlocations: () =>
