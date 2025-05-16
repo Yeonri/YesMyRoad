@@ -122,8 +122,9 @@ public interface CaptureDamageRepository extends JpaRepository<CaptureDamage, In
 											sum(case when cd.status = 'COMPLETED' then 1 else 0 end)
 			)
 			from CaptureDamage cd
+					where cd.capturePoint.region.parentRegion.regionName = :regionName
 		""")
-	MaintenanceStatusDto countByStauts();
+	MaintenanceStatusDto countByStauts(@Param("regionName") String regionName);
 
 	@Query("""
 			select new com.b201.api.dto.maintenance.CompletionStatsDto(
@@ -133,8 +134,10 @@ public interface CaptureDamageRepository extends JpaRepository<CaptureDamage, In
 			)
 					from CaptureDamage cd
 							where cd.status = 'COMPLETED'
+									and cd.capturePoint.region.parentRegion.regionName = :regionName
 		""")
-	CompletionStatsDto getCompletionStatsByPeriod(@Param("dailyAgo") LocalDateTime dailyAgo,
+	CompletionStatsDto getCompletionStatsByPeriod(@Param("regionName") String regionName,
+		@Param("dailyAgo") LocalDateTime dailyAgo,
 		@Param("weeklyAgo") LocalDateTime weeklyAgo,
 		@Param("monthlyAgo") LocalDateTime monthlyAgo);
 
@@ -148,12 +151,13 @@ public interface CaptureDamageRepository extends JpaRepository<CaptureDamage, In
 														sum(case when cd.status = 'COMPLETED' then 1 else 0 end)
 		)
 				from CaptureDamage cd
+						where cd.capturePoint.region.parentRegion.regionName = :regionName
 						group by year(cd.createdAt),
 								month(cd.createdAt)
 										order by year(cd.createdAt),
 												month(cd.createdAt)
 		""")
-	List<MonthlyMaintenanceStatusDto> getMonthlyMaintenanceStatsByPeriod();
+	List<MonthlyMaintenanceStatusDto> getMonthlyMaintenanceStatsByPeriod(@Param("regionName") String regionName);
 
 	@Query("""
 				select new com.b201.api.dto.maintenance.RegionMaintenanceStatusDto(
