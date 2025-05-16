@@ -4,6 +4,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.b201.api.dto.maintenance.CompletionStatsDto;
 import com.b201.api.dto.maintenance.MaintenanceStatusDto;
@@ -21,6 +22,7 @@ public class MaintenanceService {
 
 	private final CaptureDamageRepository captureDamageRepository;
 
+	@Transactional(readOnly = true)
 	public MaintenanceStatusDto getMaintenanceStatus(String regionName) {
 		log.info("[getMaintenanceStatus] 호출됨");
 		MaintenanceStatusDto status = captureDamageRepository.countByStauts(regionName);
@@ -28,6 +30,7 @@ public class MaintenanceService {
 		return status;
 	}
 
+	@Transactional(readOnly = true)
 	public CompletionStatsDto getCompletionStats(String regionName) {
 		log.info("[getCompletionStats] 호출됨");
 		LocalDateTime now = LocalDateTime.now();
@@ -41,6 +44,7 @@ public class MaintenanceService {
 		return stats;
 	}
 
+	@Transactional(readOnly = true)
 	public List<MonthlyMaintenanceStatusDto> getMonthlyMaintenanceStatus(String regionName) {
 		log.info("[getMonthlyMaintenanceStatus] 호출됨");
 		List<MonthlyMaintenanceStatusDto> list = captureDamageRepository.getMonthlyMaintenanceStatsByPeriod(regionName);
@@ -48,6 +52,7 @@ public class MaintenanceService {
 		return list;
 	}
 
+	@Transactional(readOnly = true)
 	public List<RegionMaintenanceStatusDto> getRegionMaintenanceStatus(String regionName) {
 		log.info("[getRegionMaintenanceStatus] 호출됨");
 		List<RegionMaintenanceStatusDto> list = captureDamageRepository.getRegionMaintenanceStatsByPeriod(regionName);
