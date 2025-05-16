@@ -29,15 +29,8 @@ import { useEffect, useMemo, useState } from 'react'
 
 const LocationHeader: React.FC = () => {
   const addressData = useMemo(() => address as unknown as AddressData, [])
-  const {
-    logState,
-    setId,
-    setLongitude,
-    setLatitude,
-    setLevel1,
-    setLevel2,
-    setLevel3,
-  } = useAddressStore()
+  const { setId, setLongitude, setLatitude, setLevel1, setLevel2, setLevel3 } =
+    useAddressStore()
 
   // 팝오버 상태 관리
   const [provinceOpen, setProvinceOpen] = useState(false)
@@ -83,18 +76,31 @@ const LocationHeader: React.FC = () => {
         const districts = Object.keys(level1Data.district)
         setDistrictLevel2Array(districts)
 
-        // 첫번째 district를 기본값으로 설정
-        if (districts.length > 0) {
-          setDistrictLevel2(districts[0])
-        } else {
-          setDistrictLevel2(null)
+        // 이미 설정된 districtLevel2가 없거나, 새로운 districts 목록에 현재 districtLevel2가 없는 경우에만 변경
+        if (!districtLevel2 || !districts.includes(districtLevel2)) {
+          // 첫 번째 district를 기본값으로 설정
+          if (districts.length > 0) {
+            setDistrictLevel2(districts[0])
+          } else {
+            setDistrictLevel2(null)
+          }
         }
       } else {
         setDistrictLevel2Array([])
         setDistrictLevel2(null)
       }
     }
-  }, [districtLevel1, addressData, setLevel1, setId, setLongitude, setLatitude])
+  }, [
+    districtLevel1,
+    addressData,
+    setLevel1,
+    setLevel2,
+    setLevel3,
+    setId,
+    setLongitude,
+    setLatitude,
+    districtLevel2,
+  ])
 
   // 시/군/구(level2) 변경시 하위 구(level3) 목록 업데이트 및 초기 하위 구(level3) 선택
   useEffect(() => {
@@ -177,14 +183,6 @@ const LocationHeader: React.FC = () => {
     setLatitude,
     setLevel3,
   ])
-
-  //  콤보박스 선택 변경 시, 행정동코드/위도/경도 변경
-  useEffect(() => {
-    console.log('districtLevel1', districtLevel1)
-    console.log('districtLevel2', districtLevel2)
-    console.log('districtLevel3', districtLevel3)
-    logState()
-  }, [districtLevel1, districtLevel2, districtLevel3])
 
   return (
     <>

@@ -1,11 +1,12 @@
 'use client'
 
+import useAddressStore from '@/store/address-store'
 import { useDefectStore } from '@/store/defect-store'
 import MapboxLanguage from '@mapbox/mapbox-gl-language'
 import { Loader } from 'lucide-react'
 import mapboxgl from 'mapbox-gl'
 import 'mapbox-gl/dist/mapbox-gl.css'
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 
 mapboxgl.accessToken = process.env.NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN
 
@@ -16,11 +17,20 @@ export default function DefectMap() {
 
   const { defectLocations, defectType, severity } = useDefectStore()
 
-  const filteredDefectLocations = defectLocations.filter((defect) => {
-    const matchesType = defectType === 'all' || defect.type === defectType
-    const matchesSeverity = severity === 'all' || defect.severity === severity
-    return matchesType && matchesSeverity
-  })
+  // 주소 스토어에서 위도/경도 가져오기, 없으면 서울 기본값 설정
+  const longitude = useAddressStore((state) => state.longitude) ?? 127.029
+  const latitude = useAddressStore((state) => state.latitude) ?? 37.4787
+  // 맵 경계 좌표 설정 함수 가져오기
+  const setMapBounds = useAddressStore((state) => state.setMapBounds)
+  const logMapBounds = useAddressStore((state) => state.logMapBounds)
+
+  const filteredDefectLocations = useMemo(() => {
+    return defectLocations.filter((defect) => {
+      const matchesType = defectType === 'all' || defect.type === defectType
+      const matchesSeverity = severity === 'all' || defect.severity === severity
+      return matchesType && matchesSeverity
+    })
+  }, [defectLocations, defectType, severity])
 
   useEffect(() => {
     if (!mapContainer.current) return
@@ -29,7 +39,7 @@ export default function DefectMap() {
     map.current = new mapboxgl.Map({
       container: mapContainer.current,
       style: 'mapbox://styles/mapbox/streets-v12',
-      center: [127.2984, 36.35518],
+      center: [longitude, latitude],
       zoom: 13,
     })
 
@@ -39,6 +49,32 @@ export default function DefectMap() {
     // 언어 설정
     const language = new MapboxLanguage()
     map.current.addControl(language)
+
+    // 지도 경계 좌표 가져오는 함수
+    const getBoundaryCoordinates = () => {
+      if (!map.current) return
+
+      const bounds = map.current.getBounds()
+
+      // 경계의 좌표 정보
+      const northEast = bounds!.getNorthEast() // 북동쪽 좌표
+      const southWest = bounds!.getSouthWest() // 남서쪽 좌표
+
+      // 좌표 정보 저장
+      setMapBounds({
+        northEast: { lat: northEast.lat, lng: northEast.lng },
+        southWest: { lat: southWest.lat, lng: southWest.lng },
+      })
+
+      // 개발 모드에서 확인용 로깅
+      // logMapBounds()
+    }
+
+    // 줌이나 이동 이벤트 발생 시 좌표 정보 가져오기
+    map.current.on('move', getBoundaryCoordinates)
+
+    // 지도가 로드 완료되거나 스타일 변경 후 안정화될 때 좌표 정보 가져오기
+    map.current.on('idle', getBoundaryCoordinates)
 
     // 지도 로드 시 마커 추가
     map.current.on('load', () => {
@@ -98,7 +134,7 @@ export default function DefectMap() {
         map.current.remove()
       }
     }
-  }, [filteredDefectLocations])
+  }, [filteredDefectLocations, longitude, latitude, setMapBounds, logMapBounds])
 
   return (
     <div className="relative h-full min-h-[400px] w-full">

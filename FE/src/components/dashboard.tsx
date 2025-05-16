@@ -294,9 +294,7 @@ export default function Dashboard() {
                   통계
                 </TabsTrigger>
               </TabsList>
-              {(selectedTab === 'map' || selectedTab === 'hitmap') && (
-                <LocationHeader />
-              )}
+              <LocationHeader />
             </div>
             <Button
               onClick={() => refetchGeoJson()}
@@ -326,9 +324,8 @@ export default function Dashboard() {
               <Card className="md:col-span-2">
                 <CardHeader>
                   <CardTitle>지도</CardTitle>
-                  <CardDescription>도로 결함의 전체 분포</CardDescription>
                 </CardHeader>
-                <CardContent className="p-0">
+                <CardContent className="p-4 pt-0">
                   <div className="aspect-video overflow-hidden rounded-md">
                     <DefectMap />
                   </div>
@@ -338,16 +335,13 @@ export default function Dashboard() {
               <DefectCard>
                 <DefectCardHeader>
                   <DefectCardTitle>최근 발생한 결함 이력</DefectCardTitle>
-                  <DefectCardDescription>
-                    심각한 결함 및 높은 우선순위 결함
-                  </DefectCardDescription>
                 </DefectCardHeader>
                 <DefectCardContent>
                   <RecentAlerts />
                 </DefectCardContent>
                 <DefectCardFooter>
                   <Button variant="outline" size="sm" className="w-full">
-                    View all alerts
+                    전체 이력 보기
                     <ArrowRight className="ml-2 h-4 w-4" />
                   </Button>
                 </DefectCardFooter>
@@ -360,7 +354,7 @@ export default function Dashboard() {
                 <CardTitle>결함 밀도 히트맵</CardTitle>
                 <CardDescription>결함 집중 지역을 시각화</CardDescription>
               </CardHeader>
-              <CardContent className="p-0">
+              <CardContent className="p-4 pt-0">
                 <div className="aspect-video overflow-hidden rounded-md">
                   <DefectHeatmap />
                 </div>
