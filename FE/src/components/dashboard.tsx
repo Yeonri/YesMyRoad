@@ -1,6 +1,7 @@
 'use client'
 
 import { coodAPI } from '@/api/coordinate-api'
+import { statisticAPI } from '@/api/statistic-api'
 import LocationHeader from '@/components/location-header'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -50,7 +51,6 @@ import DefectMap from './defect-map'
 import DefectStats from './defect-stats'
 import Header from './header'
 import RecentAlerts from './recent-alerts'
-import { statisticAPI } from '@/api/statistic-api'
 
 export default function Dashboard() {
   // Get state and actions from Zustand store
@@ -85,7 +85,7 @@ export default function Dashboard() {
       console.log(
         `GeoJSON 데이터 로드 성공: ${response.data.features!.length || 0} 개의 데이터`,
       )
-      console.log(response.data.features!)
+      console.log("데이터 목록: ", response.data.features!)
 
       updateGeoJSONData(response.data)
       // const dd = getGeoJSONData()
@@ -102,8 +102,7 @@ export default function Dashboard() {
     } else if (timeRange === 'W') {
       const response = await statisticAPI.getDamageWeeklyReport()
       console.log(response.data)
-    }
-    else {
+    } else {
       const response = await statisticAPI.getDamageMonthlyReport()
       console.log(response.data)
     }
@@ -303,8 +302,21 @@ export default function Dashboard() {
                 <LocationHeader />
               )}
             </div>
-            <Button onClick={() => loadData()}>
-              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <Button
+              onClick={() => loadData()}
+              className="active:bg-primary/70 active:translate-y-0.5 active:scale-95"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
                 <path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8" />
                 <path d="M21 3v5h-5" />
                 <path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16" />

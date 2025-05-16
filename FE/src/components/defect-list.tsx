@@ -11,6 +11,15 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
+import {
+  Pagination,
+  PaginationContent,
+  PaginationEllipsis,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
+} from "@/components/ui/pagination"
 import { StatusBadge } from '@/components/ui/status-badge'
 import {
   Table,
@@ -32,29 +41,30 @@ import { useEffect } from 'react'
 import { useState } from 'react'
 
 export default function DefectList() {
-  const [sortColumn, setSortColumn] = useState('detectedAt')
-  const [sortDirection, setSortDirection] = useState('desc')
+  const [sortColumn, setSortColumn] = useState('id') // 기본 정렬을 ID로 변경
+  const [sortDirection, setSortDirection] = useState('asc')
+  const [currentPage, setCurrentPage] = useState(1)
+  const itemsPerPage = 5 // 한 페이지에 5개의 결함만 표시
 
   // Get defects from Zustand store
-  const { defects, defectType, severity, getGeoJSONData } =
-    useDefectStore()
+  const { defectType, severity, geoJSONData } = useDefectStore()
 
-  // 상세 데이터 로깅을 위한 useEffect 추가
-  useEffect(() => {
-    const geoJSONData = getGeoJSONData()
-    // console.log('DefectList - detailedDefect 데이터:', geoJSONData)
-    geoJSONData?.features.map((data) => {
-      console.log(data.properties.publicId)
-      // 퍼블릭 id 추출 성공, 이걸 바탕으로 작업 현황 변환 가능
-      // 근데 화면상의 ID가 퍼블릭 id인가?? 그걸 모르겠네
-      // 일단 퍼블릭 id 말고도 다른것도 추출 가능
-
-      // defect-store에 이 정보들도 담아두자
-    })
-  }, [])
+  // geoJSONData를 사용하여 defects 배열 생성
+  const mappedDefects = geoJSONData ? geoJSONData.map(feature => {
+    // 각 feature에서 displayId를 가져와 defect 객체 생성
+    return {
+      id: feature.properties.displayId || 'Unknown', // displayId를 id로 사용
+      type: 'Crack', // 하드코딩된 값
+      severity: 'medium', // 하드코딩된 값
+      location: feature.properties.address?.street || 'Unknown location', // 주소 사용
+      detectedAt: new Date().toISOString(), // 현재 시간으로 하드코딩
+      status: 'Pending', // 하드코딩된 값
+      description: 'Auto-generated defect from GeoJSON data' // 하드코딩된 값
+    }
+  }) : [];
 
   // Filter defects based on selected filters
-  const filteredDefects = defects.filter((defect) => {
+  const filteredDefects = mappedDefects.filter((defect) => {
     const matchesType =
       defectType === 'all' || defect.type.toLowerCase() === defectType
     const matchesSeverity = severity === 'all' || defect.severity === severity
@@ -62,7 +72,7 @@ export default function DefectList() {
   })
 
   console.log('filteredDefects - 필터링 완료:', {
-    total: defects.length,
+    total: mappedDefects.length,
     filtered: filteredDefects.length,
   })
 
@@ -86,6 +96,45 @@ export default function DefectList() {
         : -1
     }
   })
+
+  // 페이지네이션을 위한 계산
+  const totalPages = Math.ceil(sortedDefects.length / itemsPerPage)
+  const startIndex = (currentPage - 1) * itemsPerPage
+  const endIndex = startIndex + itemsPerPage
+  const currentDefects = sortedDefects.slice(startIndex, endIndex)
+
+  // 페이지 변경 핸들러
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page)
+  }
+
+  // 페이지 번호 배열 생성 (1, 2, 3, ...)
+  const getPageNumbers = () => {
+    const pageNumbers = []
+    const maxVisiblePages = 5 // 최대 표시할 페이지 번호 수
+    
+    if (totalPages <= maxVisiblePages) {
+      // 총 페이지 수가 최대 표시 수보다 적은 경우, 모든 페이지 번호 표시
+      for (let i = 1; i <= totalPages; i++) {
+        pageNumbers.push(i)
+      }
+    } else {
+      // 현재 페이지 주변의 페이지 번호만 표시
+      let startPage = Math.max(1, currentPage - Math.floor(maxVisiblePages / 2))
+      const endPage = Math.min(totalPages, startPage + maxVisiblePages - 1)
+      
+      // 마지막 페이지가 최대 표시 수보다 적은 경우 시작 페이지 조정
+      if (endPage - startPage + 1 < maxVisiblePages) {
+        startPage = Math.max(1, endPage - maxVisiblePages + 1)
+      }
+      
+      for (let i = startPage; i <= endPage; i++) {
+        pageNumbers.push(i)
+      }
+    }
+    
+    return pageNumbers
+  }
 
   const formatDate = (dateString: string) => {
     const date = new Date(dateString)
@@ -134,11 +183,25 @@ export default function DefectList() {
 
   return (
     <div className="w-full overflow-auto">
-      {/* TODO: Replace with actual API call to fetch defects */}
       <Table>
         <TableHeader>
           <TableRow>
-            <TableHead className="w-[100px]">ID</TableHead>
+            <TableHead className="w-[100px]">
+              <Button
+                variant="ghost"
+                size="sm"
+                className="flex items-center gap-1 p-0 font-medium"
+                onClick={() => handleSort('id')}
+              >
+                ID
+                {sortColumn === 'id' &&
+                  (sortDirection === 'asc' ? (
+                    <ChevronUp className="h-4 w-4" />
+                  ) : (
+                    <ChevronDown className="h-4 w-4" />
+                  ))}
+              </Button>
+            </TableHead>
             <TableHead>
               <Button
                 variant="ghost"
@@ -208,7 +271,7 @@ export default function DefectList() {
           </TableRow>
         </TableHeader>
         <TableBody>
-          {sortedDefects.map((defect) => (
+          {currentDefects.map((defect) => (
             <TableRow key={defect.id}>
               <TableCell className="font-medium">{defect.id}</TableCell>
               <TableCell>{defect.type}</TableCell>
@@ -288,6 +351,78 @@ export default function DefectList() {
           ))}
         </TableBody>
       </Table>
+      
+      {/* 페이지네이션 추가 */}
+      <div className="mt-4">
+        <Pagination>
+          <PaginationContent>
+            <PaginationItem>
+              <PaginationPrevious 
+                onClick={() => handlePageChange(Math.max(1, currentPage - 1))}
+                className={currentPage === 1 ? "pointer-events-none opacity-50" : "cursor-pointer"}
+              />
+            </PaginationItem>
+            
+            {/* 첫 페이지가 아닐 경우 첫 페이지로 가는 링크 표시 */}
+            {getPageNumbers()[0] > 1 && (
+              <>
+                <PaginationItem>
+                  <PaginationLink 
+                    onClick={() => handlePageChange(1)}
+                    className="cursor-pointer"
+                  >
+                    1
+                  </PaginationLink>
+                </PaginationItem>
+                {getPageNumbers()[0] > 2 && (
+                  <PaginationItem>
+                    <PaginationEllipsis />
+                  </PaginationItem>
+                )}
+              </>
+            )}
+            
+            {/* 페이지 번호 표시 */}
+            {getPageNumbers().map(page => (
+              <PaginationItem key={page}>
+                <PaginationLink 
+                  isActive={currentPage === page}
+                  onClick={() => handlePageChange(page)}
+                  className="cursor-pointer"
+                >
+                  {page}
+                </PaginationLink>
+              </PaginationItem>
+            ))}
+            
+            {/* 마지막 페이지가 아닐 경우 마지막 페이지로 가는 링크 표시 */}
+            {getPageNumbers()[getPageNumbers().length - 1] < totalPages && (
+              <>
+                {getPageNumbers()[getPageNumbers().length - 1] < totalPages - 1 && (
+                  <PaginationItem>
+                    <PaginationEllipsis />
+                  </PaginationItem>
+                )}
+                <PaginationItem>
+                  <PaginationLink 
+                    onClick={() => handlePageChange(totalPages)}
+                    className="cursor-pointer"
+                  >
+                    {totalPages}
+                  </PaginationLink>
+                </PaginationItem>
+              </>
+            )}
+            
+            <PaginationItem>
+              <PaginationNext 
+                onClick={() => handlePageChange(Math.min(totalPages, currentPage + 1))}
+                className={currentPage === totalPages ? "pointer-events-none opacity-50" : "cursor-pointer"}
+              />
+            </PaginationItem>
+          </PaginationContent>
+        </Pagination>
+      </div>
     </div>
   )
 }

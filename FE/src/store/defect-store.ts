@@ -11,6 +11,23 @@ import {
   trendData,
 } from '@/data/placeholders'
 import { create } from 'zustand'
+import crypto from 'crypto'
+
+// UUID로부터 표시 ID 생성하는 함수 추가
+function getDisplayId(uuid: string, prefix: string = 'DEF-'): string {
+  const validChars = '0123456789ABCDEFGHJKLMNPQRSTUVWXYZ';
+  const hash = crypto.createHash('sha256').update(uuid).digest('hex');
+
+  const shortCode = Array(5)
+    .fill(0)
+    .map((_, i) => {
+      const index = parseInt(hash.slice(i * 2, i * 2 + 2), 16) % validChars.length;
+      return validChars[index];
+    })
+    .join('');
+
+  return `${prefix}${shortCode}`;
+}
 
 // Define types for our store
 export type DefectType = 'pothole' | 'crack' | 'paint' | 'all'
@@ -53,18 +70,20 @@ export type DetailedDefect = {
   damages: DamageItem[]
 }
 
-// GeoJSON 데이터를 위한 타입 정의
+// GeoJSON 데이터를 위한 타입 정의 - 수정함
 export type FeaturePoint = {
   type: string
   geometry: { type: string; coordinates: number[] }
   properties: {
     publicId: string
+    displayId?: string // 해싱된 ID를 저장할 필드 추가
     address: { street: string }
     accuracyMeters: number
   }
 }
 
-export type GeoJSONData = { type: string; features: FeaturePoint[] }
+// 저장소는 GeoJSONData 전체가 아닌 FeaturePoint 배열만 저장하도록 수정
+export type FeatureCollection = FeaturePoint[]
 
 export type DefectStoreState = {
   // Filter states
@@ -73,7 +92,7 @@ export type DefectStoreState = {
   severity: SeverityType
 
   detailedDefect: DetailedDefect | null
-  geoJSONData: GeoJSONData | null
+  geoJSONData: FeatureCollection | null // 타입 변경
 
   // Data states
   defectLocations: DefectLocation[]
@@ -117,10 +136,12 @@ export type DefectStoreState = {
   updateDefectStats: (typeData: { value: number; name: string }[], sevData: { value: number; name: string }[]) => void
   updateDefectTrends: (newTrends: any) => void
   updateDetailedDefect: (defect: DetailedDefect | null) => void
-  updateGeoJSONData: (data: GeoJSONData | null) => void
+
+  // 수정된 업데이트 함수 - 전체 GeoJSON이 아닌 features 배열만 받음
+  updateGeoJSONData: (data: any) => void
 
   // 상태 조회 함수
-  getGeoJSONData: () => GeoJSONData | null
+  getGeoJSONData: () => FeatureCollection | null
 }
 
 export const useDefectStore = create<DefectStoreState>((set, get) => ({
@@ -154,7 +175,31 @@ export const useDefectStore = create<DefectStoreState>((set, get) => ({
   updateDefectStats: (typeData, sevData) => set({ defectTypeData: typeData, severityData: sevData }),
   updateDefectTrends: (newTrends) => set({ trendData: newTrends }),
   updateDetailedDefect: (defect) => set({ detailedDefect: defect }),
-  updateGeoJSONData: (data) => set({ geoJSONData: data }),
+
+  // 수정된 업데이트 함수 - features 배열을 받아 각 항목의 publicId를 기반으로 displayId 생성
+  updateGeoJSONData: (data) => {
+    // GeoJSON 전체 객체가 들어올 경우 features 배열만 추출
+    const features = data.features ? data.features : data;
+
+    if (!features) {
+      set({ geoJSONData: null });
+      return;
+    }
+
+    // 각 feature에 displayId 추가
+    const enhancedFeatures = features.map((feature: FeaturePoint) => {
+      const publicId = feature.properties.publicId;
+      return {
+        ...feature,
+        properties: {
+          ...feature.properties,
+          displayId: getDisplayId(publicId)
+        }
+      };
+    });
+
+    set({ geoJSONData: enhancedFeatures });
+  },
 
   // 상태 조회 함수 - geoJSONData 반환
   getGeoJSONData: () => get().geoJSONData
