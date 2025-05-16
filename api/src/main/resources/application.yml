@@ -14,7 +14,7 @@ spring:
   #jpa
   jpa:
     hibernate:
-      ddl-auto: create
+      ddl-auto: none
     properties:
       hibernate:
         dialect: org.hibernate.dialect.MySQLDialect
@@ -24,7 +24,7 @@ spring:
   sql:
     init:
       encoding: UTF-8
-      mode: always
+      mode: never
       data-locations: classpath:data.sql
   
   #redis 설정
