@@ -15,7 +15,7 @@ import {
 import {
   DefectCard,
   DefectCardContent,
-  DefectCardDescription,
+  // DefectCardDescription,
   DefectCardFooter,
   DefectCardHeader,
   DefectCardTitle,
@@ -44,7 +44,7 @@ import {
   Filter,
   MapPin,
 } from 'lucide-react'
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 
 import DefectHeatmap from './defect-heatmap'
 import DefectList from './defect-list'
@@ -70,7 +70,7 @@ export default function Dashboard() {
     // updateDefectStats,
     // updateDefectTrends,
     updateGeoJSONData,
-    getGeoJSONData,
+    // getGeoJSONData,
     // updateDetailedDefect,
   } = useDefectStore()
 
@@ -96,9 +96,9 @@ export default function Dashboard() {
   })
 
   // 통계 데이터 로드 (timeRange 변경에 따라 자동으로 재요청)
-  const { 
+  const {
     // data: reportData
-   } = useQuery({
+  } = useQuery({
     queryKey: ['reports', timeRange],
     queryFn: async () => {
       if (timeRange === 'D') {

@@ -445,7 +445,7 @@ const AuthForm: React.FC<AuthFormProps> = ({ isLoginTab, onTabChange }) => {
                     >
                       {formData.region
                         ? Object.entries(regionIdMap).find(
-                            ([_, value]) => value === formData.region,
+                            (entry) => entry[1] === formData.region,
                           )?.[0] || '지역을 선택해주세요'
                         : '지역을 선택해주세요'}
                       <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />

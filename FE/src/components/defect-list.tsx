@@ -30,7 +30,7 @@ import {
   TableRow,
 } from '@/components/ui/table'
 import { ProcessStatus, useDefectStore } from '@/store/defect-store'
-import { useQueries, useQuery } from '@tanstack/react-query'
+import { useQueries } from '@tanstack/react-query'
 import {
   ChevronDown,
   ChevronUp,
@@ -117,8 +117,8 @@ export default function DefectList() {
       queryKey: ['defectDetail', defect.publicId],
       queryFn: async () => {
         const response = await coodAPI.getDetailedDefects(defect.publicId)
-        console.log("good!: ",response.data)
-        
+        console.log('good!: ', response.data)
+
         return { publicId: defect.publicId, data: response.data }
       },
       enabled: !!defect.publicId, // publicId가 있는 경우에만 쿼리 실행
@@ -336,9 +336,9 @@ export default function DefectList() {
         <TableBody>
           {currentDefects.map((defect) => {
             // 각 항목별 상세 정보 쿼리 상태 확인
-            const detailQuery = detailsQueries.find(
-              (q) => q.data?.publicId === defect.publicId,
-            )
+            // const detailQuery = detailsQueries.find(
+            //   (q) => q.data?.publicId === defect.publicId,
+            // )
 
             return (
               <TableRow key={defect.id}>
