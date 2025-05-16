@@ -39,14 +39,15 @@ const LocationHeader: React.FC = () => {
     setLevel3,
   } = useAddressStore()
 
-  
   // 팝오버 상태 관리
   const [provinceOpen, setProvinceOpen] = useState(false)
   const [cityOpen, setCityOpen] = useState(false)
   const [districtOpen, setDistrictOpen] = useState(false)
-  
+
   // 선택된 행정구역 상태
-  const [districtLevel1, setDistrictLevel1] = useState<string | null>('대전광역시')
+  const [districtLevel1, setDistrictLevel1] = useState<string | null>(
+    '대전광역시',
+  )
   const [districtLevel2, setDistrictLevel2] = useState<string | null>('유성구')
   const [districtLevel3, setDistrictLevel3] = useState<string | null>(null)
 
@@ -58,106 +59,124 @@ const LocationHeader: React.FC = () => {
   useEffect(() => {
     if (districtLevel1) {
       // level1 주소를 스토어에 저장
-      setLevel1(districtLevel1);
-      
+      setLevel1(districtLevel1)
+
       // level1에 해당하는 하위 지역(level2) 목록 가져오기
-      const level1Data = addressData[districtLevel1];
-      
+      const level1Data = addressData[districtLevel1]
+
       // 세종특별자치시처럼 직접 데이터를 가진 경우 id 값을 저장하고 level2를 비움
-      if (level1Data && ('id' in level1Data) && level1Data.district === null) {
-        const locationInfo = level1Data as LocationInfo;
-        if (locationInfo.id) setId(locationInfo.id);
-        if (locationInfo.longitude) setLongitude(locationInfo.longitude);
-        if (locationInfo.latitude) setLatitude(locationInfo.latitude);
-        
-        setDistrictLevel2Array([]);
-        setDistrictLevel2(null);
-        setLevel2(null);
-        setDistrictLevel3Array([]);
-        setDistrictLevel3(null);
-        setLevel3(null);
-      } 
+      if (level1Data && 'id' in level1Data && level1Data.district === null) {
+        const locationInfo = level1Data as LocationInfo
+        if (locationInfo.id) setId(locationInfo.id)
+        if (locationInfo.longitude) setLongitude(locationInfo.longitude)
+        if (locationInfo.latitude) setLatitude(locationInfo.latitude)
+
+        setDistrictLevel2Array([])
+        setDistrictLevel2(null)
+        setLevel2(null)
+        setDistrictLevel3Array([])
+        setDistrictLevel3(null)
+        setLevel3(null)
+      }
       // 일반적인 지역의 경우 하위 district 목록 가져오기
       else if (level1Data && 'district' in level1Data && level1Data.district) {
-        const districts = Object.keys(level1Data.district);
-        setDistrictLevel2Array(districts);
-        
+        const districts = Object.keys(level1Data.district)
+        setDistrictLevel2Array(districts)
+
         // 첫번째 district를 기본값으로 설정
         if (districts.length > 0) {
-          setDistrictLevel2(districts[0]);
+          setDistrictLevel2(districts[0])
         } else {
-          setDistrictLevel2(null);
+          setDistrictLevel2(null)
         }
       } else {
-        setDistrictLevel2Array([]);
-        setDistrictLevel2(null);
+        setDistrictLevel2Array([])
+        setDistrictLevel2(null)
       }
     }
-  }, [districtLevel1, addressData, setLevel1, setId, setLongitude, setLatitude]);
+  }, [districtLevel1, addressData, setLevel1, setId, setLongitude, setLatitude])
 
   // 시/군/구(level2) 변경시 하위 구(level3) 목록 업데이트 및 초기 하위 구(level3) 선택
   useEffect(() => {
     if (districtLevel1 && districtLevel2) {
       // level2 주소를 스토어에 저장
-      setLevel2(districtLevel2);
-      
-      const level1Data = addressData[districtLevel1];
-      
+      setLevel2(districtLevel2)
+
+      const level1Data = addressData[districtLevel1]
+
       if (level1Data && 'district' in level1Data && level1Data.district) {
-        const level2Data = level1Data.district[districtLevel2];
-        
+        const level2Data = level1Data.district[districtLevel2]
+
         // 지역 ID, 위도, 경도 정보 스토어에 저장
         if (level2Data) {
-          if (level2Data.id) setId(level2Data.id);
-          if (level2Data.longitude) setLongitude(level2Data.longitude);
-          if (level2Data.latitude) setLatitude(level2Data.latitude);
-          
+          if (level2Data.id) setId(level2Data.id)
+          if (level2Data.longitude) setLongitude(level2Data.longitude)
+          if (level2Data.latitude) setLatitude(level2Data.latitude)
+
           // level3 존재 여부에 따라 처리
           if (level2Data.district) {
-            const districts = Object.keys(level2Data.district);
-            setDistrictLevel3Array(districts);
-            
+            const districts = Object.keys(level2Data.district)
+            setDistrictLevel3Array(districts)
+
             // 첫번째 하위 구를 기본값으로 설정
             if (districts.length > 0) {
-              setDistrictLevel3(districts[0]);
+              setDistrictLevel3(districts[0])
             } else {
-              setDistrictLevel3(null);
-              setLevel3(null);
+              setDistrictLevel3(null)
+              setLevel3(null)
             }
           } else {
-            setDistrictLevel3Array([]);
-            setDistrictLevel3(null);
-            setLevel3(null);
+            setDistrictLevel3Array([])
+            setDistrictLevel3(null)
+            setLevel3(null)
           }
         }
       }
     }
-  }, [districtLevel1, districtLevel2, addressData, setId, setLongitude, setLatitude, setLevel2, setLevel3]);
+  }, [
+    districtLevel1,
+    districtLevel2,
+    addressData,
+    setId,
+    setLongitude,
+    setLatitude,
+    setLevel2,
+    setLevel3,
+  ])
 
   // districtLevel3 변경 시 위치 정보 업데이트
   useEffect(() => {
     if (districtLevel1 && districtLevel2 && districtLevel3) {
       // level3 주소를 스토어에 저장
-      setLevel3(districtLevel3);
-      
-      const level1Data = addressData[districtLevel1];
-      
+      setLevel3(districtLevel3)
+
+      const level1Data = addressData[districtLevel1]
+
       if (level1Data && 'district' in level1Data && level1Data.district) {
-        const level2Data = level1Data.district[districtLevel2];
-        
+        const level2Data = level1Data.district[districtLevel2]
+
         if (level2Data && level2Data.district) {
-          const level3Data = level2Data.district[districtLevel3];
-          
+          const level3Data = level2Data.district[districtLevel3]
+
           // 지역 ID, 위도, 경도 정보 스토어에 저장
           if (level3Data) {
-            if (level3Data.id) setId(level3Data.id);
-            if (level3Data.longitude) setLongitude(level3Data.longitude);
-            if (level3Data.latitude) setLatitude(level3Data.latitude);
+            if (level3Data.id) setId(level3Data.id)
+            if (level3Data.longitude) setLongitude(level3Data.longitude)
+            if (level3Data.latitude) setLatitude(level3Data.latitude)
           }
         }
       }
     }
-  }, [districtLevel1, districtLevel2, districtLevel3, addressData, setId, setLongitude, setLatitude, setLevel3]);
+  }, [
+    districtLevel1,
+    districtLevel2,
+    districtLevel3,
+    addressData,
+    setId,
+    setLongitude,
+    setLatitude,
+    setLevel3,
+  ])
 
   //  콤보박스 선택 변경 시, 행정동코드/위도/경도 변경
   useEffect(() => {

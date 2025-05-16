@@ -10,23 +10,24 @@ import {
   severityData,
   trendData,
 } from '@/data/placeholders'
-import { create } from 'zustand'
 import crypto from 'crypto'
+import { create } from 'zustand'
 
 // UUID로부터 표시 ID 생성하는 함수 추가
 function getDisplayId(uuid: string, prefix: string = 'DEF-'): string {
-  const validChars = '0123456789ABCDEFGHJKLMNPQRSTUVWXYZ';
-  const hash = crypto.createHash('sha256').update(uuid).digest('hex');
+  const validChars = '0123456789ABCDEFGHJKLMNPQRSTUVWXYZ'
+  const hash = crypto.createHash('sha256').update(uuid).digest('hex')
 
   const shortCode = Array(5)
     .fill(0)
     .map((_, i) => {
-      const index = parseInt(hash.slice(i * 2, i * 2 + 2), 16) % validChars.length;
-      return validChars[index];
+      const index =
+        parseInt(hash.slice(i * 2, i * 2 + 2), 16) % validChars.length
+      return validChars[index]
     })
-    .join('');
+    .join('')
 
-  return `${prefix}${shortCode}`;
+  return `${prefix}${shortCode}`
 }
 
 // Define types for our store
@@ -133,7 +134,10 @@ export type DefectStoreState = {
   updateDefects: (newDefects: Defect[]) => void
   updateDefectLocations: (newLocations: DefectLocation[]) => void
   updateRecentAlerts: (newAlerts: Defect[]) => void
-  updateDefectStats: (typeData: { value: number; name: string }[], sevData: { value: number; name: string }[]) => void
+  updateDefectStats: (
+    typeData: { value: number; name: string }[],
+    sevData: { value: number; name: string }[],
+  ) => void
   updateDefectTrends: (newTrends: any) => void
   updateDetailedDefect: (defect: DetailedDefect | null) => void
 
@@ -170,37 +174,39 @@ export const useDefectStore = create<DefectStoreState>((set, get) => ({
 
   // 상태 업데이트 함수들 (API 호출 없이 상태만 업데이트)
   updateDefects: (newDefects) => set({ defects: newDefects }),
-  updateDefectLocations: (newLocations) => set({ defectLocations: newLocations }),
+  updateDefectLocations: (newLocations) =>
+    set({ defectLocations: newLocations }),
   updateRecentAlerts: (newAlerts) => set({ recentAlerts: newAlerts }),
-  updateDefectStats: (typeData, sevData) => set({ defectTypeData: typeData, severityData: sevData }),
+  updateDefectStats: (typeData, sevData) =>
+    set({ defectTypeData: typeData, severityData: sevData }),
   updateDefectTrends: (newTrends) => set({ trendData: newTrends }),
   updateDetailedDefect: (defect) => set({ detailedDefect: defect }),
 
   // 수정된 업데이트 함수 - features 배열을 받아 각 항목의 publicId를 기반으로 displayId 생성
   updateGeoJSONData: (data) => {
     // GeoJSON 전체 객체가 들어올 경우 features 배열만 추출
-    const features = data.features ? data.features : data;
+    const features = data.features ? data.features : data
 
     if (!features) {
-      set({ geoJSONData: null });
-      return;
+      set({ geoJSONData: null })
+      return
     }
 
     // 각 feature에 displayId 추가
     const enhancedFeatures = features.map((feature: FeaturePoint) => {
-      const publicId = feature.properties.publicId;
+      const publicId = feature.properties.publicId
       return {
         ...feature,
         properties: {
           ...feature.properties,
-          displayId: getDisplayId(publicId)
-        }
-      };
-    });
+          displayId: getDisplayId(publicId),
+        },
+      }
+    })
 
-    set({ geoJSONData: enhancedFeatures });
+    set({ geoJSONData: enhancedFeatures })
   },
 
   // 상태 조회 함수 - geoJSONData 반환
-  getGeoJSONData: () => get().geoJSONData
+  getGeoJSONData: () => get().geoJSONData,
 }))
