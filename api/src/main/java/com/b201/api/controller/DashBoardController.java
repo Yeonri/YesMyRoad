@@ -6,7 +6,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.b201.api.dto.dashboard.CategoryCountDto;
@@ -63,20 +62,27 @@ public class DashBoardController {
 	}
 
 	@GetMapping("/monthly-summary")
-	public ResponseEntity<?> getMonthlySummary() {
-		return ResponseEntity.ok(dashboardService.getMonthlyDamageSummary());
+	public ResponseEntity<?> getMonthlySummary(
+		@AuthenticationPrincipal CustomUserDetails user
+	) {
+		String regionName = user.getRegionName();
+		return ResponseEntity.ok(dashboardService.getMonthlyDamageSummary(regionName));
 	}
 
 	@GetMapping("/districts")
 	public ResponseEntity<List<RegionCountDto>> getDistricts(
-		@RequestParam("city") String cityName
+		@AuthenticationPrincipal CustomUserDetails user
 	) {
-		List<RegionCountDto> list = dashboardService.getDistrictDistribution(cityName);
+		String regionName = user.getRegionName();
+		List<RegionCountDto> list = dashboardService.getDistrictDistribution(regionName);
 		return ResponseEntity.ok(list);
 	}
 
 	@GetMapping("/top3")
-	public List<TopRegionDto> top3Regions() {
-		return dashboardService.getTop3Regions();
+	public List<TopRegionDto> top3Regions(
+		@AuthenticationPrincipal CustomUserDetails user
+	) {
+		String regionName = user.getRegionName();
+		return dashboardService.getTop3Regions(regionName);
 	}
 }

@@ -63,12 +63,15 @@ public interface CaptureDamageRepository extends JpaRepository<CaptureDamage, In
 		    COUNT(d)
 		  )
 		  FROM CaptureDamage d
+				  join d.capturePoint.region r
+						  join r.parentRegion pr
+								  where pr.regionName = :regionName
 		  GROUP BY YEAR(d.capturePoint.captureTimestamp),
 		           MONTH(d.capturePoint.captureTimestamp)
 		  ORDER BY YEAR(d.capturePoint.captureTimestamp),
 		           MONTH(d.capturePoint.captureTimestamp)
 		""")
-	List<MonthlyDamageSummaryDto> findMonthlyDamageSummary();
+	List<MonthlyDamageSummaryDto> findMonthlyDamageSummary(@Param("regionName") String regionName);
 
 	/**
 	 * cityName을 받아
@@ -80,16 +83,14 @@ public interface CaptureDamageRepository extends JpaRepository<CaptureDamage, In
 		    COUNT(cd.damageId)
 		  )
 		  FROM Region r
-		  LEFT JOIN CapturePoint cp
-		    ON cp.region = r
-		  LEFT JOIN CaptureDamage cd
-		    ON cd.capturePoint = cp
-		   AND cd.status = 'COMPLETED'
-		  WHERE r.parentRegion.regionName = :parentName
+				  left join r.capturePoints cp
+						  left join cp.captureDamages cd
+								  left join cd.damageCategory dc
+										  where r.parentRegion.regionName = :regionName
 		  GROUP BY r.regionName
 		""")
 	List<RegionCountDto> countByCity(
-		@Param("parentName") String cityName
+		@Param("regionName") String cityName
 	);
 
 	/**
@@ -99,16 +100,19 @@ public interface CaptureDamageRepository extends JpaRepository<CaptureDamage, In
 		  SELECT new com.b201.api.dto.dashboard.TopRegionDto(
 		    r.regionName,
 				    count(cd),
-						    sum(case when cd.damageCategory.categoryName = '도로균열' then 1 ELSE 0 END),
-								    sum(case when cd.damageCategory.categoryName = '도로홀' then 1 ELSE 0 END)
+						    coalesce(sum(case when cd.damageCategory.categoryName = '도로균열' then 1 ELSE 0 END),0),
+								    coalesce(sum(case when cd.damageCategory.categoryName = '도로홀' then 1 ELSE 0 END),0)
 		  )
-		  FROM CaptureDamage cd
-		  JOIN cd.capturePoint cp
-		  JOIN cp.region r
+		  from Region r
+				  join r.parentRegion pr
+						  left join r.capturePoints cp
+								  left join cp.captureDamages cd
+										  left join cd.damageCategory dc
+										  where pr.regionName = :regionName
 		  GROUP BY r.regionName
 		  ORDER BY COUNT(cd) DESC
 		""")
-	List<TopRegionDto> findTopRegions(Pageable pageable);
+	List<TopRegionDto> findTopRegions(@Param("regionName") String regionName, Pageable pageable);
 
 	@Query("""
 			select new com.b201.api.dto.maintenance.MaintenanceStatusDto(
