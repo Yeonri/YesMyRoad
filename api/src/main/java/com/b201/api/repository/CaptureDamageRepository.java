@@ -11,7 +11,6 @@ import org.springframework.stereotype.Repository;
 
 import com.b201.api.domain.CaptureDamage;
 import com.b201.api.dto.dashboard.CategoryCountDto;
-import com.b201.api.dto.dashboard.DailyCountDto;
 import com.b201.api.dto.dashboard.MonthlyDamageSummaryDto;
 import com.b201.api.dto.dashboard.RegionCountDto;
 import com.b201.api.dto.dashboard.TopRegionDto;
@@ -40,18 +39,13 @@ public interface CaptureDamageRepository extends JpaRepository<CaptureDamage, In
 
 	// 일자별 파손 집계
 	@Query("""
-		  SELECT new com.b201.api.dto.dashboard.DailyCountDto(
-		           DATE(d.capturePoint.captureTimestamp),
-		           COUNT(d)
-		         )
-		    FROM CaptureDamage d
-				    join d.capturePoint.region r
-						    join r.parentRegion pr
-								    where pr.regionName = :regionName
-		   GROUP BY DATE(d.capturePoint.captureTimestamp)
-		   ORDER BY DATE(d.capturePoint.captureTimestamp)
+		  select count(d)
+				  from CaptureDamage d
+						  where d.capturePoint.region.parentRegion.regionName = :regionName
+								  and d.capturePoint.captureTimestamp between :start and :end
 		""")
-	List<DailyCountDto> countDaily(@Param("regionName") String regionName);
+	long countBetween(@Param("regionName") String regionName, @Param("start") LocalDateTime start,
+		@Param("end") LocalDateTime end);
 
 	// 월별 도로균열, 도로홀 분류 건수와 총합계
 	@Query("""
