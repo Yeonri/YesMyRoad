@@ -122,9 +122,9 @@ public class DashboardService {
 	/**
 	 * 월별 도로파손 누적 탐지 현황
 	 */
-	public List<MonthlyDamageSummaryDto> getMonthlyDamageSummary() {
+	public List<MonthlyDamageSummaryDto> getMonthlyDamageSummary(String regionName) {
 		log.info("[getMonthlyDamageSummary] 호출됨");
-		List<MonthlyDamageSummaryDto> list = damageRepo.findMonthlyDamageSummary();
+		List<MonthlyDamageSummaryDto> list = damageRepo.findMonthlyDamageSummary(regionName);
 		log.debug("[getMonthlyDamageSummary] summary 개수 = {}", list.size());
 		return list;
 	}
@@ -142,9 +142,9 @@ public class DashboardService {
 	/**
 	 * 상위 3개 지역의 도로파손 통계
 	 */
-	public List<TopRegionDto> getTop3Regions() {
+	public List<TopRegionDto> getTop3Regions(String regionName) {
 		log.info("[getTop3Regions] 호출됨");
-		List<TopRegionDto> list = damageRepo.findTopRegions(PageRequest.of(0, 3));
+		List<TopRegionDto> list = damageRepo.findTopRegions(regionName, PageRequest.of(0, 3));
 		log.debug("[getTop3Regions] top regions 개수 = {}", list.size());
 		return list;
 	}
