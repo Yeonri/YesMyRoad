@@ -81,6 +81,14 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 			.body(new ErrorResponse(ex.getMessage()));
 	}
 
+	@ExceptionHandler(ArithmeticException.class)
+	public ResponseEntity<Void> handleArithmetic(ArithmeticException ex) {
+		log.warn("[handleArithmetic] {}", ex.getMessage());
+		return ResponseEntity
+			.status(HttpStatus.NO_CONTENT)
+			.build();
+	}
+
 	// 기본 포맷
 	public static record ValidationError(String field, String defaultMessage) {
 	}

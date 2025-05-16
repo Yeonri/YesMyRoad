@@ -40,6 +40,7 @@ public class CapturePointService {
 		return CapturePointResponseDto.builder()
 			.features(featureDtos)   // features가 비어 있으면 []으로 직렬화됨
 			.build();
+
 	}
 
 	private FeatureDto mapToFeatureDto(CapturePoint capturePoint) {
