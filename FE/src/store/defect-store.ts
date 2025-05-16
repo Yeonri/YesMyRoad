@@ -133,7 +133,10 @@ export type DefectStoreState = {
   updateDefects: (newDefects: Defect[]) => void
   updateDefectLocations: (newLocations: DefectLocation[]) => void
   updateRecentAlerts: (newAlerts: Defect[]) => void
-  updateDefectStats: (typeData: { value: number; name: string }[], sevData: { value: number; name: string }[]) => void
+  updateDefectStats: (
+    typeData: { value: number; name: string }[],
+    sevData: { value: number; name: string }[],
+  ) => void
   updateDefectTrends: (newTrends: any) => void
   updateDetailedDefect: (defect: DetailedDefect | null) => void
 
@@ -170,9 +173,11 @@ export const useDefectStore = create<DefectStoreState>((set, get) => ({
 
   // 상태 업데이트 함수들 (API 호출 없이 상태만 업데이트)
   updateDefects: (newDefects) => set({ defects: newDefects }),
-  updateDefectLocations: (newLocations) => set({ defectLocations: newLocations }),
+  updateDefectLocations: (newLocations) =>
+    set({ defectLocations: newLocations }),
   updateRecentAlerts: (newAlerts) => set({ recentAlerts: newAlerts }),
-  updateDefectStats: (typeData, sevData) => set({ defectTypeData: typeData, severityData: sevData }),
+  updateDefectStats: (typeData, sevData) =>
+    set({ defectTypeData: typeData, severityData: sevData }),
   updateDefectTrends: (newTrends) => set({ trendData: newTrends }),
   updateDetailedDefect: (defect) => set({ detailedDefect: defect }),
 
@@ -202,5 +207,5 @@ export const useDefectStore = create<DefectStoreState>((set, get) => ({
   },
 
   // 상태 조회 함수 - geoJSONData 반환
-  getGeoJSONData: () => get().geoJSONData
+  getGeoJSONData: () => get().geoJSONData,
 }))

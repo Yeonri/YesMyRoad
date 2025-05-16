@@ -67,10 +67,7 @@ interface AuthFormProps {
   onTabChange: (isLogin: boolean) => void
 }
 
-const AuthForm: React.FC<AuthFormProps> = ({
-  isLoginTab,
-  onTabChange,
-}) => {
+const AuthForm: React.FC<AuthFormProps> = ({ isLoginTab, onTabChange }) => {
   const router = useRouter()
 
   // Zustand 스토어에서 필요한 상태와 액션 가져오기

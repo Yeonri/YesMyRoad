@@ -46,12 +46,16 @@ const eslintConfig = [
     },
     rules: {
       // react
-      'react/react-in-jsx-scope': 'off', // Not needed with Next.js
-      'react/prop-types': 'off', // Not needed with TypeScript
+      'react/react-in-jsx-scope': 'off', // Next.js에서 필요 없음
+      'react/prop-types': 'off', // TypeScript에서 필요 없음
 
       // react hooks
-      'react-hooks/rules-of-hooks': 'error', // Checks rules of Hooks
-      'react-hooks/exhaustive-deps': 'warn', // Checks effect dependencies
+      'react-hooks/rules-of-hooks': 'error', // 훅 규칙 검사
+      'react-hooks/exhaustive-deps': 'warn', // 의존성 배열 검사
+
+      // typescript
+      '@typescript-eslint/no-unused-vars': 'warn', // 사용하지 않는 변수 설정
+      '@typescript-eslint/no-explicit-any': 'warn', // any 타입 설정
     },
   },
 ]
