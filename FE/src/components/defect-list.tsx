@@ -19,7 +19,7 @@ import {
   PaginationLink,
   PaginationNext,
   PaginationPrevious,
-} from "@/components/ui/pagination"
+} from '@/components/ui/pagination'
 import { StatusBadge } from '@/components/ui/status-badge'
 import {
   Table,
@@ -30,6 +30,7 @@ import {
   TableRow,
 } from '@/components/ui/table'
 import { ProcessStatus, useDefectStore } from '@/store/defect-store'
+import { useQueries, useQuery } from '@tanstack/react-query'
 import {
   ChevronDown,
   ChevronUp,
@@ -37,33 +38,53 @@ import {
   MapPin,
   MoreHorizontal,
 } from 'lucide-react'
-import { useEffect } from 'react'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
+
+// DetailedDefect 타입 정의
+type DetailedDefect = {
+  imageUrl: string
+  risk: number
+  damages: { id: number; category: string; status: number; updatedAt: string }[]
+}
 
 export default function DefectList() {
-  const [sortColumn, setSortColumn] = useState('id') // 기본 정렬을 ID로 변경
+  const [sortColumn, setSortColumn] = useState('id')
   const [sortDirection, setSortDirection] = useState('asc')
   const [currentPage, setCurrentPage] = useState(1)
-  const itemsPerPage = 5 // 한 페이지에 5개의 결함만 표시
+  const itemsPerPage = 5
 
-  // Get defects from Zustand store
+  // 상세 정보를 저장할 맵 상태
+  const [detailsMap, setDetailsMap] = useState<Record<string, DetailedDefect>>(
+    {},
+  )
+
+  // Zustand 스토어에서 데이터 가져오기
   const { defectType, severity, geoJSONData } = useDefectStore()
 
-  // geoJSONData를 사용하여 defects 배열 생성
-  const mappedDefects = geoJSONData ? geoJSONData.map(feature => {
-    // 각 feature에서 displayId를 가져와 defect 객체 생성
-    return {
-      id: feature.properties.displayId || 'Unknown', // displayId를 id로 사용
-      type: 'Crack', // 하드코딩된 값
-      severity: 'medium', // 하드코딩된 값
-      location: feature.properties.address?.street || 'Unknown location', // 주소 사용
-      detectedAt: new Date().toISOString(), // 현재 시간으로 하드코딩
-      status: 'Pending', // 하드코딩된 값
-      description: 'Auto-generated defect from GeoJSON data' // 하드코딩된 값
-    }
-  }) : [];
+  // 기본 매핑 로직 - geoJSONData를 기반으로 기본 객체 생성
+  const mappedDefects = geoJSONData
+    ? geoJSONData.map((feature) => {
+        const publicId = feature.properties.publicId
+        const detail = detailsMap[publicId]
 
-  // Filter defects based on selected filters
+        return {
+          id: feature.properties.displayId || 'Unknown',
+          publicId: publicId, // API 호출용으로 보존
+          type: 'Crack', // 하드코딩 값
+          severity: 'medium', // 하드코딩 값
+          location: feature.properties.address?.street || 'Unknown location',
+          detectedAt: new Date().toISOString(),
+          status: 'Pending', // 하드코딩 값
+          description: 'Auto-generated defect from GeoJSON data',
+          // 상세 정보가 있으면 추가
+          risk: detail?.risk,
+          imageUrl: detail?.imageUrl,
+          damages: detail?.damages,
+        }
+      })
+    : []
+
+  // 필터링
   const filteredDefects = mappedDefects.filter((defect) => {
     const matchesType =
       defectType === 'all' || defect.type.toLowerCase() === defectType
@@ -71,20 +92,7 @@ export default function DefectList() {
     return matchesType && matchesSeverity
   })
 
-  console.log('filteredDefects - 필터링 완료:', {
-    total: mappedDefects.length,
-    filtered: filteredDefects.length,
-  })
-
-  const handleSort = (column: string) => {
-    if (sortColumn === column) {
-      setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc')
-    } else {
-      setSortColumn(column)
-      setSortDirection('asc')
-    }
-  }
-
+  // 정렬
   const sortedDefects = [...filteredDefects].sort((a, b) => {
     if (sortDirection === 'asc') {
       return a[sortColumn as keyof typeof a]! > b[sortColumn as keyof typeof b]!
@@ -97,45 +105,88 @@ export default function DefectList() {
     }
   })
 
-  // 페이지네이션을 위한 계산
+  // 페이지네이션
   const totalPages = Math.ceil(sortedDefects.length / itemsPerPage)
   const startIndex = (currentPage - 1) * itemsPerPage
   const endIndex = startIndex + itemsPerPage
   const currentDefects = sortedDefects.slice(startIndex, endIndex)
+
+  // 현재 페이지에 표시되는 항목들에 대한 상세 정보만 쿼리
+  const detailsQueries = useQueries({
+    queries: currentDefects.map((defect) => ({
+      queryKey: ['defectDetail', defect.publicId],
+      queryFn: async () => {
+        const response = await coodAPI.getDetailedDefects(defect.publicId)
+        console.log("good!: ",response.data)
+        
+        return { publicId: defect.publicId, data: response.data }
+      },
+      enabled: !!defect.publicId, // publicId가 있는 경우에만 쿼리 실행
+      staleTime: 5 * 60 * 1000, // 5분 동안 캐싱
+    })),
+  })
+
+  // 상세 정보가 로드되면 detailsMap 업데이트
+  useEffect(() => {
+    const newDetailsMap = { ...detailsMap }
+    let hasUpdates = false
+
+    detailsQueries.forEach((query) => {
+      if (query.isSuccess && query.data) {
+        const { publicId, data } = query.data
+        if (!detailsMap[publicId]) {
+          newDetailsMap[publicId] = data
+          hasUpdates = true
+        }
+      }
+    })
+
+    if (hasUpdates) {
+      setDetailsMap(newDetailsMap)
+    }
+  }, [detailsQueries, detailsMap])
+
+  // 정렬 핸들러
+  const handleSort = (column: string) => {
+    if (sortColumn === column) {
+      setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc')
+    } else {
+      setSortColumn(column)
+      setSortDirection('asc')
+    }
+  }
 
   // 페이지 변경 핸들러
   const handlePageChange = (page: number) => {
     setCurrentPage(page)
   }
 
-  // 페이지 번호 배열 생성 (1, 2, 3, ...)
+  // 페이지 번호 배열 생성
   const getPageNumbers = () => {
     const pageNumbers = []
-    const maxVisiblePages = 5 // 최대 표시할 페이지 번호 수
-    
+    const maxVisiblePages = 5
+
     if (totalPages <= maxVisiblePages) {
-      // 총 페이지 수가 최대 표시 수보다 적은 경우, 모든 페이지 번호 표시
       for (let i = 1; i <= totalPages; i++) {
         pageNumbers.push(i)
       }
     } else {
-      // 현재 페이지 주변의 페이지 번호만 표시
       let startPage = Math.max(1, currentPage - Math.floor(maxVisiblePages / 2))
       const endPage = Math.min(totalPages, startPage + maxVisiblePages - 1)
-      
-      // 마지막 페이지가 최대 표시 수보다 적은 경우 시작 페이지 조정
+
       if (endPage - startPage + 1 < maxVisiblePages) {
         startPage = Math.max(1, endPage - maxVisiblePages + 1)
       }
-      
+
       for (let i = startPage; i <= endPage; i++) {
         pageNumbers.push(i)
       }
     }
-    
+
     return pageNumbers
   }
 
+  // 유틸리티 함수들
   const formatDate = (dateString: string) => {
     const date = new Date(dateString)
     return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
@@ -171,6 +222,7 @@ export default function DefectList() {
     }
   }
 
+  // 상태 변경 핸들러
   const handleStatusChange = async (
     defectId: number,
     currentStatus: string,
@@ -181,8 +233,19 @@ export default function DefectList() {
     alert(`Changing defect ${currentStatus} status to ${newStatus}`)
   }
 
+  // 로딩 상태 확인 (전체 페이지에 대한 로딩 상태가 아니라 현재 페이지에 대한 상세 정보만 확인)
+  const isLoading = detailsQueries.some(
+    (query) => query.isLoading && !query.isError,
+  )
+
   return (
     <div className="w-full overflow-auto">
+      {isLoading && (
+        <div className="text-muted-foreground py-2 text-center text-sm">
+          상세 정보를 불러오는 중...
+        </div>
+      )}
+
       <Table>
         <TableHeader>
           <TableRow>
@@ -271,103 +334,114 @@ export default function DefectList() {
           </TableRow>
         </TableHeader>
         <TableBody>
-          {currentDefects.map((defect) => (
-            <TableRow key={defect.id}>
-              <TableCell className="font-medium">{defect.id}</TableCell>
-              <TableCell>{defect.type}</TableCell>
-              <TableCell>
-                <StatusBadge className={getSeverityColor(defect.severity)}>
-                  {defect.severity.charAt(0).toUpperCase() +
-                    defect.severity.slice(1)}
-                </StatusBadge>
-              </TableCell>
-              <TableCell className="flex items-center gap-1">
-                <MapPin className="text-muted-foreground h-3 w-3" />
-                {defect.location}
-              </TableCell>
-              <TableCell className="flex items-center gap-1">
-                <Clock className="text-muted-foreground h-3 w-3" />
-                {formatDate(defect.detectedAt)}
-              </TableCell>
-              <TableCell>
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <StatusBadge className={getStatusColor(defect.status!)}>
-                      {defect.status!}
-                    </StatusBadge>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="start">
-                    <DropdownMenuLabel>작업 상태 변경</DropdownMenuLabel>
-                    <DropdownMenuSeparator />
-                    <DropdownMenuItem
-                      onClick={() =>
-                        handleStatusChange(1, defect.status!, 'Pending')
-                      }
-                    >
-                      Pending
-                    </DropdownMenuItem>
-                    <DropdownMenuItem
-                      onClick={() =>
-                        handleStatusChange(1, defect.status!, 'Assigned')
-                      }
-                    >
-                      Assigned
-                    </DropdownMenuItem>
-                    <DropdownMenuItem
-                      onClick={() =>
-                        handleStatusChange(1, defect.status!, 'In Progress')
-                      }
-                    >
-                      In Progress
-                    </DropdownMenuItem>
-                    <DropdownMenuItem
-                      onClick={() =>
-                        handleStatusChange(1, defect.status!, 'Completed')
-                      }
-                    >
-                      Completed
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              </TableCell>
-              <TableCell>
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button variant="ghost" size="icon" className="h-8 w-8">
-                      <MoreHorizontal className="h-4 w-4" />
-                      <span className="sr-only">작업 더보기</span>
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end">
-                    <DropdownMenuLabel>작업</DropdownMenuLabel>
-                    <DropdownMenuSeparator />
-                    <DropdownMenuItem>상세 보기</DropdownMenuItem>
-                    <DropdownMenuItem>작업 할당</DropdownMenuItem>
-                    <DropdownMenuItem>수리완료 처리</DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              </TableCell>
-            </TableRow>
-          ))}
+          {currentDefects.map((defect) => {
+            // 각 항목별 상세 정보 쿼리 상태 확인
+            const detailQuery = detailsQueries.find(
+              (q) => q.data?.publicId === defect.publicId,
+            )
+
+            return (
+              <TableRow key={defect.id}>
+                <TableCell className="font-medium">{defect.id}</TableCell>
+                <TableCell>{defect.type}</TableCell>
+                <TableCell>
+                  <StatusBadge className={getSeverityColor(defect.severity)}>
+                    {defect.severity.charAt(0).toUpperCase() +
+                      defect.severity.slice(1)}
+                  </StatusBadge>
+                </TableCell>
+                <TableCell className="flex items-center gap-1">
+                  <MapPin className="text-muted-foreground h-3 w-3" />
+                  {defect.location}
+                </TableCell>
+                <TableCell className="flex items-center gap-1">
+                  <Clock className="text-muted-foreground h-3 w-3" />
+                  {formatDate(defect.detectedAt)}
+                </TableCell>
+                <TableCell>
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <StatusBadge className={getStatusColor(defect.status!)}>
+                        {defect.status!}
+                      </StatusBadge>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="start">
+                      <DropdownMenuLabel>작업 상태 변경</DropdownMenuLabel>
+                      <DropdownMenuSeparator />
+                      <DropdownMenuItem
+                        onClick={() =>
+                          handleStatusChange(1, defect.status!, 'Pending')
+                        }
+                      >
+                        Pending
+                      </DropdownMenuItem>
+                      <DropdownMenuItem
+                        onClick={() =>
+                          handleStatusChange(1, defect.status!, 'Assigned')
+                        }
+                      >
+                        Assigned
+                      </DropdownMenuItem>
+                      <DropdownMenuItem
+                        onClick={() =>
+                          handleStatusChange(1, defect.status!, 'In Progress')
+                        }
+                      >
+                        In Progress
+                      </DropdownMenuItem>
+                      <DropdownMenuItem
+                        onClick={() =>
+                          handleStatusChange(1, defect.status!, 'Completed')
+                        }
+                      >
+                        Completed
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                </TableCell>
+                <TableCell>
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button variant="ghost" size="icon" className="h-8 w-8">
+                        <MoreHorizontal className="h-4 w-4" />
+                        <span className="sr-only">작업 더보기</span>
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end">
+                      <DropdownMenuLabel>작업</DropdownMenuLabel>
+                      <DropdownMenuSeparator />
+                      <DropdownMenuItem>상세 보기</DropdownMenuItem>
+                      <DropdownMenuItem>작업 할당</DropdownMenuItem>
+                      <DropdownMenuItem>수리완료 처리</DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                </TableCell>
+              </TableRow>
+            )
+          })}
         </TableBody>
       </Table>
-      
-      {/* 페이지네이션 추가 */}
+
+      {/* 페이지네이션 */}
       <div className="mt-4">
         <Pagination>
           <PaginationContent>
             <PaginationItem>
-              <PaginationPrevious 
+              <PaginationPrevious
                 onClick={() => handlePageChange(Math.max(1, currentPage - 1))}
-                className={currentPage === 1 ? "pointer-events-none opacity-50" : "cursor-pointer"}
+                className={
+                  currentPage === 1
+                    ? 'pointer-events-none opacity-50'
+                    : 'cursor-pointer'
+                }
               />
             </PaginationItem>
-            
-            {/* 첫 페이지가 아닐 경우 첫 페이지로 가는 링크 표시 */}
+
+            {/* 페이지 번호 로직은 기존과 동일 */}
             {getPageNumbers()[0] > 1 && (
               <>
                 <PaginationItem>
-                  <PaginationLink 
+                  <PaginationLink
                     onClick={() => handlePageChange(1)}
                     className="cursor-pointer"
                   >
@@ -381,11 +455,10 @@ export default function DefectList() {
                 )}
               </>
             )}
-            
-            {/* 페이지 번호 표시 */}
-            {getPageNumbers().map(page => (
+
+            {getPageNumbers().map((page) => (
               <PaginationItem key={page}>
-                <PaginationLink 
+                <PaginationLink
                   isActive={currentPage === page}
                   onClick={() => handlePageChange(page)}
                   className="cursor-pointer"
@@ -394,17 +467,17 @@ export default function DefectList() {
                 </PaginationLink>
               </PaginationItem>
             ))}
-            
-            {/* 마지막 페이지가 아닐 경우 마지막 페이지로 가는 링크 표시 */}
+
             {getPageNumbers()[getPageNumbers().length - 1] < totalPages && (
               <>
-                {getPageNumbers()[getPageNumbers().length - 1] < totalPages - 1 && (
+                {getPageNumbers()[getPageNumbers().length - 1] <
+                  totalPages - 1 && (
                   <PaginationItem>
                     <PaginationEllipsis />
                   </PaginationItem>
                 )}
                 <PaginationItem>
-                  <PaginationLink 
+                  <PaginationLink
                     onClick={() => handlePageChange(totalPages)}
                     className="cursor-pointer"
                   >
@@ -413,11 +486,17 @@ export default function DefectList() {
                 </PaginationItem>
               </>
             )}
-            
+
             <PaginationItem>
-              <PaginationNext 
-                onClick={() => handlePageChange(Math.min(totalPages, currentPage + 1))}
-                className={currentPage === totalPages ? "pointer-events-none opacity-50" : "cursor-pointer"}
+              <PaginationNext
+                onClick={() =>
+                  handlePageChange(Math.min(totalPages, currentPage + 1))
+                }
+                className={
+                  currentPage === totalPages
+                    ? 'pointer-events-none opacity-50'
+                    : 'cursor-pointer'
+                }
               />
             </PaginationItem>
           </PaginationContent>

@@ -10,23 +10,24 @@ import {
   severityData,
   trendData,
 } from '@/data/placeholders'
-import { create } from 'zustand'
 import crypto from 'crypto'
+import { create } from 'zustand'
 
 // UUID로부터 표시 ID 생성하는 함수 추가
 function getDisplayId(uuid: string, prefix: string = 'DEF-'): string {
-  const validChars = '0123456789ABCDEFGHJKLMNPQRSTUVWXYZ';
-  const hash = crypto.createHash('sha256').update(uuid).digest('hex');
+  const validChars = '0123456789ABCDEFGHJKLMNPQRSTUVWXYZ'
+  const hash = crypto.createHash('sha256').update(uuid).digest('hex')
 
   const shortCode = Array(5)
     .fill(0)
     .map((_, i) => {
-      const index = parseInt(hash.slice(i * 2, i * 2 + 2), 16) % validChars.length;
-      return validChars[index];
+      const index =
+        parseInt(hash.slice(i * 2, i * 2 + 2), 16) % validChars.length
+      return validChars[index]
     })
-    .join('');
+    .join('')
 
-  return `${prefix}${shortCode}`;
+  return `${prefix}${shortCode}`
 }
 
 // Define types for our store
@@ -184,26 +185,26 @@ export const useDefectStore = create<DefectStoreState>((set, get) => ({
   // 수정된 업데이트 함수 - features 배열을 받아 각 항목의 publicId를 기반으로 displayId 생성
   updateGeoJSONData: (data) => {
     // GeoJSON 전체 객체가 들어올 경우 features 배열만 추출
-    const features = data.features ? data.features : data;
+    const features = data.features ? data.features : data
 
     if (!features) {
-      set({ geoJSONData: null });
-      return;
+      set({ geoJSONData: null })
+      return
     }
 
     // 각 feature에 displayId 추가
     const enhancedFeatures = features.map((feature: FeaturePoint) => {
-      const publicId = feature.properties.publicId;
+      const publicId = feature.properties.publicId
       return {
         ...feature,
         properties: {
           ...feature.properties,
-          displayId: getDisplayId(publicId)
-        }
-      };
-    });
+          displayId: getDisplayId(publicId),
+        },
+      }
+    })
 
-    set({ geoJSONData: enhancedFeatures });
+    set({ geoJSONData: enhancedFeatures })
   },
 
   // 상태 조회 함수 - geoJSONData 반환

@@ -34,6 +34,7 @@ import {
   TimeRangeType,
   useDefectStore,
 } from '@/store/defect-store'
+import { useQuery } from '@tanstack/react-query'
 import {
   AlertTriangle,
   ArrowRight,
@@ -69,53 +70,48 @@ export default function Dashboard() {
     // updateDefectStats,
     // updateDefectTrends,
     updateGeoJSONData,
-    // getGeoJSONData,
+    getGeoJSONData,
     // updateDetailedDefect,
   } = useDefectStore()
 
   const [selectedTab, selectTab] = useState('map')
 
-  // const [isLoading, setIsLoading] = useState(false)
-  // const [recentlyIn, setRecentlyIn] = useState('D')
+  // TanStack Query 사용하여 데이터 로드
+  const {
+    // data: geoJsonData,
+    refetch: refetchGeoJson,
+    // isLoading,
+    // error,
+  } = useQuery({
+    queryKey: ['defects'],
+    queryFn: async () => {
+      const response = await coodAPI.getDefects()
+      if (response.status === 200 && response.data) {
+        // 스토어 업데이트
+        updateGeoJSONData(response.data)
+        return response.data
+      }
+      throw new Error('데이터 로드 실패')
+    },
+  })
 
-  const loadData = async () => {
-    console.log(`데이터 로딩 시작`)
-    const response = await coodAPI.getDefects()
-    if (response.status === 200 && response.data) {
-      console.log(
-        `GeoJSON 데이터 로드 성공: ${response.data.features!.length || 0} 개의 데이터`,
-      )
-      console.log("데이터 목록: ", response.data.features!)
-
-      updateGeoJSONData(response.data)
-      // const dd = getGeoJSONData()
-      // if(dd){
-      //   console.log('이거 나오면 store까지 잘 들어간 것:', dd.features)
-      // }
-    }
-  }
-
-  const getReportByTimeRange = async () => {
-    if (timeRange === 'D') {
-      const response = await statisticAPI.getDamageDailyReport()
-      console.log(response.data)
-    } else if (timeRange === 'W') {
-      const response = await statisticAPI.getDamageWeeklyReport()
-      console.log(response.data)
-    } else {
-      const response = await statisticAPI.getDamageMonthlyReport()
-      console.log(response.data)
-    }
-  }
-
-  useEffect(() => {
-    loadData()
-  }, [])
-
-  useEffect(() => {
-    console.log(`timeRange: ${timeRange}`)
-    getReportByTimeRange()
-  }, [timeRange])
+  // 통계 데이터 로드 (timeRange 변경에 따라 자동으로 재요청)
+  const { 
+    // data: reportData
+   } = useQuery({
+    queryKey: ['reports', timeRange],
+    queryFn: async () => {
+      if (timeRange === 'D') {
+        return statisticAPI.getDamageDailyReport()
+      } else if (timeRange === 'W') {
+        return statisticAPI.getDamageWeeklyReport()
+      } else {
+        return statisticAPI.getDamageMonthlyReport()
+      }
+    },
+    // timeRange가 변경될 때마다 자동으로 재요청
+    enabled: !!timeRange,
+  })
 
   return (
     <div className="bg-muted/40 flex min-h-screen w-full flex-col">
@@ -301,7 +297,7 @@ export default function Dashboard() {
               <LocationHeader />
             </div>
             <Button
-              onClick={() => loadData()}
+              onClick={() => refetchGeoJson()}
               className="active:bg-primary/70 active:translate-y-0.5 active:scale-95"
             >
               <svg
