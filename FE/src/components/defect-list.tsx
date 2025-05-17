@@ -1,6 +1,6 @@
 'use client'
 
-import { coodAPI } from '@/api/coordinate-api'
+import { coordinateAPI } from '@/api/coordinate-api'
 import { defectAPI } from '@/api/defect-api'
 import { Button } from '@/components/ui/button'
 import {
@@ -61,28 +61,28 @@ export default function DefectList() {
   // Zustand 스토어에서 데이터 가져오기
   const { defectType, severity, geoJSONData } = useDefectStore()
 
-  // 기본 매핑 로직 - geoJSONData를 기반으로 기본 객체 생성
+  // geoJSONData를 사용하여 defects 배열 생성
   const mappedDefects = geoJSONData
-    ? geoJSONData.map((feature) => {
-        const publicId = feature.properties.publicId
-        const detail = detailsMap[publicId]
+  ? geoJSONData.map((feature) => {
+      const publicId = feature.properties.publicId
+      const detail = detailsMap[publicId]
 
-        return {
-          id: feature.properties.displayId || 'Unknown',
-          publicId: publicId, // API 호출용으로 보존
-          type: 'Crack', // 하드코딩 값
-          severity: 'medium', // 하드코딩 값
-          location: feature.properties.address?.street || 'Unknown location',
-          detectedAt: new Date().toISOString(),
-          status: 'Pending', // 하드코딩 값
-          description: 'Auto-generated defect from GeoJSON data',
-          // 상세 정보가 있으면 추가
-          risk: detail?.risk,
-          imageUrl: detail?.imageUrl,
-          damages: detail?.damages,
-        }
-      })
-    : []
+      return {
+        id: feature.properties.displayId || 'Unknown',
+        publicId: publicId, // API 호출용으로 보존
+        type: 'Crack', // 하드코딩 값
+        severity: 'medium', // 하드코딩 값
+        location: feature.properties.address?.street || 'Unknown location',
+        detectedAt: new Date().toISOString(),
+        status: 'Pending', // 하드코딩 값
+        description: 'Auto-generated defect from GeoJSON data',
+        // 상세 정보가 있으면 추가
+        risk: detail?.risk,
+        imageUrl: detail?.imageUrl,
+        damages: detail?.damages,
+      }
+    })
+  : []
 
   // 필터링
   const filteredDefects = mappedDefects.filter((defect) => {
@@ -116,7 +116,7 @@ export default function DefectList() {
     queries: currentDefects.map((defect) => ({
       queryKey: ['defectDetail', defect.publicId],
       queryFn: async () => {
-        const response = await coodAPI.getDetailedDefects(defect.publicId)
+        const response = await coordinateAPI.getDefectDetail(defect.publicId)
         console.log('good!: ', response.data.damages)
 
         return { publicId: defect.publicId, data: response.data }
@@ -166,7 +166,7 @@ export default function DefectList() {
   // 페이지 번호 배열 생성
   const getPageNumbers = () => {
     const pageNumbers = []
-    const maxVisiblePages = 5
+    const maxVisiblePages = 5 // 최대 표시할 페이지 번호 수
 
     if (totalPages <= maxVisiblePages) {
       for (let i = 1; i <= totalPages; i++) {
@@ -176,6 +176,7 @@ export default function DefectList() {
       let startPage = Math.max(1, currentPage - Math.floor(maxVisiblePages / 2))
       const endPage = Math.min(totalPages, startPage + maxVisiblePages - 1)
 
+      // 마지막 페이지가 최대 표시 수보다 적은 경우 시작 페이지 조정
       if (endPage - startPage + 1 < maxVisiblePages) {
         startPage = Math.max(1, endPage - maxVisiblePages + 1)
       }
@@ -424,7 +425,7 @@ export default function DefectList() {
         </TableBody>
       </Table>
 
-      {/* 페이지네이션 */}
+      {/* 페이지네이션 추가 */}
       <div className="mt-4">
         <Pagination>
           <PaginationContent>
@@ -439,7 +440,7 @@ export default function DefectList() {
               />
             </PaginationItem>
 
-            {/* 페이지 번호 로직은 기존과 동일 */}
+            {/* 첫 페이지가 아닐 경우 첫 페이지로 가는 링크 표시 */}
             {getPageNumbers()[0] > 1 && (
               <>
                 <PaginationItem>
@@ -458,6 +459,7 @@ export default function DefectList() {
               </>
             )}
 
+            {/* 페이지 번호 표시 */}
             {getPageNumbers().map((page) => (
               <PaginationItem key={page}>
                 <PaginationLink
@@ -470,6 +472,7 @@ export default function DefectList() {
               </PaginationItem>
             ))}
 
+            {/* 마지막 페이지가 아닐 경우 마지막 페이지로 가는 링크 표시 */}
             {getPageNumbers()[getPageNumbers().length - 1] < totalPages && (
               <>
                 {getPageNumbers()[getPageNumbers().length - 1] <
