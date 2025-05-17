@@ -60,7 +60,7 @@ const processQueue = (
 // request interceptor
 apiClient.interceptors.request.use(
   (config: InternalAxiosRequestConfig): InternalAxiosRequestConfig => {
-    if (config.url === '/api/users/refresh') {
+    if (config.url?.endsWith('/api/users/refresh')) {
       const refreshToken = TokenService.getRefreshToken()
       if (refreshToken) {
         config.headers['Authorization'] = `Bearer ${refreshToken}`
@@ -97,7 +97,7 @@ apiClient.interceptors.response.use(
     // 401 처리 로직
     if (error.response?.status === 401 && !originalRequest._retry) {
       // 리프레시 요청 자체가 401인 경우 - 리프레시 토큰도 만료됨
-      if (originalRequest.url === '/api/users/refresh') {
+      if (originalRequest.url?.endsWith('/api/users/refresh')) {
         handleLogout()
         alert('세션이 만료되었습니다. 다시 로그인해주세요.')
         return Promise.reject(error)
@@ -126,6 +126,7 @@ apiClient.interceptors.response.use(
             } else {
               processQueue(new Error('토큰 갱신 실패'), null)
               reject(error)
+              handleLogout()
             }
           } catch (refreshError) {
             isRefreshing = false
@@ -135,6 +136,7 @@ apiClient.interceptors.response.use(
                 : new Error('토큰 갱신 실패'),
               null,
             )
+            handleLogout()
             reject(refreshError)
           }
         })

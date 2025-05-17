@@ -1,4 +1,3 @@
-// src/app/client-layout.tsx
 'use client'
 
 import { userAPI } from '@/api/user-api'
@@ -7,8 +6,6 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools'
 import { usePathname, useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
-
-// src/app/client-layout.tsx
 
 // 보호할 경로 목록
 const protectedRoutes = ['/']

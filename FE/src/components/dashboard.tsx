@@ -15,7 +15,7 @@ import {
 import {
   DefectCard,
   DefectCardContent,
-  DefectCardDescription,
+  // DefectCardDescription,
   DefectCardFooter,
   DefectCardHeader,
   DefectCardTitle,
@@ -44,7 +44,7 @@ import {
   Filter,
   MapPin,
 } from 'lucide-react'
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 
 import DefectHeatmap from './defect-heatmap'
 import DefectList from './defect-list'
@@ -70,7 +70,7 @@ export default function Dashboard() {
     // updateDefectStats,
     // updateDefectTrends,
     updateGeoJSONData,
-    getGeoJSONData,
+    // getGeoJSONData,
     // updateDetailedDefect,
   } = useDefectStore()
 
@@ -96,17 +96,32 @@ export default function Dashboard() {
   })
 
   // 통계 데이터 로드 (timeRange 변경에 따라 자동으로 재요청)
-  const { 
-    // data: reportData
-   } = useQuery({
+  const { data: reportData } = useQuery({
     queryKey: ['reports', timeRange],
     queryFn: async () => {
-      if (timeRange === 'D') {
-        return statisticAPI.getDamageDailyReport()
-      } else if (timeRange === 'W') {
-        return statisticAPI.getDamageWeeklyReport()
-      } else {
-        return statisticAPI.getDamageMonthlyReport()
+      // API 함수 매핑 - timeRange에 따라 다른 API 호출
+      const apiCalls = {
+        'D': statisticAPI.getDamageDailyReport,
+        'W': statisticAPI.getDamageWeeklyReport,
+        'M': statisticAPI.getDamageMonthlyReport
+      }
+
+      // timeRange에 해당하는 API 함수 호출
+      const apiFunction = apiCalls[timeRange] || apiCalls['D'] // 기본값은 일간 보고서
+      const response = await apiFunction()
+
+      console.log(`${timeRange} 보고서:`, response.data, '상태 코드:', response.status)
+
+      // 응답 데이터 구조화 및 204 처리
+      return {
+        data: {
+          // 응답이 204인 경우 기본값 설정
+          count: response.status === 204 ? 0 : response.data?.count || 0,
+          // 응답이 204인 경우 changeRate를 null로 설정 (렌더링에서 '-'로 표시)
+          changeRate: response.status === 204 ? null : response.data?.changeRate
+        },
+        status: response.status,
+        originalData: response.data // 원본 데이터도 유지
       }
     },
     // timeRange가 변경될 때마다 자동으로 재요청
@@ -199,6 +214,21 @@ export default function Dashboard() {
                 <SelectItem value="low">낮음</SelectItem>
               </SelectContent>
             </Select>
+            <Select
+              value={severity}
+              onValueChange={(value) => setSeverity(value as SeverityType)}
+            >
+              <SelectTrigger className="h-8 w-[130px]">
+                <SelectValue placeholder="Severity" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">전체</SelectItem>
+                <SelectItem value="critical">심각</SelectItem>
+                <SelectItem value="high">높음</SelectItem>
+                <SelectItem value="medium">중간</SelectItem>
+                <SelectItem value="low">낮음</SelectItem>
+              </SelectContent>
+            </Select>
             <Button variant="outline" size="sm" className="h-8 gap-1">
               <Filter className="h-3.5 w-3.5" />
               <span>필터 더보기</span>
@@ -214,10 +244,13 @@ export default function Dashboard() {
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">
-                {dashboardMetrics.totalDefects}
+                {reportData?.data?.count || 0}
               </div>
               <p className="text-muted-foreground text-xs">
-                지난 주 대비 {dashboardMetrics.totalDefectsChange}
+                {{ D: '어제', W: '지난 주', M: '지난 달' }[timeRange] || ''}{' '}
+                대비{' '}
+                {reportData?.data?.changeRate === null ? '-' : (reportData?.data?.changeRate || 0)}{' '}
+                % 증가
               </p>
             </CardContent>
           </Card>
