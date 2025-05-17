@@ -1,5 +1,6 @@
 // src/api/statistic-api.ts
 import apiCaller from '@/api/api-utils'
+import apiClient from '@/api/api-client'
 
 export const statisticAPI = {
   // 유형별 도로파손 분포
@@ -43,6 +44,16 @@ export const statisticAPI = {
     ),
 
   // 지역별 도로파손 분포 지도
+  getLocationallyDamageMap: async (city: string) => {
+    try {
+      const response = await apiClient.get('/api/dashboard/districts', { params: { city } })
+      return { data: response.data, status: response.status, error: null }
+    } catch (error: any) {
+      console.error(`지역별 도로파손 분포 지도 조회 실패: ${error}`)
+      return { data: null, status: error.response.status, error }
+    }
+  },
+
   // getLocationallyDamageMap: (city: string) =>
   //   apiCaller(
   //     'get',
