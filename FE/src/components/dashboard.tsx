@@ -75,7 +75,6 @@ export default function Dashboard() {
   } = useDefectStore()
 
   const [selectedTab, selectTab] = useState('map')
-  const [selectedFilter, selectFilter] = useState('timeRange')
 
   // TanStack Query 사용하여 데이터 로드
   const {
@@ -100,12 +99,29 @@ export default function Dashboard() {
   const { data: reportData } = useQuery({
     queryKey: ['reports', timeRange],
     queryFn: async () => {
-      if (timeRange === 'D') {
-        return await statisticAPI.getDamageDailyReport()
-      } else if (timeRange === 'W') {
-        return await statisticAPI.getDamageWeeklyReport()
-      } else {
-        return await statisticAPI.getDamageMonthlyReport()
+      // API 함수 매핑 - timeRange에 따라 다른 API 호출
+      const apiCalls = {
+        'D': statisticAPI.getDamageDailyReport,
+        'W': statisticAPI.getDamageWeeklyReport,
+        'M': statisticAPI.getDamageMonthlyReport
+      }
+
+      // timeRange에 해당하는 API 함수 호출
+      const apiFunction = apiCalls[timeRange] || apiCalls['D'] // 기본값은 일간 보고서
+      const response = await apiFunction()
+
+      console.log(`${timeRange} 보고서:`, response.data, '상태 코드:', response.status)
+
+      // 응답 데이터 구조화 및 204 처리
+      return {
+        data: {
+          // 응답이 204인 경우 기본값 설정
+          count: response.status === 204 ? 0 : response.data?.count || 0,
+          // 응답이 204인 경우 changeRate를 null로 설정 (렌더링에서 '-'로 표시)
+          changeRate: response.status === 204 ? null : response.data?.changeRate
+        },
+        status: response.status,
+        originalData: response.data // 원본 데이터도 유지
       }
     },
     // timeRange가 변경될 때마다 자동으로 재요청
@@ -228,14 +244,12 @@ export default function Dashboard() {
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">
-                {reportData?.data.count || 0}
+                {reportData?.data?.count || 0}
               </div>
               <p className="text-muted-foreground text-xs">
                 {{ D: '어제', W: '지난 주', M: '지난 달' }[timeRange] || ''}{' '}
                 대비{' '}
-                {reportData?.data.status === 204
-                  ? '-'
-                  : reportData?.data.changeRate}{' '}
+                {reportData?.data?.changeRate === null ? '-' : (reportData?.data?.changeRate || 0)}{' '}
                 % 증가
               </p>
             </CardContent>
