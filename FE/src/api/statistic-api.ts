@@ -1,6 +1,7 @@
 // src/api/statistic-api.ts
-import apiCaller from '@/api/api-utils'
 import apiClient from '@/api/api-client'
+import apiCaller from '@/api/api-utils'
+import axios from 'axios'
 
 export const statisticAPI = {
   // 유형별 도로파손 분포
@@ -46,11 +47,25 @@ export const statisticAPI = {
   // 지역별 도로파손 분포 지도
   getLocationallyDamageMap: async (city: string) => {
     try {
-      const response = await apiClient.get('/api/dashboard/districts', { params: { city } })
+      // 제네릭으로 response.data 타입 지정
+      const response = await apiClient.get('/api/dashboard/districts', {
+        params: { city },
+      })
       return { data: response.data, status: response.status, error: null }
-    } catch (error: any) {
-      console.error(`지역별 도로파손 분포 지도 조회 실패: ${error}`)
-      return { data: null, status: error.response.status, error }
+    } catch (error: unknown) {
+      // 1) unknown 타입 좁히기
+      if (axios.isAxiosError(error) && error.response) {
+        console.error(`지역별 도로파손 분포 지도 조회 실패: ${error.message}`)
+        return {
+          data: null,
+          status: error.response.status,
+          error, // 여기선 AxiosError 타입입니다
+        }
+      }
+
+      // 2) AxiosError가 아니면 fallback
+      console.error('알 수 없는 오류:', error)
+      return { data: null, status: 500, error: new Error('Unknown error') }
     }
   },
 

@@ -15,7 +15,6 @@ export const coordinateAPI = {
     ),
 }
 
-
 // import apiClient from '@/api/api-client'
 
 // export const coodAPI = {
