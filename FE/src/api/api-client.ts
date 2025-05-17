@@ -99,7 +99,7 @@ apiClient.interceptors.response.use(
       // 리프레시 요청 자체가 401인 경우 - 리프레시 토큰도 만료됨
       if (originalRequest.url?.endsWith('/api/users/refresh')) {
         handleLogout()
-        alert('세션이 만료되었습니다. 다시 로그인해주세요.')
+        alert('1세션이 만료되었습니다. 다시 로그인해주세요.')
         return Promise.reject(error)
       }
 
@@ -126,6 +126,7 @@ apiClient.interceptors.response.use(
             } else {
               processQueue(new Error('토큰 갱신 실패'), null)
               reject(error)
+              alert('2세션이 만료되었습니다. 다시 로그인해주세요.')
               handleLogout()
             }
           } catch (refreshError) {
@@ -136,6 +137,7 @@ apiClient.interceptors.response.use(
                 : new Error('토큰 갱신 실패'),
               null,
             )
+            alert('3세션이 만료되었습니다. 다시 로그인해주세요.')
             handleLogout()
             reject(refreshError)
           }

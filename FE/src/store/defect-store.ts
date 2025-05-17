@@ -14,7 +14,11 @@ import crypto from 'crypto'
 import { create } from 'zustand'
 
 // UUID로부터 표시 ID 생성하는 함수 추가
-const getDisplayId = (uuid: string, damageId: number, prefix: string = 'DEF'): string => {
+const getDisplayId = (
+  uuid: string,
+  damageId: number,
+  prefix: string = 'DEF',
+): string => {
   const validChars = '0123456789ABCDEFGHJKLMNPQRSTUVWXYZ'
   const hash = crypto.createHash('sha256').update(uuid).digest('hex')
 
@@ -186,8 +190,6 @@ export type DefectStoreState = {
   getProcessedDefects: () => ProcessedDefect[]
 }
 
-
-
 export const useDefectStore = create<DefectStoreState>((set, get) => ({
   // Initial filter states
   timeRange: 'D',
@@ -232,9 +234,10 @@ export const useDefectStore = create<DefectStoreState>((set, get) => ({
 
   updateProcessedDefects: (defects) => set({ processedDefects: defects }),
   updateDetailsMap: (detailsMap) => set({ detailsMap }),
-  setProcessingDefects: (isProcessing) => set({ isProcessingDefects: isProcessing }),
+  setProcessingDefects: (isProcessing) =>
+    set({ isProcessingDefects: isProcessing }),
 
-    // 가공된 defects 가져오는 함수
+  // 가공된 defects 가져오는 함수
   getProcessedDefects: () => get().processedDefects,
 
   // 수정된 업데이트 함수 - features 배열을 받아 각 항목의 publicId를 기반으로 displayId 생성

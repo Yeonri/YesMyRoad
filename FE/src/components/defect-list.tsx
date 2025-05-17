@@ -63,26 +63,26 @@ export default function DefectList() {
 
   // geoJSONData를 사용하여 defects 배열 생성
   const mappedDefects = geoJSONData
-  ? geoJSONData.map((feature) => {
-      const publicId = feature.properties.publicId
-      const detail = detailsMap[publicId]
+    ? geoJSONData.map((feature) => {
+        const publicId = feature.properties.publicId
+        const detail = detailsMap[publicId]
 
-      return {
-        id: feature.properties.displayId || 'Unknown',
-        publicId: publicId, // API 호출용으로 보존
-        type: 'Crack', // 하드코딩 값
-        severity: 'medium', // 하드코딩 값
-        location: feature.properties.address?.street || 'Unknown location',
-        detectedAt: new Date().toISOString(),
-        status: 'Pending', // 하드코딩 값
-        description: 'Auto-generated defect from GeoJSON data',
-        // 상세 정보가 있으면 추가
-        risk: detail?.risk,
-        imageUrl: detail?.imageUrl,
-        damages: detail?.damages,
-      }
-    })
-  : []
+        return {
+          id: feature.properties.displayId || 'Unknown',
+          publicId: publicId, // API 호출용으로 보존
+          type: 'Crack', // 하드코딩 값
+          severity: 'medium', // 하드코딩 값
+          location: feature.properties.address?.street || 'Unknown location',
+          detectedAt: new Date().toISOString(),
+          status: 'Pending', // 하드코딩 값
+          description: 'Auto-generated defect from GeoJSON data',
+          // 상세 정보가 있으면 추가
+          risk: detail?.risk,
+          imageUrl: detail?.imageUrl,
+          damages: detail?.damages,
+        }
+      })
+    : []
 
   // 필터링
   const filteredDefects = mappedDefects.filter((defect) => {
