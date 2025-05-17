@@ -75,6 +75,7 @@ export default function Dashboard() {
   } = useDefectStore()
 
   const [selectedTab, selectTab] = useState('map')
+  const [selectedFilter, selectFilter] = useState('timeRange')
 
   // TanStack Query 사용하여 데이터 로드
   const {
@@ -169,70 +170,6 @@ export default function Dashboard() {
               <div className="mr-1 h-2 w-2 rounded-full bg-green-500" />
               안전: {severityCounts.low}
             </Badge>
-          </div>
-          <div className="flex flex-wrap gap-2">
-            <Select
-              value={timeRange}
-              onValueChange={(value) => setTimeRange(value as TimeRangeType)}
-            >
-              <SelectTrigger className="h-8 w-[130px]">
-                <SelectValue placeholder="Time Range" />
-              </SelectTrigger>
-              <SelectContent>
-                {/* <SelectItem value="1h">1시간 이내</SelectItem> */}
-                <SelectItem value="D">24시간 이내</SelectItem>
-                <SelectItem value="W">7일 이내</SelectItem>
-                <SelectItem value="M">30일 이내</SelectItem>
-              </SelectContent>
-            </Select>
-            <Select
-              value={defectType}
-              onValueChange={(value) => setDefectType(value as DefectType)}
-            >
-              <SelectTrigger className="h-8 w-[130px]">
-                <SelectValue placeholder="Defect Type" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">전체</SelectItem>
-                <SelectItem value="pothole">포트홀</SelectItem>
-                <SelectItem value="crack">깨짐</SelectItem>
-                <SelectItem value="paint">페인트 벗겨짐</SelectItem>
-              </SelectContent>
-            </Select>
-            <Select
-              value={severity}
-              onValueChange={(value) => setSeverity(value as SeverityType)}
-            >
-              <SelectTrigger className="h-8 w-[130px]">
-                <SelectValue placeholder="Severity" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">전체</SelectItem>
-                <SelectItem value="critical">심각</SelectItem>
-                <SelectItem value="high">높음</SelectItem>
-                <SelectItem value="medium">중간</SelectItem>
-                <SelectItem value="low">낮음</SelectItem>
-              </SelectContent>
-            </Select>
-            <Select
-              value={severity}
-              onValueChange={(value) => setSeverity(value as SeverityType)}
-            >
-              <SelectTrigger className="h-8 w-[130px]">
-                <SelectValue placeholder="Severity" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">전체</SelectItem>
-                <SelectItem value="critical">심각</SelectItem>
-                <SelectItem value="high">높음</SelectItem>
-                <SelectItem value="medium">중간</SelectItem>
-                <SelectItem value="low">낮음</SelectItem>
-              </SelectContent>
-            </Select>
-            <Button variant="outline" size="sm" className="h-8 gap-1">
-              <Filter className="h-3.5 w-3.5" />
-              <span>필터 더보기</span>
-            </Button>
           </div>
         </div>
 
@@ -397,8 +334,79 @@ export default function Dashboard() {
           <TabsContent value="list" className="space-y-4">
             <Card>
               <CardHeader>
-                <CardTitle>결함 리스트</CardTitle>
-                <CardDescription>모든 결함을 심각도별로 정렬</CardDescription>
+                <div className='flex justify-between'>
+                  <div>
+                    <CardTitle>결함 리스트</CardTitle>
+                    <CardDescription>모든 결함을 심각도별로 정렬</CardDescription>
+                  </div>
+                  <div className="flex flex-wrap gap-2">
+                    {
+                      selectedFilter === 'timeRange' &&
+                      <Select
+                        value={timeRange}
+                        onValueChange={(value) => setTimeRange(value as TimeRangeType)}
+                      >
+                        <SelectTrigger className="h-8 w-[130px]">
+                          <SelectValue placeholder="Time Range" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {/* <SelectItem value="1h">1시간 이내</SelectItem> */}
+                          <SelectItem value="D">24시간 이내</SelectItem>
+                          <SelectItem value="W">7일 이내</SelectItem>
+                          <SelectItem value="M">30일 이내</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    }
+                    {
+                      selectedFilter === 'type' &&
+                      <Select
+                        value={defectType}
+                        onValueChange={(value) => setDefectType(value as DefectType)}
+                      >
+                        <SelectTrigger className="h-8 w-[130px]">
+                          <SelectValue placeholder="Defect Type" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="all">전체</SelectItem>
+                          <SelectItem value="pothole">포트홀</SelectItem>
+                          <SelectItem value="crack">깨짐</SelectItem>
+                          <SelectItem value="paint">페인트 벗겨짐</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    }
+                    {
+                      selectedFilter === 'severity' &&
+                      <Select
+                        value={severity}
+                        onValueChange={(value) => setSeverity(value as SeverityType)}
+                      >
+                        <SelectTrigger className="h-8 w-[130px]">
+                          <SelectValue placeholder="Severity" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="all">전체</SelectItem>
+                          <SelectItem value="critical">심각</SelectItem>
+                          <SelectItem value="high">높음</SelectItem>
+                          <SelectItem value="medium">중간</SelectItem>
+                          <SelectItem value="low">낮음</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    }
+                    <Select
+                      value={selectedFilter}
+                      onValueChange={(value: string) => selectFilter(value)}
+                    >
+                      <SelectTrigger className="h-8 w-[130px]">
+                        <SelectValue placeholder="필터 선택" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="timeRange">시간</SelectItem>
+                        <SelectItem value="type">유형</SelectItem>
+                        <SelectItem value="severity">심각도</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
               </CardHeader>
               <CardContent>
                 <DefectList />
