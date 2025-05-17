@@ -19,7 +19,7 @@ import {
   PaginationLink,
   PaginationNext,
   PaginationPrevious,
-} from "@/components/ui/pagination"
+} from '@/components/ui/pagination'
 import { StatusBadge } from '@/components/ui/status-badge'
 import {
   Table,
@@ -50,18 +50,20 @@ export default function DefectList() {
   const { defectType, severity, geoJSONData } = useDefectStore()
 
   // geoJSONData를 사용하여 defects 배열 생성
-  const mappedDefects = geoJSONData ? geoJSONData.map(feature => {
-    // 각 feature에서 displayId를 가져와 defect 객체 생성
-    return {
-      id: feature.properties.displayId || 'Unknown', // displayId를 id로 사용
-      type: 'Crack', // 하드코딩된 값
-      severity: 'medium', // 하드코딩된 값
-      location: feature.properties.address?.street || 'Unknown location', // 주소 사용
-      detectedAt: new Date().toISOString(), // 현재 시간으로 하드코딩
-      status: 'Pending', // 하드코딩된 값
-      description: 'Auto-generated defect from GeoJSON data' // 하드코딩된 값
-    }
-  }) : [];
+  const mappedDefects = geoJSONData
+    ? geoJSONData.map((feature) => {
+        // 각 feature에서 displayId를 가져와 defect 객체 생성
+        return {
+          id: feature.properties.displayId || 'Unknown', // displayId를 id로 사용
+          type: 'Crack', // 하드코딩된 값
+          severity: 'medium', // 하드코딩된 값
+          location: feature.properties.address?.street || 'Unknown location', // 주소 사용
+          detectedAt: new Date().toISOString(), // 현재 시간으로 하드코딩
+          status: 'Pending', // 하드코딩된 값
+          description: 'Auto-generated defect from GeoJSON data', // 하드코딩된 값
+        }
+      })
+    : []
 
   // Filter defects based on selected filters
   const filteredDefects = mappedDefects.filter((defect) => {
@@ -112,7 +114,7 @@ export default function DefectList() {
   const getPageNumbers = () => {
     const pageNumbers = []
     const maxVisiblePages = 5 // 최대 표시할 페이지 번호 수
-    
+
     if (totalPages <= maxVisiblePages) {
       // 총 페이지 수가 최대 표시 수보다 적은 경우, 모든 페이지 번호 표시
       for (let i = 1; i <= totalPages; i++) {
@@ -122,17 +124,17 @@ export default function DefectList() {
       // 현재 페이지 주변의 페이지 번호만 표시
       let startPage = Math.max(1, currentPage - Math.floor(maxVisiblePages / 2))
       const endPage = Math.min(totalPages, startPage + maxVisiblePages - 1)
-      
+
       // 마지막 페이지가 최대 표시 수보다 적은 경우 시작 페이지 조정
       if (endPage - startPage + 1 < maxVisiblePages) {
         startPage = Math.max(1, endPage - maxVisiblePages + 1)
       }
-      
+
       for (let i = startPage; i <= endPage; i++) {
         pageNumbers.push(i)
       }
     }
-    
+
     return pageNumbers
   }
 
@@ -351,23 +353,27 @@ export default function DefectList() {
           ))}
         </TableBody>
       </Table>
-      
+
       {/* 페이지네이션 추가 */}
       <div className="mt-4">
         <Pagination>
           <PaginationContent>
             <PaginationItem>
-              <PaginationPrevious 
+              <PaginationPrevious
                 onClick={() => handlePageChange(Math.max(1, currentPage - 1))}
-                className={currentPage === 1 ? "pointer-events-none opacity-50" : "cursor-pointer"}
+                className={
+                  currentPage === 1
+                    ? 'pointer-events-none opacity-50'
+                    : 'cursor-pointer'
+                }
               />
             </PaginationItem>
-            
+
             {/* 첫 페이지가 아닐 경우 첫 페이지로 가는 링크 표시 */}
             {getPageNumbers()[0] > 1 && (
               <>
                 <PaginationItem>
-                  <PaginationLink 
+                  <PaginationLink
                     onClick={() => handlePageChange(1)}
                     className="cursor-pointer"
                   >
@@ -381,11 +387,11 @@ export default function DefectList() {
                 )}
               </>
             )}
-            
+
             {/* 페이지 번호 표시 */}
-            {getPageNumbers().map(page => (
+            {getPageNumbers().map((page) => (
               <PaginationItem key={page}>
-                <PaginationLink 
+                <PaginationLink
                   isActive={currentPage === page}
                   onClick={() => handlePageChange(page)}
                   className="cursor-pointer"
@@ -394,17 +400,18 @@ export default function DefectList() {
                 </PaginationLink>
               </PaginationItem>
             ))}
-            
+
             {/* 마지막 페이지가 아닐 경우 마지막 페이지로 가는 링크 표시 */}
             {getPageNumbers()[getPageNumbers().length - 1] < totalPages && (
               <>
-                {getPageNumbers()[getPageNumbers().length - 1] < totalPages - 1 && (
+                {getPageNumbers()[getPageNumbers().length - 1] <
+                  totalPages - 1 && (
                   <PaginationItem>
                     <PaginationEllipsis />
                   </PaginationItem>
                 )}
                 <PaginationItem>
-                  <PaginationLink 
+                  <PaginationLink
                     onClick={() => handlePageChange(totalPages)}
                     className="cursor-pointer"
                   >
@@ -413,11 +420,17 @@ export default function DefectList() {
                 </PaginationItem>
               </>
             )}
-            
+
             <PaginationItem>
-              <PaginationNext 
-                onClick={() => handlePageChange(Math.min(totalPages, currentPage + 1))}
-                className={currentPage === totalPages ? "pointer-events-none opacity-50" : "cursor-pointer"}
+              <PaginationNext
+                onClick={() =>
+                  handlePageChange(Math.min(totalPages, currentPage + 1))
+                }
+                className={
+                  currentPage === totalPages
+                    ? 'pointer-events-none opacity-50'
+                    : 'cursor-pointer'
+                }
               />
             </PaginationItem>
           </PaginationContent>

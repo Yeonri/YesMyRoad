@@ -10,23 +10,24 @@ import {
   severityData,
   trendData,
 } from '@/data/placeholders'
-import { create } from 'zustand'
 import crypto from 'crypto'
+import { create } from 'zustand'
 
 // UUID로부터 표시 ID 생성하는 함수 추가
 function getDisplayId(uuid: string, prefix: string = 'DEF-'): string {
-  const validChars = '0123456789ABCDEFGHJKLMNPQRSTUVWXYZ';
-  const hash = crypto.createHash('sha256').update(uuid).digest('hex');
+  const validChars = '0123456789ABCDEFGHJKLMNPQRSTUVWXYZ'
+  const hash = crypto.createHash('sha256').update(uuid).digest('hex')
 
   const shortCode = Array(5)
     .fill(0)
     .map((_, i) => {
-      const index = parseInt(hash.slice(i * 2, i * 2 + 2), 16) % validChars.length;
-      return validChars[index];
+      const index =
+        parseInt(hash.slice(i * 2, i * 2 + 2), 16) % validChars.length
+      return validChars[index]
     })
-    .join('');
+    .join('')
 
-  return `${prefix}${shortCode}`;
+  return `${prefix}${shortCode}`
 }
 
 // Define types for our store
@@ -56,7 +57,7 @@ export type DefectLocation = {
 
 export type HeatmapLocation = { lat: number; lng: number }
 
-// 상세 손상 정보를 위한 타입 정의
+// 손상 상세 정보를 위한 타입 정의
 export type DamageItem = {
   id: number
   category: string
@@ -64,7 +65,9 @@ export type DamageItem = {
   updatedAt: string
 }
 
-export type DetailedDefect = {
+export type DefectDetail = {
+  publicId: string
+  address: string
   imageUrl: string
   risk: number
   damages: DamageItem[]
@@ -91,8 +94,12 @@ export type DefectStoreState = {
   defectType: DefectType
   severity: SeverityType
 
-  detailedDefect: DetailedDefect | null
+  // 손상 발생 위치 데이터 리스트
   geoJSONData: FeatureCollection | null // 타입 변경
+
+  // 손상 상세 정보
+  defectDetail: DefectDetail | null
+  defectDetailList: DefectDetail[]
 
   // Data states
   defectLocations: DefectLocation[]
@@ -124,6 +131,9 @@ export type DefectStoreState = {
     low: number
   }
 
+  // 지도 상 마커를 클릭했을 때, 선택된 결함의 publicId를 저장하는 상태
+  selectedDefect: { publicId: string | null }
+
   // Actions
   setTimeRange: (timeRange: TimeRangeType) => void
   setDefectType: (defectType: DefectType) => void
@@ -138,13 +148,20 @@ export type DefectStoreState = {
     sevData: { value: number; name: string }[],
   ) => void
   updateDefectTrends: (newTrends: any) => void
-  updateDetailedDefect: (defect: DetailedDefect | null) => void
+
+  // 손상 상세 정보 업데이트 함수
+  updateDefectDetail: (defect: DefectDetail | null) => void
+  updateDefectDetailList: (defects: DefectDetail[]) => void
 
   // 수정된 업데이트 함수 - 전체 GeoJSON이 아닌 features 배열만 받음
   updateGeoJSONData: (data: any) => void
 
   // 상태 조회 함수
   getGeoJSONData: () => FeatureCollection | null
+
+  // selectedDefect 관련 함수
+  setSelectedDefect: (publicId: string) => void
+  getSelectedDefect: () => { publicId: string | null }
 }
 
 export const useDefectStore = create<DefectStoreState>((set, get) => ({
@@ -152,8 +169,9 @@ export const useDefectStore = create<DefectStoreState>((set, get) => ({
   timeRange: 'D',
   defectType: 'all',
   severity: 'all',
-  detailedDefect: null,
   geoJSONData: null,
+  defectDetail: null,
+  defectDetailList: [],
 
   // Initial data states with placeholder data
   defectLocations,
@@ -165,6 +183,9 @@ export const useDefectStore = create<DefectStoreState>((set, get) => ({
   trendData,
   dashboardMetrics,
   severityCounts,
+
+  // selectedDefect 초기값
+  selectedDefect: { publicId: null },
 
   // Actions for updating filters
   setTimeRange: (timeRange) => set({ timeRange }),
@@ -179,33 +200,40 @@ export const useDefectStore = create<DefectStoreState>((set, get) => ({
   updateDefectStats: (typeData, sevData) =>
     set({ defectTypeData: typeData, severityData: sevData }),
   updateDefectTrends: (newTrends) => set({ trendData: newTrends }),
-  updateDetailedDefect: (defect) => set({ detailedDefect: defect }),
+  updateDefectDetail: (defect) => set({ defectDetail: defect }),
+  updateDefectDetailList: (defect) => set({ defectDetailList: defect }),
 
   // 수정된 업데이트 함수 - features 배열을 받아 각 항목의 publicId를 기반으로 displayId 생성
   updateGeoJSONData: (data) => {
     // GeoJSON 전체 객체가 들어올 경우 features 배열만 추출
-    const features = data.features ? data.features : data;
+    const features = data.features ? data.features : data
 
     if (!features) {
-      set({ geoJSONData: null });
-      return;
+      set({ geoJSONData: null })
+      return
     }
 
     // 각 feature에 displayId 추가
     const enhancedFeatures = features.map((feature: FeaturePoint) => {
-      const publicId = feature.properties.publicId;
+      const publicId = feature.properties.publicId
       return {
         ...feature,
         properties: {
           ...feature.properties,
-          displayId: getDisplayId(publicId)
-        }
-      };
-    });
+          displayId: getDisplayId(publicId),
+        },
+      }
+    })
 
-    set({ geoJSONData: enhancedFeatures });
+    set({ geoJSONData: enhancedFeatures })
   },
 
   // 상태 조회 함수 - geoJSONData 반환
   getGeoJSONData: () => get().geoJSONData,
+
+  // selectedDefect 설정 함수
+  setSelectedDefect: (publicId) => set({ selectedDefect: { publicId } }),
+
+  // selectedDefect 조회 함수
+  getSelectedDefect: () => get().selectedDefect,
 }))
