@@ -57,7 +57,7 @@ export type DefectLocation = {
 
 export type HeatmapLocation = { lat: number; lng: number }
 
-// 상세 손상 정보를 위한 타입 정의
+// 손상 상세 정보를 위한 타입 정의
 export type DamageItem = {
   id: number
   category: string
@@ -65,7 +65,9 @@ export type DamageItem = {
   updatedAt: string
 }
 
-export type DetailedDefect = {
+export type DefectDetail = {
+  publicId: string
+  address: string
   imageUrl: string
   risk: number
   damages: DamageItem[]
@@ -106,8 +108,12 @@ export type DefectStoreState = {
   defectType: DefectType
   severity: SeverityType
 
-  detailedDefect: DetailedDefect | null
+  // 손상 발생 위치 데이터 리스트
   geoJSONData: FeatureCollection | null // 타입 변경
+
+  // 손상 상세 정보
+  defectDetail: DefectDetail | null
+  defectDetailList: DefectDetail[]
 
   // Data states
   defectLocations: DefectLocation[]
@@ -139,8 +145,10 @@ export type DefectStoreState = {
     low: number
   }
 
+  // 지도 상 마커를 클릭했을 때, 선택된 결함의 publicId를 저장하는 상태
+  selectedDefect: { publicId: string | null }
   processedDefects: ProcessedDefect[] // 가공된 결함 데이터
-  detailsMap: Record<string, DetailedDefect> // publicId를 키로 하는 상세 정보 맵
+  detailsMap: Record<string, DefectDetail> // publicId를 키로 하는 상세 정보 맵
   isProcessingDefects: boolean // 데이터 처리 중 상태
 
   // Actions
@@ -149,7 +157,7 @@ export type DefectStoreState = {
   setSeverity: (severity: SeverityType) => void
 
   updateProcessedDefects: (defects: ProcessedDefect[]) => void
-  updateDetailsMap: (detailsMap: Record<string, DetailedDefect>) => void
+  updateDetailsMap: (detailsMap: Record<string, DefectDetail>) => void
   setProcessingDefects: (isProcessing: boolean) => void
 
   // 상태 업데이트 함수 (API 호출 없이 상태만 업데이트)
@@ -161,13 +169,20 @@ export type DefectStoreState = {
     sevData: { value: number; name: string }[],
   ) => void
   updateDefectTrends: (newTrends: any) => void
-  updateDetailedDefect: (defect: DetailedDefect | null) => void
+
+  // 손상 상세 정보 업데이트 함수
+  updateDefectDetail: (defect: DefectDetail | null) => void
+  updateDefectDetailList: (defects: DefectDetail[]) => void
 
   // 수정된 업데이트 함수 - 전체 GeoJSON이 아닌 features 배열만 받음
   updateGeoJSONData: (data: any) => void
 
   // 상태 조회 함수
   getGeoJSONData: () => FeatureCollection | null
+
+  // selectedDefect 관련 함수
+  setSelectedDefect: (publicId: string) => void
+  getSelectedDefect: () => { publicId: string | null }
   getProcessedDefects: () => ProcessedDefect[]
 }
 
@@ -178,8 +193,9 @@ export const useDefectStore = create<DefectStoreState>((set, get) => ({
   timeRange: 'D',
   defectType: 'all',
   severity: 'all',
-  detailedDefect: null,
   geoJSONData: null,
+  defectDetail: null,
+  defectDetailList: [],
 
   // Initial data states with placeholder data
   defectLocations,
@@ -192,6 +208,8 @@ export const useDefectStore = create<DefectStoreState>((set, get) => ({
   dashboardMetrics,
   severityCounts,
 
+  // selectedDefect 초기값
+  selectedDefect: { publicId: null },
   processedDefects: [],
   detailsMap: {},
   isProcessingDefects: false,
@@ -209,7 +227,8 @@ export const useDefectStore = create<DefectStoreState>((set, get) => ({
   updateDefectStats: (typeData, sevData) =>
     set({ defectTypeData: typeData, severityData: sevData }),
   updateDefectTrends: (newTrends) => set({ trendData: newTrends }),
-  updateDetailedDefect: (defect) => set({ detailedDefect: defect }),
+  updateDefectDetail: (defect) => set({ defectDetail: defect }),
+  updateDefectDetailList: (defect) => set({ defectDetailList: defect }),
 
   updateProcessedDefects: (defects) => set({ processedDefects: defects }),
   updateDetailsMap: (detailsMap) => set({ detailsMap }),
@@ -246,4 +265,10 @@ export const useDefectStore = create<DefectStoreState>((set, get) => ({
 
   // 상태 조회 함수 - geoJSONData 반환
   getGeoJSONData: () => get().geoJSONData,
+
+  // selectedDefect 설정 함수
+  setSelectedDefect: (publicId) => set({ selectedDefect: { publicId } }),
+
+  // selectedDefect 조회 함수
+  getSelectedDefect: () => get().selectedDefect,
 }))
