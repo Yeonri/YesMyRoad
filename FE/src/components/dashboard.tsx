@@ -30,7 +30,7 @@ import {
 } from '@/store/defect-store'
 // import { useQuery } from '@tanstack/react-query'
 import { AlertTriangle, BarChart3, Clock, MapPin } from 'lucide-react'
-import { useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 
 import DefectHeatmap from './defect-heatmap'
 import DefectList from './defect-list'
@@ -55,7 +55,7 @@ export default function Dashboard() {
     // updateRecentAlerts,
     // updateDefectStats,
     // updateDefectTrends,
-    // updateGeoJSONData,
+    updateGeoJSONData,
     // getGeoJSONData,
     updateDefectDetailList,
   } = useDefectStore()
@@ -130,7 +130,7 @@ export default function Dashboard() {
     )
   }, [defectDetailList, filteredPublicIdsByBounds])
 
-  const loadDefectDetails = () => {
+  const loadDefectDetails = useCallback(() => {
     // 지도 데이터가 로드되지 않았거나 데이터가 없으면 종료
     if (geoJSONData === null || geoJSONData.length === 0) return
 
@@ -149,20 +149,21 @@ export default function Dashboard() {
     })
 
     updateDefectDetailList(defectDetailList)
-  }
+  }, [geoJSONData, updateDefectDetailList])
 
-  const loadLocationData = async () => {
-    console.log(`GeoJSON 데이터 로딩 시작 : 실제론 작동 막아둠`)
-    //   const response = await coordinateAPI.getDefectLocations()
-    //   if (response.status === 200 && response.data) {
-    //     console.log(
-    //       `GeoJSON 데이터 로드 성공: ${response.data.features!.length || 0} 개의 데이터`,
-    //     )
-    //     // console.log('데이터 목록: ', response.data.features!)
+  const loadLocationData = useCallback(async () => {
+    console.log(`GeoJSON 데이터 로딩 시작`)
+    const response = await coordinateAPI.getDefectLocations()
+    if (response.status === 200 && response.data) {
+      console.log(
+        `GeoJSON 데이터 로드 성공: ${response.data.features!.length || 0} 개의 데이터`,
+      )
+      // console.log('데이터 목록: ', response.data.features!)
 
-    //     updateGeoJSONData(response.data.features!)
-    //   }
-  }
+      updateGeoJSONData(response.data.features!)
+    }
+  }, [updateGeoJSONData])
+
   // 통계 데이터 로드 (timeRange 변경에 따라 자동으로 재요청)
   // const { data: reportData } = useQuery({
   //   queryKey: ['reports', timeRange],
@@ -189,14 +190,14 @@ export default function Dashboard() {
   //   enabled: !!timeRange,
   // })
 
-  // useEffect(() => {
-  //   loadLocationData()
-  // }, [loadLocationData])
+  useEffect(() => {
+    loadLocationData()
+  }, [])
 
   useEffect(() => {
     if (geoJSONData === null || geoJSONData.length === 0) return
     loadDefectDetails()
-  }, [geoJSONData, loadDefectDetails])
+  }, [geoJSONData])
 
   useEffect(() => {
     console.log(defectDetailList)
