@@ -187,6 +187,7 @@ export default function Dashboard() {
             <DefectMap
               onSelectTab={selectTab}
               filteredDefectDetailList={filteredDefectDetailList}
+              selectedTab={selectedTab}
             />
           </TabsContent>
           <TabsContent value="heatmap" className="space-y-4">

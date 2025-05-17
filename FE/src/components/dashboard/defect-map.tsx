@@ -1,5 +1,6 @@
 'use client'
 
+import DamageListOnMap from '@/components/dashboard/damage-list-on-map'
 import { Button } from '@/components/ui/button'
 import {
   Card,
@@ -18,21 +19,23 @@ import 'mapbox-gl/dist/mapbox-gl.css'
 import { useEffect, useRef, useState } from 'react'
 import { useDebounceCallback } from 'usehooks-ts'
 
-import RecentAlerts from '@/components/dashboard/recent-alerts'
-
 mapboxgl.accessToken = process.env.NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN
 
-function DefectMapContent() {
+function DefectMapContent({
+  selectedDefectPublicId,
+  onSelectDefect,
+}: {
+  selectedDefectPublicId: string | null
+  onSelectDefect: (id: string) => void
+}) {
   // 지도 관련 상태 관리
   const mapContainer = useRef<HTMLDivElement>(null)
   const map = useRef<mapboxgl.Map | null>(null)
-  const markersRef = useRef<mapboxgl.Marker[]>([])
+  // publicId를 키로, 마커를 값으로 가지는 객체로 변경
+  const markersRef = useRef<Record<string, mapboxgl.Marker>>({})
+  // 현재 열려있는 마커 ID를 추적
+  const activePopupIdRef = useRef<string | null>(null)
   const [loading, setLoading] = useState(true)
-
-  // setSelectedDefect 함수 가져오기
-  // const setSelectedDefect = useDefectStore((state) => state.setSelectedDefect)
-  // selectedDefect 상태 가져오기 > 이걸 왜 defect-store에서 가져와야하지????
-  // const selectedDefect = useDefectStore((state) => state.selectedDefect)
 
   // 주소 스토어에서 위도/경도 가져오기, 없으면 서울 기본값 설정
   const longitude = useAddressStore((state) => state.longitude)
@@ -43,6 +46,31 @@ function DefectMapContent() {
   const debouncedSetMapBounds = useDebounceCallback(setMapBounds, 500)
 
   const geoJsonData = useDefectStore((state) => state.geoJSONData)
+
+  // 선택된 결함 ID가 변경될 때 해당 마커의 팝업을 표시
+  useEffect(() => {
+    if (!map.current) return;
+
+    // 이전에 열려있던 팝업이 있으면 닫기
+    if (activePopupIdRef.current && markersRef.current[activePopupIdRef.current]) {
+      const prevMarker = markersRef.current[activePopupIdRef.current];
+      const popup = prevMarker?.getPopup();
+      if (popup && popup.isOpen()) {
+        popup.remove();
+      }
+      // selectedDefectPublicId가 null이거나 다른 마커가 선택된 경우 현재 활성화된 팝업 ID 초기화
+      if (!selectedDefectPublicId || selectedDefectPublicId !== activePopupIdRef.current) {
+        activePopupIdRef.current = null;
+      }
+    }
+
+    // 새 마커가 선택된 경우에만 팝업 열기
+    if (selectedDefectPublicId && markersRef.current[selectedDefectPublicId]) {
+      const marker = markersRef.current[selectedDefectPublicId];
+      marker.togglePopup();
+      activePopupIdRef.current = selectedDefectPublicId;
+    }
+  }, [selectedDefectPublicId])
 
   // 지도 초기화 및 기본 설정
   useEffect(() => {
@@ -114,21 +142,15 @@ function DefectMapContent() {
     }
   }, [longitude, latitude, setMapBounds, debouncedSetMapBounds])
 
-  // TODO: defect-store에서 하지 말고 onclick 콜백으로 구현, 선택된 변수는 useState 등으로 관리하도록 변경
-  // selectedDefect 변경 감지 useEffect
-  // useEffect(() => {
-  //   if (selectedDefect.publicId) {
-  //     console.log('선택된 결함 ID:', selectedDefect.publicId)
-  //   }
-  // }, [selectedDefect])
-
   // 마커 추가 로직을 별도 useEffect로 분리
   useEffect(() => {
     if (!map.current || loading || !geoJsonData) return
 
     // 기존 마커 제거
-    markersRef.current.forEach((marker) => marker.remove())
-    markersRef.current = []
+    Object.values(markersRef.current).forEach((marker) => marker.remove())
+    markersRef.current = {}
+    // 활성 팝업 ID 초기화
+    activePopupIdRef.current = null
 
     // 각 결함에 대한 마커 추가
     geoJsonData.forEach((defect: FeaturePoint) => {
@@ -164,17 +186,15 @@ function DefectMapContent() {
         .setPopup(popup)
         .addTo(map.current!)
 
-      // TODO: 콜백함수 직접 구현
-      // 마커 클릭 이벤트 리스너 추가 : 
+      // 마커 클릭 이벤트 리스너 추가
       markerEl.addEventListener('click', () => {
-        // setSelectedDefect(publicId)
+        onSelectDefect(publicId)
       })
 
-      // 마커 참조 저장
-      markersRef.current.push(marker)
+      // 마커를 publicId로 구분하여 저장
+      markersRef.current[publicId] = marker
     })
   }, [geoJsonData, loading])
-  // }, [geoJsonData, loading, setSelectedDefect])
 
   return (
     <div className="relative h-full min-h-[400px] w-full">
@@ -196,18 +216,39 @@ function DefectMapContent() {
 export default function DefectMap({
   onSelectTab,
   filteredDefectDetailList,
+  selectedTab,
 }: {
   onSelectTab?: (tab: string) => void
   filteredDefectDetailList: DefectDetail[]
+  selectedTab?: string
 }) {
   const mapCardRef = useRef<HTMLDivElement>(null)
   const detailCardRef = useRef<HTMLDivElement>(null)
+  const [selectedDefectPublicId, setSelectedDefectPublicId] = useState<string | null>(null)
+  
+  // 주소 스토어에서 위도/경도와 맵 바운드 가져오기
+  const longitude = useAddressStore((state) => state.longitude)
+  const latitude = useAddressStore((state) => state.latitude)
+  const mapBounds = useAddressStore((state) => state.mapBounds)
 
   useEffect(() => {
     if (mapCardRef.current && detailCardRef.current) {
       detailCardRef.current.style.maxHeight = `${mapCardRef.current.clientHeight}px`
     }
   }, [mapCardRef.current?.clientHeight])
+
+  // selectedDefectPublicId 변경 시 콘솔에 로그 출력
+  useEffect(() => {
+    if (selectedDefectPublicId) {
+      console.log('선택된 결함 ID (DefectMap):', selectedDefectPublicId)
+    }
+  }, [selectedDefectPublicId])
+  
+  // 탭 변경, 위치 변경, 맵 바운드 변경 시 결함 선택 초기화
+  useEffect(() => {
+    // 선택된 결함 ID 초기화
+    setSelectedDefectPublicId(null)
+  }, [selectedTab, longitude, latitude, mapBounds.northEast, mapBounds.southWest])
 
   return (
     <div className="grid gap-4 md:grid-cols-3">
@@ -217,7 +258,10 @@ export default function DefectMap({
         </CardHeader>
         <CardContent className="p-4 pt-0">
           <div className="aspect-video overflow-hidden rounded-md">
-            <DefectMapContent />
+            <DefectMapContent
+              selectedDefectPublicId={selectedDefectPublicId}
+              onSelectDefect={setSelectedDefectPublicId}
+            />
           </div>
         </CardContent>
       </Card>
@@ -227,7 +271,11 @@ export default function DefectMap({
           <CardTitle>지도에 보이는 손상 필터링</CardTitle>
         </CardHeader>
         <CardContent className="grow overflow-y-hidden p-4 pt-0">
-          <RecentAlerts filteredDefectDetailList={filteredDefectDetailList} />
+          <DamageListOnMap
+            filteredDefectDetailList={filteredDefectDetailList}
+            selectedDefectPublicId={selectedDefectPublicId}
+            onSelectDefect={setSelectedDefectPublicId}
+          />
         </CardContent>
         <CardFooter>
           <Button

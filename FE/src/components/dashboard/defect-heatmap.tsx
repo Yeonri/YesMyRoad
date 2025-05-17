@@ -1,10 +1,13 @@
 'use client'
 
+import useAddressStore from '@/store/address-store'
+import { useDefectStore } from '@/store/defect-store'
+import { FeaturePoint } from '@/types/defects'
 import MapboxLanguage from '@mapbox/mapbox-gl-language'
 import { Loader } from 'lucide-react'
 import mapboxgl from 'mapbox-gl'
 import 'mapbox-gl/dist/mapbox-gl.css'
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 
 mapboxgl.accessToken = process.env.NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN as string
 
@@ -13,46 +16,34 @@ export default function DefectHeatmap() {
   const map = useRef<mapboxgl.Map | null>(null)
   const [loading, setLoading] = useState(true)
 
+  const geoJsonData = useDefectStore((state) => state.geoJSONData)
+
+  // 주소 스토어에서 위도/경도 가져오기, 없으면 대전 기본값 설정
+  const longitude = useAddressStore((state) => state.longitude)
+  const latitude = useAddressStore((state) => state.latitude)
+
   // TODO: 이거 대신에 zustand store에 저장된 geoJSONData로 대체
-  const heatmapLocations = [
-    // NYC area
-    { lat: 40.7128, lng: -74.006 },
-    { lat: 40.7148, lng: -74.013 },
-    { lat: 40.7118, lng: -74.008 },
-    { lat: 40.7138, lng: -74.003 },
-    { lat: 40.7158, lng: -74.009 },
-    { lat: 40.7168, lng: -74.016 },
-    { lat: 40.7108, lng: -74.002 },
-    { lat: 40.7135, lng: -74.007 },
-    { lat: 40.7145, lng: -74.011 },
-    { lat: 40.7125, lng: -74.005 },
-    { lat: 40.7115, lng: -74.009 },
-    { lat: 40.7155, lng: -74.012 },
-    { lat: 40.7165, lng: -74.008 },
-    { lat: 40.7105, lng: -74.004 },
-    { lat: 40.7175, lng: -74.018 },
-    { lat: 40.7185, lng: -74.014 },
-    { lat: 40.7195, lng: -74.01 },
-    { lat: 40.7205, lng: -74.006 },
-    { lat: 40.7215, lng: -74.002 },
-    { lat: 40.7225, lng: -74.008 },
-  ]
+  const heatmapLocations = useMemo(
+    () =>
+      geoJsonData?.map((defect: FeaturePoint) => ({
+        lat: defect.geometry.coordinates[0],
+        lng: defect.geometry.coordinates[1],
+      })) || [],
+    [geoJsonData],
+  )
 
-
-  // Get heatmap locations from Zustand store
-  // const {  } = useDefectStore() // 구현할 때 주석 해제
+  useEffect(() => {
+    console.log('heatmapLocations', heatmapLocations)
+  }, [heatmapLocations])
 
   useEffect(() => {
     if (!mapContainer.current) return
-
-    // TODO: Replace with actual API call to fetch heatmap data
-    // This would be implemented in the Zustand store
 
     // 지도 초기화
     map.current = new mapboxgl.Map({
       container: mapContainer.current,
       style: 'mapbox://styles/mapbox/dark-v11',
-      center: [127.2984, 36.35518],
+      center: [longitude!, latitude!],
       zoom: 12,
     })
 
@@ -66,7 +57,9 @@ export default function DefectHeatmap() {
     map.current.on('load', () => {
       setLoading(false)
 
-      // 결함 위치를 GeoJSON 형식으로 변환
+      if (heatmapLocations.length === 0) return
+
+      // 결함 위치를 GeoJSON 형식으로 변환 : 바보짓했음... 수정 필요...
       const geojsonData = {
         type: 'FeatureCollection' as const,
         features: heatmapLocations.map((defect) => ({
@@ -150,7 +143,7 @@ export default function DefectHeatmap() {
         map.current.remove()
       }
     }
-  }, [heatmapLocations])
+  }, [heatmapLocations, longitude, latitude])
 
   return (
     <div className="relative h-full min-h-[400px] w-full">
@@ -159,7 +152,7 @@ export default function DefectHeatmap() {
           <div className="flex flex-col items-center gap-2">
             <Loader className="text-primary h-8 w-8 animate-spin" />
             <p className="text-muted-foreground text-sm">
-              Loading heatmap data...
+              히트맵 데이터 로딩중...
             </p>
           </div>
         </div>
