@@ -27,7 +27,7 @@ import { AddressData, LocationInfo } from '@/types/address'
 import { Check, ChevronDown } from 'lucide-react'
 import { useEffect, useMemo, useState } from 'react'
 
-const LocationHeader: React.FC = () => {
+const AddressSelector: React.FC = () => {
   const addressData = useMemo(() => address as unknown as AddressData, [])
   const { setId, setLongitude, setLatitude, setLevel1, setLevel2, setLevel3 } =
     useAddressStore()
@@ -349,4 +349,4 @@ const LocationHeader: React.FC = () => {
   )
 }
 
-export default LocationHeader
+export default AddressSelector

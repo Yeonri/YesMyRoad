@@ -1,5 +1,14 @@
 // TODO: Replace these placeholder values with actual data from API endpoints
-import { Defect } from '@/store/defect-store'
+
+type Defect = {
+  id: string
+  type: string
+  severity: string
+  location: string
+  detectedAt: string
+  status?: string
+  description?: string
+}
 
 // Mock data for defect locations
 export const defectLocations = [

@@ -20,7 +20,7 @@ import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet'
 import { Bell, Menu, Search, Settings, User } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 
-import { MobileNav } from './mobile-nav'
+import { MobileNav } from '../mobile-nav'
 
 // const PUBLIC_ID = '23569766-0f5a-4f54-ba9b-dba4dbf0b922'
 
@@ -47,6 +47,7 @@ export default function Header() {
 
   return (
     <header className="bg-background sticky top-0 z-50 flex h-16 items-center gap-4 border-b px-4 md:px-6">
+      {/* 얘네 뭐하는 코드지? 주석처리해도 고장이 안나는데??? 렌더링 되는것도 전혀 없고 */}
       <Sheet>
         <SheetTrigger asChild>
           <Button variant="outline" size="icon" className="md:hidden">
@@ -55,7 +56,7 @@ export default function Header() {
           </Button>
         </SheetTrigger>
         <SheetContent side="left" className="pr-0">
-          <MobileNav />
+          <MobileNav /> {/* 특히 요녀석 */}
         </SheetContent>
       </Sheet>
       <div className="flex items-center gap-2">
