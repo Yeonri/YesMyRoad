@@ -1,6 +1,5 @@
 'use client'
 
-import { useDefectStore } from '@/store/defect-store'
 import MapboxLanguage from '@mapbox/mapbox-gl-language'
 import { Loader } from 'lucide-react'
 import mapboxgl from 'mapbox-gl'
@@ -14,8 +13,34 @@ export default function DefectHeatmap() {
   const map = useRef<mapboxgl.Map | null>(null)
   const [loading, setLoading] = useState(true)
 
+  // TODO: 이거 대신에 zustand store에 저장된 geoJSONData로 대체
+  const heatmapLocations = [
+    // NYC area
+    { lat: 40.7128, lng: -74.006 },
+    { lat: 40.7148, lng: -74.013 },
+    { lat: 40.7118, lng: -74.008 },
+    { lat: 40.7138, lng: -74.003 },
+    { lat: 40.7158, lng: -74.009 },
+    { lat: 40.7168, lng: -74.016 },
+    { lat: 40.7108, lng: -74.002 },
+    { lat: 40.7135, lng: -74.007 },
+    { lat: 40.7145, lng: -74.011 },
+    { lat: 40.7125, lng: -74.005 },
+    { lat: 40.7115, lng: -74.009 },
+    { lat: 40.7155, lng: -74.012 },
+    { lat: 40.7165, lng: -74.008 },
+    { lat: 40.7105, lng: -74.004 },
+    { lat: 40.7175, lng: -74.018 },
+    { lat: 40.7185, lng: -74.014 },
+    { lat: 40.7195, lng: -74.01 },
+    { lat: 40.7205, lng: -74.006 },
+    { lat: 40.7215, lng: -74.002 },
+    { lat: 40.7225, lng: -74.008 },
+  ]
+
+
   // Get heatmap locations from Zustand store
-  const { heatmapLocations } = useDefectStore()
+  // const {  } = useDefectStore() // 구현할 때 주석 해제
 
   useEffect(() => {
     if (!mapContainer.current) return

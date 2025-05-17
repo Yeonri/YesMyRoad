@@ -9,8 +9,8 @@ import {
   CardTitle,
 } from '@/components/ui/card'
 import useAddressStore from '@/store/address-store'
-import { DefectDetail, useDefectStore } from '@/store/defect-store'
-import { FeaturePoint } from '@/store/defect-store'
+import { useDefectStore } from '@/store/defect-store'
+import { DefectDetail, FeaturePoint } from '@/types/defects'
 import MapboxLanguage from '@mapbox/mapbox-gl-language'
 import { ArrowRight, Loader } from 'lucide-react'
 import mapboxgl from 'mapbox-gl'
@@ -18,7 +18,7 @@ import 'mapbox-gl/dist/mapbox-gl.css'
 import { useEffect, useRef, useState } from 'react'
 import { useDebounceCallback } from 'usehooks-ts'
 
-import RecentAlerts from '../recent-alerts'
+import RecentAlerts from '@/components/dashboard/recent-alerts'
 
 mapboxgl.accessToken = process.env.NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN
 
@@ -30,9 +30,9 @@ function DefectMapContent() {
   const [loading, setLoading] = useState(true)
 
   // setSelectedDefect 함수 가져오기
-  const setSelectedDefect = useDefectStore((state) => state.setSelectedDefect)
-  // selectedDefect 상태 가져오기
-  const selectedDefect = useDefectStore((state) => state.selectedDefect)
+  // const setSelectedDefect = useDefectStore((state) => state.setSelectedDefect)
+  // selectedDefect 상태 가져오기 > 이걸 왜 defect-store에서 가져와야하지????
+  // const selectedDefect = useDefectStore((state) => state.selectedDefect)
 
   // 주소 스토어에서 위도/경도 가져오기, 없으면 서울 기본값 설정
   const longitude = useAddressStore((state) => state.longitude)
@@ -114,12 +114,13 @@ function DefectMapContent() {
     }
   }, [longitude, latitude, setMapBounds, debouncedSetMapBounds])
 
+  // TODO: defect-store에서 하지 말고 onclick 콜백으로 구현, 선택된 변수는 useState 등으로 관리하도록 변경
   // selectedDefect 변경 감지 useEffect
-  useEffect(() => {
-    if (selectedDefect.publicId) {
-      console.log('선택된 결함 ID:', selectedDefect.publicId)
-    }
-  }, [selectedDefect])
+  // useEffect(() => {
+  //   if (selectedDefect.publicId) {
+  //     console.log('선택된 결함 ID:', selectedDefect.publicId)
+  //   }
+  // }, [selectedDefect])
 
   // 마커 추가 로직을 별도 useEffect로 분리
   useEffect(() => {
@@ -163,15 +164,17 @@ function DefectMapContent() {
         .setPopup(popup)
         .addTo(map.current!)
 
-      // 마커 클릭 이벤트 리스너 추가
+      // TODO: 콜백함수 직접 구현
+      // 마커 클릭 이벤트 리스너 추가 : 
       markerEl.addEventListener('click', () => {
-        setSelectedDefect(publicId)
+        // setSelectedDefect(publicId)
       })
 
       // 마커 참조 저장
       markersRef.current.push(marker)
     })
-  }, [geoJsonData, loading, setSelectedDefect])
+  }, [geoJsonData, loading])
+  // }, [geoJsonData, loading, setSelectedDefect])
 
   return (
     <div className="relative h-full min-h-[400px] w-full">

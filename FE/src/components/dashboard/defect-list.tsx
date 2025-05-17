@@ -29,7 +29,7 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table'
-import { ProcessStatus, useDefectStore } from '@/store/defect-store'
+import { useDefectStore } from '@/store/defect-store'
 import { useQueries } from '@tanstack/react-query'
 import {
   ChevronDown,
@@ -39,6 +39,9 @@ import {
   MoreHorizontal,
 } from 'lucide-react'
 import { useEffect, useState } from 'react'
+import crypto from 'crypto'
+
+export type ProcessStatus = 'Pending' | 'Assigned' | 'In Progress' | 'Completed'
 
 // DetailedDefect 타입 정의
 type DetailedDefect = {
@@ -52,6 +55,30 @@ export default function DefectList() {
   const [sortDirection, setSortDirection] = useState('asc')
   const [currentPage, setCurrentPage] = useState(1)
   const itemsPerPage = 5
+  const defectType = "all"
+  const severity = "all"
+
+
+  // UUID로부터 표시 ID 생성하는 함수
+  const getDisplayId = (
+    uuid: string,
+    damageId: number,
+    prefix: string = 'DEF',
+  ): string => {
+    const validChars = '0123456789ABCDEFGHJKLMNPQRSTUVWXYZ'
+    const hash = crypto.createHash('sha256').update(uuid).digest('hex')
+  
+    const shortCode = Array(5)
+      .fill(0)
+      .map((_, i) => {
+        const index =
+          parseInt(hash.slice(i * 2, i * 2 + 2), 16) % validChars.length
+        return validChars[index]
+      })
+      .join('')
+  
+    return `${prefix}-${damageId}-${shortCode}`
+  }
 
   // 상세 정보를 저장할 맵 상태
   const [detailsMap, setDetailsMap] = useState<Record<string, DetailedDefect>>(
@@ -59,7 +86,7 @@ export default function DefectList() {
   )
 
   // Zustand 스토어에서 데이터 가져오기
-  const { defectType, severity, geoJSONData } = useDefectStore()
+  const { geoJSONData } = useDefectStore()
 
   // geoJSONData를 사용하여 defects 배열 생성
   const mappedDefects = geoJSONData

@@ -1,5 +1,6 @@
 'use client'
 
+import RefreshIcon from "@/assets/refresh.svg"
 import { coordinateAPI } from '@/api/coordinate-api'
 // import { statisticAPI } from '@/api/statistic-api'
 import AddressSelector from './address-selector'
@@ -21,42 +22,22 @@ import {
 } from '@/components/ui/select'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import useAddressStore from '@/store/address-store'
-import {
-  DefectDetail,
-  // DefectType,
-  // SeverityType,
-  // TimeRangeType,
-  useDefectStore,
-} from '@/store/defect-store'
-import { AlertTriangle, BarChart3, Clock, MapPin } from 'lucide-react'
+import {  useDefectStore} from '@/store/defect-store'
 import { useCallback, useEffect, useMemo, useState } from 'react'
-
-import DefectHeatmap from './defect-heatmap'
-import DefectList from './defect-list'
-import DefectMap from './defect-map'
-import DefectStats from './defect-stats'
-import Header from './header'
-import SeverityBadges from './severity-badges'
+import { DefectDetail } from "@/types/defects"
+import DefectHeatmap from '@/components/dashboard/defect-heatmap'
+import DefectList from '@/components/dashboard/defect-list'
+import DefectMap from '@/components/dashboard/defect-map'
+import DefectStats from '@/components/dashboard/defect-stats'
+import Header from '@/components/dashboard/header'
+import SeverityBadges from '@/components/dashboard/severity-badges'
+import DefectOverall from '@/components/dashboard/defect-overall'
 
 export default function Dashboard() {
   // Get state and actions from Zustand store
   const {
-    // timeRange,
-    // setTimeRange,
-    // defectType,
-    defectDetailList,
-    // setDefectType,
-    // severity,
-    // setSeverity,
-    // severityCounts,
-    // dashboardMetrics,
-    // updateDefects,
-    // updateDefectLocations,
-    // updateRecentAlerts,
-    // updateDefectStats,
-    // updateDefectTrends,
     updateGeoJSONData,
-    // getGeoJSONData,
+    defectDetailList,
     updateDefectDetailList,
   } = useDefectStore()
 
@@ -153,7 +134,7 @@ export default function Dashboard() {
   }, [geoJSONData])
 
   useEffect(() => {
-    console.log(defectDetailList)
+    console.log("defectDetailList: ", defectDetailList)
   }, [defectDetailList])
 
   return (
@@ -161,81 +142,7 @@ export default function Dashboard() {
       <Header />
       <main className="flex flex-1 flex-col gap-4 p-4 md:gap-8 md:p-8">
         <SeverityBadges />
-
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">총 결함 수</CardTitle>
-              <BarChart3 className="text-muted-foreground h-4 w-4" />
-            </CardHeader>
-            <CardContent>
-              {/* <div className="text-2xl font-bold">
-                {reportData?.data?.count || 0}
-              </div>
-              <p className="text-muted-foreground text-xs">
-                {{ D: '어제', W: '지난 주', M: '지난 달' }[timeRange] || ''}{' '}
-                대비{' '}
-                {reportData?.data?.changeRate === null ? '-' : (reportData?.data?.changeRate || 0)}{' '}
-                % 증가
-              </p> */}
-            </CardContent>
-          </Card>
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">
-                심각한 결함 수
-              </CardTitle>
-              <AlertTriangle className="text-muted-foreground h-4 w-4" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">
-                {/* {dashboardMetrics.criticalIssues} */}
-                0
-              </div>
-              <p className="text-muted-foreground text-xs">
-                지난 주 대비 n % 증가
-                {/* 지난 주 대비 {dashboardMetrics.criticalIssuesChange} */}
-              </p>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">
-                평균 작업 착수 시간
-              </CardTitle>
-              <Clock className="text-muted-foreground h-4 w-4" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">
-                0
-                {/* {dashboardMetrics.avgResponseTime} */}
-              </div>
-              <p className="text-muted-foreground text-xs">
-                지난 주 대비 n % 증가
-                {/* 지난 주 대비 {dashboardMetrics.avgResponseTimeChange} */}
-              </p>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">
-                발생 행정구역 수
-              </CardTitle>
-              <MapPin className="text-muted-foreground h-4 w-4" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">
-                0
-                {/* {dashboardMetrics.affectedAreas} */}
-              </div>
-              <p className="text-muted-foreground text-xs">
-                지난 주 대비 n % 증가
-                {/* 지난 주 대비 {dashboardMetrics.affectedAreasChange} */}
-              </p>
-            </CardContent>
-          </Card>
-        </div>
-
+        <DefectOverall />
         <Tabs
           defaultValue="map"
           value={selectedTab}
@@ -256,6 +163,7 @@ export default function Dashboard() {
               onClick={() => loadLocationData()}
               className="active:bg-primary/70 active:translate-y-0.5 active:scale-95"
             >
+              {/* <RefreshIcon/> */}
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 width="16"
@@ -308,7 +216,7 @@ export default function Dashboard() {
                     {selectedFilter === 'timeRange' && (
                       <Select
                         value={selectedTimeRange}
-                        onValueChange={(value: string) => selectTimeRange(value)}
+                        onValueChange={selectTimeRange}
                       >
                         <SelectTrigger className="h-8 w-[130px]">
                           <SelectValue placeholder="Time Range" />
@@ -323,7 +231,7 @@ export default function Dashboard() {
                     {selectedFilter === 'type' && (
                       <Select
                         value={selectedDefectType}
-                        onValueChange={(value: string) => selectDefectType(value)}
+                        onValueChange={selectDefectType}
                       >
                         <SelectTrigger className="h-8 w-[130px]">
                           <SelectValue placeholder="Defect Type" />
@@ -339,7 +247,7 @@ export default function Dashboard() {
                     {selectedFilter === 'severity' && (
                       <Select
                         value={selectedSeverity}
-                        onValueChange={(value: string) => selectSeverity(value)}
+                        onValueChange={selectSeverity}
                       >
                         <SelectTrigger className="h-8 w-[130px]">
                           <SelectValue placeholder="Severity" />
@@ -355,7 +263,7 @@ export default function Dashboard() {
                     )}
                     <Select
                       value={selectedFilter}
-                      onValueChange={(value: string) => selectFilter(value)}
+                      onValueChange={selectFilter}
                     >
                       <SelectTrigger className="h-8 w-[130px]">
                         <SelectValue placeholder="필터 선택" />
