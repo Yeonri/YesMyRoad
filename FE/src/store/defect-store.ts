@@ -109,7 +109,7 @@ export type ProcessedDefect = {
 export type DefectStoreState = {
   // Filter states
   timeRange: TimeRangeType
-  defectType: DefectType
+  // defectType: DefectType
   severity: SeverityType
 
   // 손상 발생 위치 데이터 리스트
@@ -157,7 +157,7 @@ export type DefectStoreState = {
 
   // Actions
   setTimeRange: (timeRange: TimeRangeType) => void
-  setDefectType: (defectType: DefectType) => void
+  // setDefectType: (defectType: DefectType) => void
   setSeverity: (severity: SeverityType) => void
 
   updateProcessedDefects: (defects: ProcessedDefect[]) => void
@@ -193,7 +193,7 @@ export type DefectStoreState = {
 export const useDefectStore = create<DefectStoreState>((set, get) => ({
   // Initial filter states
   timeRange: 'D',
-  defectType: 'all',
+  // defectType: 'all',
   severity: 'all',
   geoJSONData: null,
   defectDetail: null,
@@ -201,7 +201,7 @@ export const useDefectStore = create<DefectStoreState>((set, get) => ({
 
   // Initial data states with placeholder data
   defectLocations,
-  heatmapLocations,
+  heatmapLocations, // 히트맵에서 사용됨
   defects,
   recentAlerts,
   defectTypeData,
@@ -218,7 +218,7 @@ export const useDefectStore = create<DefectStoreState>((set, get) => ({
 
   // Actions for updating filters
   setTimeRange: (timeRange) => set({ timeRange }),
-  setDefectType: (defectType) => set({ defectType }),
+  // setDefectType: (defectType) => set({ defectType }),
   setSeverity: (severity) => set({ severity }),
 
   // 상태 업데이트 함수들 (API 호출 없이 상태만 업데이트)

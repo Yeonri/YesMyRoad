@@ -2,8 +2,8 @@
 
 import { coordinateAPI } from '@/api/coordinate-api'
 // import { statisticAPI } from '@/api/statistic-api'
-import LocationHeader from '@/components/location-header'
-import { Badge } from '@/components/ui/badge'
+import AddressSelector from './address-selector'
+// import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import {
   Card,
@@ -23,12 +23,11 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import useAddressStore from '@/store/address-store'
 import {
   DefectDetail,
-  DefectType,
-  SeverityType,
-  TimeRangeType,
+  // DefectType,
+  // SeverityType,
+  // TimeRangeType,
   useDefectStore,
 } from '@/store/defect-store'
-// import { useQuery } from '@tanstack/react-query'
 import { AlertTriangle, BarChart3, Clock, MapPin } from 'lucide-react'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 
@@ -37,19 +36,20 @@ import DefectList from './defect-list'
 import DefectMap from './defect-map'
 import DefectStats from './defect-stats'
 import Header from './header'
+import SeverityBadges from './severity-badges'
 
 export default function Dashboard() {
   // Get state and actions from Zustand store
   const {
-    timeRange,
-    setTimeRange,
-    defectType,
+    // timeRange,
+    // setTimeRange,
+    // defectType,
     defectDetailList,
-    setDefectType,
-    severity,
-    setSeverity,
-    severityCounts,
-    dashboardMetrics,
+    // setDefectType,
+    // severity,
+    // setSeverity,
+    // severityCounts,
+    // dashboardMetrics,
     // updateDefects,
     // updateDefectLocations,
     // updateRecentAlerts,
@@ -60,28 +60,11 @@ export default function Dashboard() {
     updateDefectDetailList,
   } = useDefectStore()
 
-  const [selectedTab, selectTab] = useState<string>('map')
-  const [selectedFilter, selectFilter] = useState('timeRange')
-
-  // TanStack Query 사용하여 데이터 로드
-  // const {
-  //   // data: geoJsonData,
-  //   refetch: refetchGeoJson,
-  //   // isLoading,
-  //   // error,
-  // } = useQuery({
-  //   queryKey: ['defects'],
-  //   queryFn: async () => {
-  //     const response = await coordinateAPI.getDefectLocations()
-  //     if (response.status === 200 && response.data) {
-  //       // 스토어 업데이트
-  //       updateGeoJSONData(response.data)
-  //       return response.data
-  //     }
-  //     throw new Error('데이터 로드 실패')
-  //   },
-  // })
-
+  const [selectedTab, selectTab] = useState<string>('map') // 지도/히트맵/리스트/통계 탭 선택용 상태 변수
+  const [selectedFilter, selectFilter] = useState<string>('timeRange') // 리스트 탭에서 시간/유형/심각도 필터를 고르는 필터
+  const [selectedTimeRange, selectTimeRange] = useState<string>("daily") // 리스트 탭에서 시간 필터
+  const [selectedDefectType, selectDefectType] = useState<string>("all") // 리스트 탭에서 유형 필터
+  const [selectedSeverity, selectSeverity] = useState<string>("daily") // 리스트 탭에서 심각도 필터
   const geoJSONData = useDefectStore((state) => state.geoJSONData)
   const mapBounds = useAddressStore((state) => state.mapBounds)
 
@@ -155,40 +138,10 @@ export default function Dashboard() {
     console.log(`GeoJSON 데이터 로딩 시작`)
     const response = await coordinateAPI.getDefectLocations()
     if (response.status === 200 && response.data) {
-      console.log(
-        `GeoJSON 데이터 로드 성공: ${response.data.features!.length || 0} 개의 데이터`,
-      )
-      // console.log('데이터 목록: ', response.data.features!)
-
+      console.log(`GeoJSON 데이터 로드 성공: ${response.data.features!.length || 0} 개의 데이터`)
       updateGeoJSONData(response.data.features!)
     }
   }, [updateGeoJSONData])
-
-  // 통계 데이터 로드 (timeRange 변경에 따라 자동으로 재요청)
-  // const { data: reportData } = useQuery({
-  //   queryKey: ['reports', timeRange],
-  //   queryFn: async () => {
-  //     // API 함수 매핑 - timeRange에 따라 다른 API 호출
-  //     const apiCalls = {
-  //       D: statisticAPI.getDamageDailyReport,
-  //       W: statisticAPI.getDamageWeeklyReport,
-  //       M: statisticAPI.getDamageMonthlyReport,
-  //     }
-
-  //     // timeRange에 해당하는 API 함수 호출
-  //     const apiFunction = apiCalls[timeRange] || apiCalls['D'] // 기본값은 일간 보고서
-  //     const response = await apiFunction()
-
-  //     console.log(
-  //       `${timeRange} 보고서:`,
-  //       response.data,
-  //       '상태 코드:',
-  //       response.status,
-  //     )
-  //     return response.data
-  //   },
-  //   enabled: !!timeRange,
-  // })
 
   useEffect(() => {
     loadLocationData()
@@ -207,26 +160,7 @@ export default function Dashboard() {
     <div className="bg-muted/40 flex min-h-screen w-full flex-col">
       <Header />
       <main className="flex flex-1 flex-col gap-4 p-4 md:gap-8 md:p-8">
-        <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-          <div className="flex flex-wrap gap-2">
-            <Badge variant="default" className="rounded-md px-3 py-1">
-              <div className="mr-1 h-2 w-2 rounded-full bg-red-500" />
-              심각: {severityCounts.critical}
-            </Badge>
-            <Badge variant="default" className="rounded-md px-3 py-1">
-              <div className="mr-1 h-2 w-2 rounded-full bg-amber-500" />
-              위험: {severityCounts.high}
-            </Badge>
-            <Badge variant="default" className="rounded-md px-3 py-1">
-              <div className="mr-1 h-2 w-2 rounded-full bg-blue-500" />
-              주의: {severityCounts.medium}
-            </Badge>
-            <Badge variant="default" className="rounded-md px-3 py-1">
-              <div className="mr-1 h-2 w-2 rounded-full bg-green-500" />
-              안전: {severityCounts.low}
-            </Badge>
-          </div>
-        </div>
+        <SeverityBadges />
 
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
           <Card>
@@ -255,10 +189,12 @@ export default function Dashboard() {
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">
-                {dashboardMetrics.criticalIssues}
+                {/* {dashboardMetrics.criticalIssues} */}
+                0
               </div>
               <p className="text-muted-foreground text-xs">
-                지난 주 대비 {dashboardMetrics.criticalIssuesChange}
+                지난 주 대비 n % 증가
+                {/* 지난 주 대비 {dashboardMetrics.criticalIssuesChange} */}
               </p>
             </CardContent>
           </Card>
@@ -271,10 +207,12 @@ export default function Dashboard() {
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">
-                {dashboardMetrics.avgResponseTime}
+                0
+                {/* {dashboardMetrics.avgResponseTime} */}
               </div>
               <p className="text-muted-foreground text-xs">
-                지난 주 대비 {dashboardMetrics.avgResponseTimeChange}
+                지난 주 대비 n % 증가
+                {/* 지난 주 대비 {dashboardMetrics.avgResponseTimeChange} */}
               </p>
             </CardContent>
           </Card>
@@ -287,10 +225,12 @@ export default function Dashboard() {
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">
-                {dashboardMetrics.affectedAreas}
+                0
+                {/* {dashboardMetrics.affectedAreas} */}
               </div>
               <p className="text-muted-foreground text-xs">
-                지난 주 대비 {dashboardMetrics.affectedAreasChange}
+                지난 주 대비 n % 증가
+                {/* 지난 주 대비 {dashboardMetrics.affectedAreasChange} */}
               </p>
             </CardContent>
           </Card>
@@ -310,7 +250,7 @@ export default function Dashboard() {
                 <TabsTrigger value="list">리스트</TabsTrigger>
                 <TabsTrigger value="analytics">통계</TabsTrigger>
               </TabsList>
-              <LocationHeader />
+              <AddressSelector />
             </div>
             <Button
               onClick={() => loadLocationData()}
@@ -367,28 +307,23 @@ export default function Dashboard() {
                   <div className="flex flex-wrap gap-2">
                     {selectedFilter === 'timeRange' && (
                       <Select
-                        value={timeRange}
-                        onValueChange={(value) =>
-                          setTimeRange(value as TimeRangeType)
-                        }
+                        value={selectedTimeRange}
+                        onValueChange={(value: string) => selectTimeRange(value)}
                       >
                         <SelectTrigger className="h-8 w-[130px]">
                           <SelectValue placeholder="Time Range" />
                         </SelectTrigger>
                         <SelectContent>
-                          {/* <SelectItem value="1h">1시간 이내</SelectItem> */}
-                          <SelectItem value="D">24시간 이내</SelectItem>
-                          <SelectItem value="W">7일 이내</SelectItem>
-                          <SelectItem value="M">30일 이내</SelectItem>
+                          <SelectItem value="daily">24시간 이내</SelectItem>
+                          <SelectItem value="weekly">7일 이내</SelectItem>
+                          <SelectItem value="monthly">30일 이내</SelectItem>
                         </SelectContent>
                       </Select>
                     )}
                     {selectedFilter === 'type' && (
                       <Select
-                        value={defectType}
-                        onValueChange={(value) =>
-                          setDefectType(value as DefectType)
-                        }
+                        value={selectedDefectType}
+                        onValueChange={(value: string) => selectDefectType(value)}
                       >
                         <SelectTrigger className="h-8 w-[130px]">
                           <SelectValue placeholder="Defect Type" />
@@ -403,10 +338,8 @@ export default function Dashboard() {
                     )}
                     {selectedFilter === 'severity' && (
                       <Select
-                        value={severity}
-                        onValueChange={(value) =>
-                          setSeverity(value as SeverityType)
-                        }
+                        value={selectedSeverity}
+                        onValueChange={(value: string) => selectSeverity(value)}
                       >
                         <SelectTrigger className="h-8 w-[130px]">
                           <SelectValue placeholder="Severity" />
