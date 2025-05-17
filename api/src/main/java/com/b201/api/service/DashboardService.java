@@ -74,12 +74,18 @@ public class DashboardService {
 			todayStart
 		);
 
-		// 3) 증감율 계산
-		double rate = calculateRate(todayCount, yesterdayCount);
+		try{
+			// 3) 증감율 계산
+			double rate = calculateRate(todayCount, yesterdayCount);
 
-		log.debug("[getDailyStatusWithChangeRate] todayCount={}, yesterdayCount={}, rate={}",
-			todayCount, yesterdayCount, rate);
-		return new DailyStatusDto(today, todayCount, rate);
+			log.debug("[getDailyStatusWithChangeRate] todayCount={}, yesterdayCount={}, rate={}",
+				todayCount, yesterdayCount, rate);
+			return new DailyStatusDto(today, todayCount, rate);
+		}catch(ArithmeticException e){
+			log.warn("[getDailyStatusWithChangeRate] 0으로 나누기 감지");
+			// 0으로 나눈 경우: todayCount를 음수로 바꿔 리턴
+			return new DailyStatusDto(today, -todayCount, 0.0);
+		}
 	}
 
 	// 이번 주(월요일~) 파손 건수 합계 + 전주 대비 증감율
@@ -94,11 +100,17 @@ public class DashboardService {
 
 		long lastWeekSum = damageRepo.countBetween(regionName, lastMon.atStartOfDay(), thisMon.atStartOfDay());
 
-		double rate = calculateRate(thisWeekSum, lastWeekSum);
+		try{
+			double rate = calculateRate(thisWeekSum, lastWeekSum);
 
-		log.debug("[getWeeklyStatusWithChangeRate] thisWeekSum={}, lastWeekSum={}, rate={}",
-			thisWeekSum, lastWeekSum, rate);
-		return new WeeklyStatusDto(thisMon, thisWeekSum, rate);
+			log.debug("[getWeeklyStatusWithChangeRate] thisWeekSum={}, lastWeekSum={}, rate={}",
+				thisWeekSum, lastWeekSum, rate);
+			return new WeeklyStatusDto(thisMon, thisWeekSum, rate);
+		}catch(ArithmeticException e){
+			log.warn("[getWeeklyStatusWithChangeRate] 0으로 나누기 감지");
+			return new WeeklyStatusDto(thisMon, -thisWeekSum, 0.0);
+		}
+
 	}
 
 	// 이번 달 파손 건수 합계 + 전월 대비 증감율
@@ -128,13 +140,18 @@ public class DashboardService {
 			lastEnd
 		);
 
-		// 증감율 계산
-		double rate = calculateRate(thisMonthCount, lastMonthCount);
+		try{
+			double rate = calculateRate(thisMonthCount, lastMonthCount);
 
-		log.debug("[getMonthlyStatusWithChangeRate] thisMonthCount={}, lastMonthCount={}, rate={}",
-			thisMonthCount, lastMonthCount, rate);
+			log.debug("[getMonthlyStatusWithChangeRate] thisMonthCount={}, lastMonthCount={}, rate={}",
+				thisMonthCount, lastMonthCount, rate);
 
-		return new MonthlyStatusDto(YearMonth.from(firstDayThisMon), thisMonthCount, rate);
+			return new MonthlyStatusDto(YearMonth.from(firstDayThisMon), thisMonthCount, rate);
+		}catch (ArithmeticException e){
+			log.warn("[getMonthlyStatusWithChangeRate] 0으로 나누기 감지");
+			return new MonthlyStatusDto(YearMonth.from(firstDayThisMon), -thisMonthCount, 0.0);
+		}
+
 	}
 
 	/**
