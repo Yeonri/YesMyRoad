@@ -28,6 +28,7 @@ import {
   TimeRangeType,
   useDefectStore,
 } from '@/store/defect-store'
+import { useQuery } from '@tanstack/react-query'
 import { AlertTriangle, BarChart3, Clock, Filter, MapPin } from 'lucide-react'
 import { useEffect, useMemo, useState } from 'react'
 
@@ -61,8 +62,24 @@ export default function Dashboard() {
 
   const [selectedTab, selectTab] = useState<string>('map')
 
-  // const [isLoading, setIsLoading] = useState(false)
-  // const [recentlyIn, setRecentlyIn] = useState('D')
+  // TanStack Query 사용하여 데이터 로드
+  const {
+    // data: geoJsonData,
+    refetch: refetchGeoJson,
+    // isLoading,
+    // error,
+  } = useQuery({
+    queryKey: ['defects'],
+    queryFn: async () => {
+      const response = await coordinateAPI.getDefectLocations()
+      if (response.status === 200 && response.data) {
+        // 스토어 업데이트
+        updateGeoJSONData(response.data)
+        return response.data
+      }
+      throw new Error('데이터 로드 실패')
+    },
+  })
 
   const geoJSONData = useDefectStore((state) => state.geoJSONData)
   const mapBounds = useAddressStore((state) => state.mapBounds)
@@ -145,19 +162,26 @@ export default function Dashboard() {
       updateGeoJSONData(response.data.features!)
     }
   }
+  // 통계 데이터 로드 (timeRange 변경에 따라 자동으로 재요청)
+  const { data: reportData } = useQuery({
+    queryKey: ['reports', timeRange],
+    queryFn: async () => {
+      // API 함수 매핑 - timeRange에 따라 다른 API 호출
+      const apiCalls = {
+        'D': statisticAPI.getDamageDailyReport,
+        'W': statisticAPI.getDamageWeeklyReport,
+        'M': statisticAPI.getDamageMonthlyReport
+      }
 
-  const getReportByTimeRange = async () => {
-    if (timeRange === 'D') {
-      const response = await statisticAPI.getDamageDailyReport()
-      console.log(response.data)
-    } else if (timeRange === 'W') {
-      const response = await statisticAPI.getDamageWeeklyReport()
-      console.log(response.data)
-    } else {
-      const response = await statisticAPI.getDamageMonthlyReport()
-      console.log(response.data)
-    }
-  }
+      // timeRange에 해당하는 API 함수 호출
+      const apiFunction = apiCalls[timeRange] || apiCalls['D'] // 기본값은 일간 보고서
+      const response = await apiFunction()
+
+      console.log(`${timeRange} 보고서:`, response.data, '상태 코드:', response.status)
+      return response.data
+    },
+    enabled: !!timeRange,
+  })
 
   useEffect(() => {
     loadLocationData()
@@ -171,11 +195,6 @@ export default function Dashboard() {
   useEffect(() => {
     console.log(defectDetailList)
   }, [defectDetailList])
-
-  useEffect(() => {
-    console.log(`timeRange: ${timeRange}`)
-    getReportByTimeRange()
-  }, [timeRange, getReportByTimeRange])
 
   return (
     <div className="bg-muted/40 flex min-h-screen w-full flex-col">
@@ -244,6 +263,21 @@ export default function Dashboard() {
                 <SelectItem value="low">낮음</SelectItem>
               </SelectContent>
             </Select>
+            <Select
+              value={severity}
+              onValueChange={(value) => setSeverity(value as SeverityType)}
+            >
+              <SelectTrigger className="h-8 w-[130px]">
+                <SelectValue placeholder="Severity" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">전체</SelectItem>
+                <SelectItem value="critical">심각</SelectItem>
+                <SelectItem value="high">높음</SelectItem>
+                <SelectItem value="medium">중간</SelectItem>
+                <SelectItem value="low">낮음</SelectItem>
+              </SelectContent>
+            </Select>
             <Button variant="outline" size="sm" className="h-8 gap-1">
               <Filter className="h-3.5 w-3.5" />
               <span>필터 더보기</span>
@@ -258,12 +292,15 @@ export default function Dashboard() {
               <BarChart3 className="text-muted-foreground h-4 w-4" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">
-                {dashboardMetrics.totalDefects}
+              {/* <div className="text-2xl font-bold">
+                {reportData?.data?.count || 0}
               </div>
               <p className="text-muted-foreground text-xs">
-                지난 주 대비 {dashboardMetrics.totalDefectsChange}
-              </p>
+                {{ D: '어제', W: '지난 주', M: '지난 달' }[timeRange] || ''}{' '}
+                대비{' '}
+                {reportData?.data?.changeRate === null ? '-' : (reportData?.data?.changeRate || 0)}{' '}
+                % 증가
+              </p> */}
             </CardContent>
           </Card>
           <Card>
@@ -392,4 +429,5 @@ export default function Dashboard() {
       </main>
     </div>
   )
+
 }

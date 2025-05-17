@@ -2,6 +2,8 @@
 
 import { userAPI } from '@/api/user-api'
 import TokenService from '@/services/token-service'
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
+import { ReactQueryDevtools } from '@tanstack/react-query-devtools'
 import { usePathname, useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
 
@@ -18,6 +20,20 @@ export default function ClientLayout({
   const pathname = usePathname()
   const router = useRouter()
   const [isChecking, setIsChecking] = useState(true)
+
+  // QueryClient 인스턴스 생성 - useState를 사용하여 컴포넌트 리렌더링시에도 인스턴스가 유지되도록 함
+  const [queryClient] = useState(
+    () =>
+      new QueryClient({
+        defaultOptions: {
+          queries: {
+            staleTime: 5 * 60 * 1000, // 5분
+            gcTime: 10 * 60 * 1000, // 10분
+            retry: 1, // 실패 시 1번 재시도
+          },
+        },
+      }),
+  )
 
   // 앱 초기화 시 세션 유효성 검증
   useEffect(() => {
@@ -69,5 +85,11 @@ export default function ClientLayout({
     return <div>인증 상태 확인 중...</div>
   }
 
-  return <>{children}</>
+  // QueryClientProvider로 children 감싸기
+  return (
+    <QueryClientProvider client={queryClient}>
+      {children}
+      <ReactQueryDevtools initialIsOpen={false} /> {/* 개발 도구 추가 */}
+    </QueryClientProvider>
+  )
 }

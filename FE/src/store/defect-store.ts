@@ -14,7 +14,7 @@ import crypto from 'crypto'
 import { create } from 'zustand'
 
 // UUID로부터 표시 ID 생성하는 함수 추가
-function getDisplayId(uuid: string, prefix: string = 'DEF-'): string {
+const getDisplayId = (uuid: string, damageId: number, prefix: string = 'DEF'): string => {
   const validChars = '0123456789ABCDEFGHJKLMNPQRSTUVWXYZ'
   const hash = crypto.createHash('sha256').update(uuid).digest('hex')
 
@@ -27,7 +27,7 @@ function getDisplayId(uuid: string, prefix: string = 'DEF-'): string {
     })
     .join('')
 
-  return `${prefix}${shortCode}`
+  return `${prefix}-${damageId}-${shortCode}`
 }
 
 // Define types for our store
@@ -88,6 +88,20 @@ export type FeaturePoint = {
 // 저장소는 GeoJSONData 전체가 아닌 FeaturePoint 배열만 저장하도록 수정
 export type FeatureCollection = FeaturePoint[]
 
+export type ProcessedDefect = {
+  id: string
+  publicId: string
+  type: string
+  severity: string
+  location: string
+  detectedAt: string
+  status: string
+  description: string
+  risk?: number
+  imageUrl?: string
+  damages?: DamageItem[]
+}
+
 export type DefectStoreState = {
   // Filter states
   timeRange: TimeRangeType
@@ -133,11 +147,18 @@ export type DefectStoreState = {
 
   // 지도 상 마커를 클릭했을 때, 선택된 결함의 publicId를 저장하는 상태
   selectedDefect: { publicId: string | null }
+  processedDefects: ProcessedDefect[] // 가공된 결함 데이터
+  detailsMap: Record<string, DefectDetail> // publicId를 키로 하는 상세 정보 맵
+  isProcessingDefects: boolean // 데이터 처리 중 상태
 
   // Actions
   setTimeRange: (timeRange: TimeRangeType) => void
   setDefectType: (defectType: DefectType) => void
   setSeverity: (severity: SeverityType) => void
+
+  updateProcessedDefects: (defects: ProcessedDefect[]) => void
+  updateDetailsMap: (detailsMap: Record<string, DefectDetail>) => void
+  setProcessingDefects: (isProcessing: boolean) => void
 
   // 상태 업데이트 함수 (API 호출 없이 상태만 업데이트)
   updateDefects: (newDefects: Defect[]) => void
@@ -162,7 +183,10 @@ export type DefectStoreState = {
   // selectedDefect 관련 함수
   setSelectedDefect: (publicId: string) => void
   getSelectedDefect: () => { publicId: string | null }
+  getProcessedDefects: () => ProcessedDefect[]
 }
+
+
 
 export const useDefectStore = create<DefectStoreState>((set, get) => ({
   // Initial filter states
@@ -186,6 +210,9 @@ export const useDefectStore = create<DefectStoreState>((set, get) => ({
 
   // selectedDefect 초기값
   selectedDefect: { publicId: null },
+  processedDefects: [],
+  detailsMap: {},
+  isProcessingDefects: false,
 
   // Actions for updating filters
   setTimeRange: (timeRange) => set({ timeRange }),
@@ -202,6 +229,13 @@ export const useDefectStore = create<DefectStoreState>((set, get) => ({
   updateDefectTrends: (newTrends) => set({ trendData: newTrends }),
   updateDefectDetail: (defect) => set({ defectDetail: defect }),
   updateDefectDetailList: (defect) => set({ defectDetailList: defect }),
+
+  updateProcessedDefects: (defects) => set({ processedDefects: defects }),
+  updateDetailsMap: (detailsMap) => set({ detailsMap }),
+  setProcessingDefects: (isProcessing) => set({ isProcessingDefects: isProcessing }),
+
+    // 가공된 defects 가져오는 함수
+  getProcessedDefects: () => get().processedDefects,
 
   // 수정된 업데이트 함수 - features 배열을 받아 각 항목의 publicId를 기반으로 displayId 생성
   updateGeoJSONData: (data) => {
@@ -220,7 +254,8 @@ export const useDefectStore = create<DefectStoreState>((set, get) => ({
         ...feature,
         properties: {
           ...feature.properties,
-          displayId: getDisplayId(publicId),
+          // 기본 ID는 damage ID 없이 생성 (이후 상세 데이터 로드 시 업데이트됨)
+          displayId: getDisplayId(publicId, 0),
         },
       }
     })
