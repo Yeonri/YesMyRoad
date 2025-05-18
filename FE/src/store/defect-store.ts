@@ -14,6 +14,7 @@ export const useDefectStore = create<DefectStoreState>((set) => ({
   geoJSONData: null,
   defectDetailList: [],
 
-  updateGeoJSONData: (features: FeaturePoint[]) => set({ geoJSONData: features }),
+  updateGeoJSONData: (features: FeaturePoint[]) =>
+    set({ geoJSONData: features }),
   updateDefectDetailList: (defect) => set({ defectDetailList: defect }),
 }))
