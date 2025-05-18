@@ -1,9 +1,49 @@
+import { statisticAPI } from '@/api/statistic-api'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { useQuery } from '@tanstack/react-query'
 import * as echarts from 'echarts'
 import ReactECharts from 'echarts-for-react'
 
+type monthItem = {
+  month:string
+  crackCount: number
+  holeCount: number
+  totalCount: number
+}
+
 export default function MonthlyChange(props: { cardHeight: string }) {
   const { cardHeight = 'h-80' } = props
+
+  const { data: response, isLoading, error } = useQuery({
+    queryKey: ['monthly-change'],
+    queryFn: statisticAPI.getSummarizedDamageMonthlyReport,
+    refetchOnWindowFocus: false,
+    staleTime: 5 * 60 * 1000,
+    retry: 1
+  })
+
+  // const month = ["2025-04", "2025-05"]
+  const month = response?.data.map((item:monthItem) => item.month)
+  const crackCounts = response?.data.map((item:monthItem) => item.crackCount)
+  const holeCounts = response?.data.map((item:monthItem) => item.holeCount)
+
+  // 로딩 중이면 로딩 표시
+  if (isLoading) {
+    return (
+      <Card className={`col-span-2 ${cardHeight} flex items-center justify-center`}>
+        <div>데이터 로딩 중...</div>
+      </Card>
+    )
+  }
+
+  // 에러가 있으면 에러 표시
+  if (error) {
+    return (
+      <Card className={`col-span-2 ${cardHeight} flex items-center justify-center`}>
+        <div>데이터를 불러오는 중 오류가 발생했습니다.</div>
+      </Card>
+    )
+  }
 
   const option: echarts.EChartsOption = {
     tooltip: { trigger: 'axis', axisPointer: { type: 'shadow' } },
@@ -12,88 +52,23 @@ export default function MonthlyChange(props: { cardHeight: string }) {
     xAxis: [
       {
         type: 'category',
-        data: [
-          '1월',
-          '2월',
-          '3월',
-          '4월',
-          '5월',
-          '6월',
-          '7월',
-          '8월',
-          '9월',
-          '10월',
-          '11월',
-          '12월',
-        ],
+        data: month,
       },
     ],
     yAxis: [{ type: 'value' }],
     series: [
-      // 동구
+      // month
       {
         name: '포트홀',
         type: 'bar',
-        stack: '동구',
-        data: [12, 3, 17, 8, 19, 2, 15, 7, 20, 1, 13, 6],
+        stack: 'month',
+        data: holeCounts,
       },
       {
         name: '균열',
         type: 'bar',
-        stack: '동구',
-        data: [5, 18, 2, 14, 7, 11, 4, 16, 9, 12, 3, 20],
-      },
-      // 중구
-      {
-        name: '포트홀',
-        type: 'bar',
-        stack: '중구',
-        data: [8, 15, 1, 19, 6, 13, 10, 2, 17, 5, 14, 7],
-      },
-      {
-        name: '균열',
-        type: 'bar',
-        stack: '중구',
-        data: [11, 4, 16, 9, 12, 3, 20, 5, 18, 2, 14, 7],
-      },
-      // 서구
-      {
-        name: '포트홀',
-        type: 'bar',
-        stack: '서구',
-        data: [7, 20, 5, 14, 8, 15, 1, 19, 6, 13, 10, 2],
-      },
-      {
-        name: '균열',
-        type: 'bar',
-        stack: '서구',
-        data: [13, 10, 2, 17, 5, 14, 7, 11, 4, 16, 9, 12],
-      },
-      // 유성구
-      {
-        name: '포트홀',
-        type: 'bar',
-        stack: '유성구',
-        data: [3, 17, 8, 19, 2, 15, 7, 20, 1, 13, 6, 12],
-      },
-      {
-        name: '균열',
-        type: 'bar',
-        stack: '유성구',
-        data: [16, 9, 12, 3, 20, 5, 18, 2, 14, 7, 11, 4],
-      },
-      // 대덕구
-      {
-        name: '포트홀',
-        type: 'bar',
-        stack: '대덕구',
-        data: [19, 2, 15, 7, 20, 1, 13, 6, 12, 3, 17, 8],
-      },
-      {
-        name: '균열',
-        type: 'bar',
-        stack: '대덕구',
-        data: [2, 14, 7, 11, 4, 16, 9, 12, 3, 20, 5, 18],
+        stack: 'month',
+        data: crackCounts,
       },
     ],
   }
