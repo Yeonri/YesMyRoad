@@ -22,7 +22,7 @@ import {
 } from '@/components/ui/select'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import useAddressStore from '@/store/address-store'
-import {  useDefectStore} from '@/store/defect-store'
+import { useDefectStore } from '@/store/defect-store'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { DefectDetail } from "@/types/defects"
 import DefectHeatmap from '@/components/dashboard/defect-heatmap'
@@ -137,6 +137,12 @@ export default function Dashboard() {
     console.log("defectDetailList: ", defectDetailList)
   }, [defectDetailList])
 
+  // // 스토어가 제대로 작동하는지 확인용 -> 정상 작동 확인완료
+  // useEffect(() => {
+  //   console.log("GeoJSONData updated:", geoJSONData)
+  // }, [geoJSONData])
+
+
   return (
     <div className="bg-muted/40 flex min-h-screen w-full flex-col">
       <Header />
@@ -160,7 +166,7 @@ export default function Dashboard() {
               <AddressSelector />
             </div>
             <Button
-              onClick={() => loadLocationData()}
+              // onClick={() => loadLocationData()}
               className="active:bg-primary/70 active:translate-y-0.5 active:scale-95"
             >
               {/* <RefreshIcon/> */}

@@ -20,11 +20,22 @@ export type FeaturePoint = {
   geometry: { type: string; coordinates: number[] }
   properties: {
     publicId: string
-    displayId?: string // 해싱된 ID를 저장할 필드 추가
     address: { street: string }
     accuracyMeters: number
   }
 }
 
-// 저장소는 GeoJSONData 전체가 아닌 FeaturePoint 배열만 저장하도록 수정
 export type FeatureCollection = FeaturePoint[]
+
+export type DetailedFeaturePoint = {
+  type: string
+  geometry: { type: string; coordinates: number[] }
+  properties: {
+    publicId: string
+    address: { street: string }
+    accuracyMeters: number
+  }
+  imageUrl: string
+  risk: number
+  damages: DamageItem[]
+}
