@@ -102,7 +102,7 @@ export default function MapStatus(props: { cardHeight: string }) {
   return (
     <Card className={`col-span-3 grow ${cardHeight}`}>
       <CardHeader className="p-4">
-        <CardTitle className="text-md">구역별 도로 파손 현황</CardTitle>
+        <CardTitle className="text-md">구역별 도로파손 현황</CardTitle>
       </CardHeader>
       <CardContent className="p-4 pt-0 flex items-center justify-center">
         {content}
