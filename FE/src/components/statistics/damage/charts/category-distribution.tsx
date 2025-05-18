@@ -1,9 +1,48 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import * as echarts from 'echarts'
 import ReactECharts from 'echarts-for-react'
+import { statisticAPI } from '@/api/statistic-api'
+import { useQuery } from '@tanstack/react-query'
+
+type category = {
+  categoryName: string
+  count: number
+}
 
 export default function CategoryDistribution(props: { cardHeight: string }) {
   const { cardHeight = 'h-80' } = props
+
+  const { data: response, isLoading, error } = useQuery({
+    queryKey: ['response'],
+    queryFn: statisticAPI.getDamageReportByType,
+    refetchOnWindowFocus: false,
+    staleTime: 5 * 60 * 1000,
+    retry: 1
+  })
+
+  const chartData = response?.data.map((item: category) => ({
+    value: item.count,
+    name: item.categoryName
+  })) || []
+
+
+  // 로딩 중이면 로딩 표시
+  if (isLoading) {
+    return (
+      <Card className={`col-span-2 ${cardHeight} flex items-center justify-center`}>
+        <div>데이터 로딩 중...</div>
+      </Card>
+    )
+  }
+
+  // 에러가 있으면 에러 표시
+  if (error) {
+    return (
+      <Card className={`col-span-2 ${cardHeight} flex items-center justify-center`}>
+        <div>데이터를 불러오는 중 오류가 발생했습니다.</div>
+      </Card>
+    )
+  }
 
   const option: echarts.EChartsOption = {
     tooltip: { trigger: 'item' },
@@ -14,17 +53,11 @@ export default function CategoryDistribution(props: { cardHeight: string }) {
         type: 'pie',
         radius: ['40%', '70%'],
         avoidLabelOverlap: false,
-        itemStyle: { borderRadius: 10, borderColor: '#fff', borderWidth: 2 },
+        itemStyle: { borderRadius: 10, borderColor: '#FFFFFF', borderWidth: 2 },
         label: { show: false, position: 'center' },
         emphasis: { label: { show: true, fontSize: 16, fontWeight: 'bold' } },
         labelLine: { show: false },
-        data: [
-          { value: 35, name: '포트홀' },
-          { value: 20, name: '침하' },
-          { value: 15, name: '균열' },
-          { value: 10, name: '패임' },
-          { value: 5, name: '기타' },
-        ],
+        data: chartData
       },
     ],
   }
