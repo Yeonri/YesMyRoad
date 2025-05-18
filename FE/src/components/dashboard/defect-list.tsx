@@ -94,7 +94,8 @@ export default function DefectList() {
         const detail = detailsMap[publicId]
 
         return {
-          id: feature.properties.displayId || 'Unknown',
+          id: 'Unknown',
+          // id: feature.properties.displayId || 'Unknown',
           publicId: publicId, // API 호출용으로 보존
           type: 'Crack', // 하드코딩 값
           severity: 'medium', // 하드코딩 값
@@ -370,7 +371,8 @@ export default function DefectList() {
             // )
 
             return (
-              <TableRow key={defect.id}>
+              <TableRow key={defect.publicId}>
+              {/* <TableRow key={defect.id}> */}
                 <TableCell className="font-medium">{defect.id}</TableCell>
                 <TableCell>{defect.type}</TableCell>
                 <TableCell>
