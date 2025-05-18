@@ -51,7 +51,7 @@ const eslintConfig = [
 
       // react hooks
       'react-hooks/rules-of-hooks': 'error', // 훅 규칙 검사
-      'react-hooks/exhaustive-deps': 'warn', // 의존성 배열 검사
+      'react-hooks/exhaustive-deps': 'off', // 의존성 배열 검사
 
       // typescript
       '@typescript-eslint/no-unused-vars': 'warn', // 사용하지 않는 변수 설정

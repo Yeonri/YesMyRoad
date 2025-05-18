@@ -1,9 +1,13 @@
 'use client'
 
-import RefreshIcon from "@/assets/refresh.svg"
 import { coordinateAPI } from '@/api/coordinate-api'
-// import { statisticAPI } from '@/api/statistic-api'
-import AddressSelector from './address-selector'
+import DefectHeatmap from '@/components/dashboard/defect-heatmap'
+import DefectList from '@/components/dashboard/defect-list'
+import DefectMap from '@/components/dashboard/defect-map'
+import DefectOverall from '@/components/dashboard/defect-overall'
+import DefectStats from '@/components/dashboard/defect-stats'
+import Header from '@/components/dashboard/header'
+import SeverityBadges from '@/components/dashboard/severity-badges'
 // import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import {
@@ -23,29 +27,22 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import useAddressStore from '@/store/address-store'
 import { useDefectStore } from '@/store/defect-store'
+import { DefectDetail } from '@/types/defects'
 import { useCallback, useEffect, useMemo, useState } from 'react'
-import { DefectDetail } from "@/types/defects"
-import DefectHeatmap from '@/components/dashboard/defect-heatmap'
-import DefectList from '@/components/dashboard/defect-list'
-import DefectMap from '@/components/dashboard/defect-map'
-import DefectStats from '@/components/dashboard/defect-stats'
-import Header from '@/components/dashboard/header'
-import SeverityBadges from '@/components/dashboard/severity-badges'
-import DefectOverall from '@/components/dashboard/defect-overall'
+
+// import { statisticAPI } from '@/api/statistic-api'
+import AddressSelector from './address-selector'
 
 export default function Dashboard() {
   // Get state and actions from Zustand store
-  const {
-    updateGeoJSONData,
-    defectDetailList,
-    updateDefectDetailList,
-  } = useDefectStore()
+  const { updateGeoJSONData, defectDetailList, updateDefectDetailList } =
+    useDefectStore()
 
   const [selectedTab, selectTab] = useState<string>('map') // 지도/히트맵/리스트/통계 탭 선택용 상태 변수
   const [selectedFilter, selectFilter] = useState<string>('timeRange') // 리스트 탭에서 시간/유형/심각도 필터를 고르는 필터
-  const [selectedTimeRange, selectTimeRange] = useState<string>("daily") // 리스트 탭에서 시간 필터
-  const [selectedDefectType, selectDefectType] = useState<string>("all") // 리스트 탭에서 유형 필터
-  const [selectedSeverity, selectSeverity] = useState<string>("daily") // 리스트 탭에서 심각도 필터
+  const [selectedTimeRange, selectTimeRange] = useState<string>('daily') // 리스트 탭에서 시간 필터
+  const [selectedDefectType, selectDefectType] = useState<string>('all') // 리스트 탭에서 유형 필터
+  const [selectedSeverity, selectSeverity] = useState<string>('daily') // 리스트 탭에서 심각도 필터
   const geoJSONData = useDefectStore((state) => state.geoJSONData)
   const mapBounds = useAddressStore((state) => state.mapBounds)
 
@@ -94,6 +91,20 @@ export default function Dashboard() {
     )
   }, [defectDetailList, filteredPublicIdsByBounds])
 
+  // DefectMap과 DefectHeatmap 컴포넌트를 메모이제이션
+  const memoizedDefectMap = useMemo(
+    () => (
+      <DefectMap
+        onSelectTab={selectTab}
+        filteredDefectDetailList={filteredDefectDetailList}
+        selectedTab={selectedTab}
+      />
+    ),
+    [filteredDefectDetailList, selectedTab]
+  )
+
+  const memoizedDefectHeatmap = useMemo(() => <DefectHeatmap />, [])
+
   const loadDefectDetails = useCallback(() => {
     // 지도 데이터가 로드되지 않았거나 데이터가 없으면 종료
     if (geoJSONData === null || geoJSONData.length === 0) return
@@ -119,7 +130,9 @@ export default function Dashboard() {
     console.log(`GeoJSON 데이터 로딩 시작`)
     const response = await coordinateAPI.getDefectLocations()
     if (response.status === 200 && response.data) {
-      console.log(`GeoJSON 데이터 로드 성공: ${response.data.features!.length || 0} 개의 데이터`)
+      console.log(
+        `GeoJSON 데이터 로드 성공: ${response.data.features!.length || 0} 개의 데이터`,
+      )
       updateGeoJSONData(response.data.features!)
     }
   }, [updateGeoJSONData])
@@ -134,7 +147,7 @@ export default function Dashboard() {
   }, [geoJSONData])
 
   useEffect(() => {
-    console.log("defectDetailList: ", defectDetailList)
+    console.log('defectDetailList: ', defectDetailList)
   }, [defectDetailList])
 
   // // 스토어가 제대로 작동하는지 확인용 -> 정상 작동 확인완료
@@ -189,11 +202,8 @@ export default function Dashboard() {
               결함 현황 새로고침
             </Button>
           </div>
-          <TabsContent value="map" className="space-y-4">
-            <DefectMap
-              onSelectTab={selectTab}
-              filteredDefectDetailList={filteredDefectDetailList}
-            />
+          <TabsContent value="map" className="space-y-4" forceMount>
+            {memoizedDefectMap}
           </TabsContent>
           <TabsContent value="heatmap" className="space-y-4">
             <Card>
@@ -203,7 +213,7 @@ export default function Dashboard() {
               </CardHeader>
               <CardContent className="p-4 pt-0">
                 <div className="aspect-video overflow-hidden rounded-md">
-                  <DefectHeatmap />
+                  {memoizedDefectHeatmap}
                 </div>
               </CardContent>
             </Card>
@@ -267,10 +277,7 @@ export default function Dashboard() {
                         </SelectContent>
                       </Select>
                     )}
-                    <Select
-                      value={selectedFilter}
-                      onValueChange={selectFilter}
-                    >
+                    <Select value={selectedFilter} onValueChange={selectFilter}>
                       <SelectTrigger className="h-8 w-[130px]">
                         <SelectValue placeholder="필터 선택" />
                       </SelectTrigger>

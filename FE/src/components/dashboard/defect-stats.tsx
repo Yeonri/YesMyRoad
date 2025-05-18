@@ -61,8 +61,9 @@ export default function DefectStats() {
             <button
               key={index}
               onClick={() => emblaApi?.scrollTo(index)}
-              className={`h-2 w-2 rounded-full transition-colors ${index === selectedIndex ? 'bg-blue-600' : 'bg-gray-300'
-                }`}
+              className={`h-2 w-2 rounded-full transition-colors ${
+                index === selectedIndex ? 'bg-blue-600' : 'bg-gray-300'
+              }`}
             />
           ))}
         </div>
