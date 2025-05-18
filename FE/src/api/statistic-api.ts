@@ -68,16 +68,7 @@ export const statisticAPI = {
       return { data: null, status: 500, error: new Error('Unknown error') }
     }
   },
-
-  // getLocationallyDamageMap: (city: string) =>
-  //   apiCaller(
-  //     'get',
-  //     '/api/dashboard/districts',
-  //     '지역별 도로파손 분포 지도 조회 실패',
-  //     undefined,
-  //     { params: { city } },
-  //   ),
-
+  
   // 도로파손 분포 Top3 지역
   getTop3Damagedlocations: () =>
     apiCaller(
