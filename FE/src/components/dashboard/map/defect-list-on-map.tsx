@@ -12,27 +12,12 @@ import { Separator } from '@/components/ui/separator'
 import { DamageItem, DefectDetail } from '@/types/defects'
 import { AlertTriangle, Clock, MapPin } from 'lucide-react'
 import Image from 'next/image'
-import { useEffect, useState } from 'react'
 
-export default function DamageListOnMap({
+export default function DefectListOnMap({
   filteredDefectDetailList,
-  selectedDefectPublicId,
-  onSelectDefect,
 }: {
   filteredDefectDetailList: DefectDetail[]
-  selectedDefectPublicId: string | null
-  onSelectDefect: (publicId: string | null) => void
 }) {
-  // 내부에서 아코디언 상태 관리
-  const [openAccordion, setOpenAccordion] = useState<string | undefined>(
-    selectedDefectPublicId ? `item-${selectedDefectPublicId}` : undefined
-  )
-
-  // 외부의 selectedDefectPublicId와 내부 상태 동기화
-  useEffect(() => {
-    setOpenAccordion(selectedDefectPublicId ? `item-${selectedDefectPublicId}` : undefined)
-  }, [selectedDefectPublicId])
-
   const formatDate = (dateString: string) => {
     const date = new Date(dateString)
     return date.toLocaleString([], {
@@ -66,26 +51,9 @@ export default function DamageListOnMap({
     return 'warning'
   }
 
-  // 아코디언 값 변경 처리
-  const handleValueChange = (value: string | undefined) => {
-    setOpenAccordion(value)
-    
-    if (value) {
-      const publicId = value.replace('item-', '')
-      onSelectDefect(publicId)
-    } else {
-      onSelectDefect(null)
-    }
-  }
-
   return (
     <ScrollArea className="h-full">
-      <Accordion 
-        type="single" 
-        collapsible 
-        value={openAccordion}
-        onValueChange={handleValueChange}
-      >
+      <Accordion type="single" collapsible>
         {filteredDefectDetailList.map((defectDetail, index) => (
           <div key={defectDetail.publicId}>
             <div className="flex items-start gap-2">
