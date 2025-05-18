@@ -91,6 +91,20 @@ export default function Dashboard() {
     )
   }, [defectDetailList, filteredPublicIdsByBounds])
 
+  // DefectMap과 DefectHeatmap 컴포넌트를 메모이제이션
+  const memoizedDefectMap = useMemo(
+    () => (
+      <DefectMap
+        onSelectTab={selectTab}
+        filteredDefectDetailList={filteredDefectDetailList}
+        selectedTab={selectedTab}
+      />
+    ),
+    [filteredDefectDetailList, selectedTab]
+  )
+
+  const memoizedDefectHeatmap = useMemo(() => <DefectHeatmap />, [])
+
   const loadDefectDetails = useCallback(() => {
     // 지도 데이터가 로드되지 않았거나 데이터가 없으면 종료
     if (geoJSONData === null || geoJSONData.length === 0) return
@@ -183,11 +197,7 @@ export default function Dashboard() {
             </Button>
           </div>
           <TabsContent value="map" className="space-y-4" forceMount>
-            <DefectMap
-              onSelectTab={selectTab}
-              filteredDefectDetailList={filteredDefectDetailList}
-              selectedTab={selectedTab}
-            />
+            {memoizedDefectMap}
           </TabsContent>
           <TabsContent value="heatmap" className="space-y-4">
             <Card>
@@ -197,7 +207,7 @@ export default function Dashboard() {
               </CardHeader>
               <CardContent className="p-4 pt-0">
                 <div className="aspect-video overflow-hidden rounded-md">
-                  <DefectHeatmap />
+                  {memoizedDefectHeatmap}
                 </div>
               </CardContent>
             </Card>
