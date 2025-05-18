@@ -13,7 +13,7 @@ export default function CategoryDistribution(props: { cardHeight: string }) {
   const { cardHeight = 'h-80' } = props
 
   const { data: response, isLoading, error } = useQuery({
-    queryKey: ['response'],
+    queryKey: ['category-distribution'],
     queryFn: statisticAPI.getDamageReportByType,
     refetchOnWindowFocus: false,
     staleTime: 5 * 60 * 1000,
