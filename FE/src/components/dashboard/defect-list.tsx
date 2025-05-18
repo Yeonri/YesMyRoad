@@ -31,6 +31,7 @@ import {
 } from '@/components/ui/table'
 import { useDefectStore } from '@/store/defect-store'
 import { useQueries } from '@tanstack/react-query'
+import crypto from 'crypto'
 import {
   ChevronDown,
   ChevronUp,
@@ -39,7 +40,6 @@ import {
   MoreHorizontal,
 } from 'lucide-react'
 import { useEffect, useState } from 'react'
-import crypto from 'crypto'
 
 export type ProcessStatus = 'Pending' | 'Assigned' | 'In Progress' | 'Completed'
 
@@ -55,9 +55,8 @@ export default function DefectList() {
   const [sortDirection, setSortDirection] = useState('asc')
   const [currentPage, setCurrentPage] = useState(1)
   const itemsPerPage = 5
-  const defectType = "all"
-  const severity = "all"
-
+  const defectType = 'all'
+  const severity = 'all'
 
   // UUID로부터 표시 ID 생성하는 함수
   const getDisplayId = (
@@ -67,7 +66,7 @@ export default function DefectList() {
   ): string => {
     const validChars = '0123456789ABCDEFGHJKLMNPQRSTUVWXYZ'
     const hash = crypto.createHash('sha256').update(uuid).digest('hex')
-  
+
     const shortCode = Array(5)
       .fill(0)
       .map((_, i) => {
@@ -76,7 +75,7 @@ export default function DefectList() {
         return validChars[index]
       })
       .join('')
-  
+
     return `${prefix}-${damageId}-${shortCode}`
   }
 
