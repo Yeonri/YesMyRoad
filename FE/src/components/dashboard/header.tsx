@@ -1,7 +1,7 @@
 'use client'
 
 // import { coodAPI } from '@/api/coordinate-api'
-// import { defectAPI } from '@/api/defect-api'
+import { defectAPI } from '@/api/defect-api'
 // import { maintenanceAPI } from '@/api/maintenance-api'
 // import { statisticAPI } from '@/api/statistic-api'
 // API 테스트
@@ -42,6 +42,16 @@ export default function Header() {
 
       // 로그인 페이지로 리디렉션
       router.push('/auth')
+    }
+  }
+
+  const defectAPITest = async () => {
+    const response = await defectAPI.updateRoadDamageStatus(10, "COMPLETED")
+    if (response.status === 200) {
+      console.log(response.data)
+    }
+    else {
+      alert("응 안돼~")
     }
   }
 
@@ -111,7 +121,7 @@ export default function Header() {
             <DropdownMenuLabel>내 계정</DropdownMenuLabel>
             <DropdownMenuSeparator />
             <DropdownMenuItem>프로필</DropdownMenuItem>
-            <DropdownMenuItem>설정</DropdownMenuItem>
+            <DropdownMenuItem onClick={defectAPITest}>설정</DropdownMenuItem>
             <DropdownMenuSeparator />
             <DropdownMenuItem onClick={handleLogout}>로그아웃</DropdownMenuItem>
           </DropdownMenuContent>
