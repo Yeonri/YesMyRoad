@@ -1,10 +1,8 @@
-import CategoryDistribution from './charts/category-distribution'
-import MapStatus from './charts/map-status'
-import MonthlyChange from './charts/monthly-change'
-import TopThreeRegion from './charts/top-three-region'
-import SummaryDaily from './summary/summary-daily'
-import SummaryMonthly from './summary/summary-monthly'
-import SummaryWeekly from './summary/summary-weekly'
+import CategoryDistribution from '@/components/statistics/damage/charts/category-distribution'
+import MapStatus from '@/components/statistics/damage/charts/map-status'
+import MonthlyChange from '@/components/statistics/damage/charts/monthly-change'
+import TopThreeRegion from '@/components/statistics/damage/charts/top-three-region'
+import DamageSummary from '@/components/statistics/damage/summary/damage-summary'
 
 const CARD_HEIGHT = 'h-auto'
 
@@ -15,11 +13,8 @@ export default function DefectStatsDamage() {
       {/* 유형별 도로파손 분포 : 도넛형 */}
       <CategoryDistribution cardHeight={CARD_HEIGHT} />
       {/* 일/월/년 도로파손 건수 */}
-      <div className={`${CARD_HEIGHT} col-span-2 flex flex-col gap-4`}>
-        <SummaryDaily />
-        <SummaryWeekly />
-        <SummaryMonthly />
-      </div>
+
+      <DamageSummary />
       {/* 월별 도로파손 현황 : 행정구역별 세로 막대 그래프 */}
       <MonthlyChange cardHeight={CARD_HEIGHT} />
 

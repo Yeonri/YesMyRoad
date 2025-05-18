@@ -1,10 +1,10 @@
-import BudgetExecutionReport from './charts/budget-execution-report'
-import CategoryDistribution from './charts/category-distribution'
-import MapStatus from './charts/map-status'
-import MonthlyRepair from './charts/monthly-repair'
-import SummaryDaily from './summary/summary-daily'
-import SummaryMonthly from './summary/summary-monthly'
-import SummaryWeekly from './summary/summary-weekly'
+import BudgetExecutionReport from '@/components/statistics/repair/charts/budget-execution-report'
+import CategoryDistribution from '@/components/statistics/repair/charts/category-distribution'
+import MapStatus from '@/components/statistics/repair/charts/map-status'
+import MonthlyRepair from '@/components/statistics/repair/charts/monthly-repair'
+import SummaryDaily from '@/components/statistics/repair/summary/summary-daily'
+import SummaryMonthly from '@/components/statistics/repair/summary/summary-monthly'
+import SummaryWeekly from '@/components/statistics/repair/summary/summary-weekly'
 
 const CARD_HEIGHT = 'h-auto'
 
