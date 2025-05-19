@@ -95,7 +95,7 @@ export default function DefectList() {
     return geoJSONData.flatMap((feature, index) => {
       const queryResult = defectQueries[index]
       const damages = queryResult.data?.data.damages || []
-      const defectId = ""
+      const defectId = 0
 
       if (Array.isArray(damages)) {
         return damages.map((damage: damageType) => ({
