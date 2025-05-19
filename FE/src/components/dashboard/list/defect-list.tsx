@@ -29,9 +29,10 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table'
+import { formatDate, getSeverityColor, getStatusColor } from '@/libs/formatter'
 import { useDefectStore } from '@/store/defect-store'
 import { useQueries } from '@tanstack/react-query'
-// import crypto from 'crypto'
+
 import {
   ChevronDown,
   ChevronUp,
@@ -58,26 +59,6 @@ export default function DefectList() {
   const defectType = 'all'
   const severity = 'all'
 
-  // UUID로부터 표시 ID 생성하는 함수
-  // const getDisplayId = (
-  //   uuid: string,
-  //   damageId: number,
-  //   prefix: string = 'DEF',
-  // ): string => {
-  //   const validChars = '0123456789ABCDEFGHJKLMNPQRSTUVWXYZ'
-  //   const hash = crypto.createHash('sha256').update(uuid).digest('hex')
-
-  //   const shortCode = Array(5)
-  //     .fill(0)
-  //     .map((_, i) => {
-  //       const index =
-  //         parseInt(hash.slice(i * 2, i * 2 + 2), 16) % validChars.length
-  //       return validChars[index]
-  //     })
-  //     .join('')
-
-  //   return `${prefix}-${damageId}-${shortCode}`
-  // }
 
   // 상세 정보를 저장할 맵 상태
   const [detailsMap, setDetailsMap] = useState<Record<string, DetailedDefect>>(
@@ -185,11 +166,6 @@ export default function DefectList() {
     }
   }
 
-  // 페이지 변경 핸들러
-  const handlePageChange = (page: number) => {
-    setCurrentPage(page)
-  }
-
   // 페이지 번호 배열 생성
   const getPageNumbers = () => {
     const pageNumbers = []
@@ -216,41 +192,6 @@ export default function DefectList() {
     return pageNumbers
   }
 
-  // 유틸리티 함수들
-  const formatDate = (dateString: string) => {
-    const date = new Date(dateString)
-    return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-  }
-
-  const getSeverityColor = (severity: string) => {
-    switch (severity) {
-      case 'critical':
-        return 'bg-red-500 text-white'
-      case 'high':
-        return 'bg-amber-500 text-white'
-      case 'medium':
-        return 'bg-blue-500 text-white'
-      case 'low':
-        return 'bg-green-500 text-white'
-      default:
-        return 'bg-gray-500 text-white'
-    }
-  }
-
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'Pending':
-        return 'bg-gray-100 text-gray-800 hover:bg-gray-300 hover:text-gray-900 transition-colors duration-150'
-      case 'Assigned':
-        return 'bg-blue-100 text-blue-800 hover:bg-blue-300 hover:text-blue-900 transition-colors duration-150'
-      case 'In Progress':
-        return 'bg-amber-100 text-amber-800 hover:bg-amber-300 hover:text-amber-900 transition-colors duration-150'
-      case 'Completed':
-        return 'bg-green-100 text-green-800 hover:bg-green-300 hover:text-green-900 transition-colors duration-150'
-      default:
-        return 'bg-gray-100 text-gray-800 hover:bg-gray-300 hover:text-gray-900 transition-colors duration-150'
-    }
-  }
 
   // 상태 변경 핸들러
   const handleStatusChange = async (
@@ -459,7 +400,7 @@ export default function DefectList() {
           <PaginationContent>
             <PaginationItem>
               <PaginationPrevious
-                onClick={() => handlePageChange(Math.max(1, currentPage - 1))}
+                onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
                 className={
                   currentPage === 1
                     ? 'pointer-events-none opacity-50'
@@ -473,7 +414,7 @@ export default function DefectList() {
               <>
                 <PaginationItem>
                   <PaginationLink
-                    onClick={() => handlePageChange(1)}
+                    onClick={() => setCurrentPage(1)}
                     className="cursor-pointer"
                   >
                     1
@@ -492,7 +433,7 @@ export default function DefectList() {
               <PaginationItem key={page}>
                 <PaginationLink
                   isActive={currentPage === page}
-                  onClick={() => handlePageChange(page)}
+                  onClick={() => setCurrentPage(page)}
                   className="cursor-pointer"
                 >
                   {page}
@@ -511,7 +452,7 @@ export default function DefectList() {
                 )}
                 <PaginationItem>
                   <PaginationLink
-                    onClick={() => handlePageChange(totalPages)}
+                    onClick={() => setCurrentPage(totalPages)}
                     className="cursor-pointer"
                   >
                     {totalPages}
@@ -523,7 +464,7 @@ export default function DefectList() {
             <PaginationItem>
               <PaginationNext
                 onClick={() =>
-                  handlePageChange(Math.min(totalPages, currentPage + 1))
+                  setCurrentPage(Math.min(totalPages, currentPage + 1))
                 }
                 className={
                   currentPage === totalPages

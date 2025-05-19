@@ -21,7 +21,7 @@ import {
   PopoverTrigger,
 } from '@/components/ui/popover'
 import address from '@/data/address.json'
-import { cn } from '@/lib/utils'
+import { cn } from '@/libs/utils'
 import useAddressStore from '@/store/address-store'
 import { AddressData, LocationInfo } from '@/types/address'
 import { Check, ChevronDown } from 'lucide-react'
