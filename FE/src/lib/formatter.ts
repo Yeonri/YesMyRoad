@@ -7,10 +7,10 @@ export const formatDate = (dateString: string) => {
 }
 
 export const getSeverity = (risk: number) => {
-  if (0 <= risk && risk < 40) return "심각"
-  else if (40 <= risk && risk < 60) return "위험"
-  else if (60 <= risk && risk < 80) return "주의"
-  else return "안전"
+  if (0 <= risk && risk < 40) return '심각'
+  else if (40 <= risk && risk < 60) return '위험'
+  else if (60 <= risk && risk < 80) return '주의'
+  else return '안전'
 }
 
 export const getSeverityColor = (severity: string) => {
@@ -30,13 +30,13 @@ export const getSeverityColor = (severity: string) => {
 
 export const getStatusColor = (status: string) => {
   switch (status) {
-    case 'Pending':
+    case 'REPORTED':
       return 'bg-gray-100 text-gray-800 hover:bg-gray-300 hover:text-gray-900 transition-colors duration-150'
-    case 'Assigned':
+    case 'RECEIVED':
       return 'bg-blue-100 text-blue-800 hover:bg-blue-300 hover:text-blue-900 transition-colors duration-150'
-    case 'In Progress':
+    case 'IN_PROGRESS':
       return 'bg-amber-100 text-amber-800 hover:bg-amber-300 hover:text-amber-900 transition-colors duration-150'
-    case 'Completed':
+    case 'COMPLETED':
       return 'bg-green-100 text-green-800 hover:bg-green-300 hover:text-green-900 transition-colors duration-150'
     default:
       return 'bg-gray-100 text-gray-800 hover:bg-gray-300 hover:text-gray-900 transition-colors duration-150'
@@ -44,8 +44,8 @@ export const getStatusColor = (status: string) => {
 }
 
 export const getDisplayId = (damageId: number, publicId: string): string => {
-    const validChars = '0123456789ABCDEFGHJKLMNPQRSTUVWXYZ'
-    const hash = crypto.createHash('sha256').update(publicId).digest('hex')
+  const validChars = '0123456789ABCDEFGHJKLMNPQRSTUVWXYZ'
+  const hash = crypto.createHash('sha256').update(publicId).digest('hex')
 
   const shortCode = Array(5)
     .fill(0)
@@ -56,5 +56,5 @@ export const getDisplayId = (damageId: number, publicId: string): string => {
     })
     .join('')
 
-    return `DEF-${damageId}-${shortCode}`
+  return `DEF-${damageId}-${shortCode}`
 }

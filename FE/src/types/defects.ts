@@ -40,5 +40,8 @@ export type DetailedFeaturePoint = {
   damages: DamageItem[]
 }
 
-
-export type ProcessStatus = 'REPORTED' | 'RECEIVED' | 'IN_PROGRESS' | 'COMPLETED'
+export type ProcessStatus =
+  | 'REPORTED'
+  | 'RECEIVED'
+  | 'IN_PROGRESS'
+  | 'COMPLETED'
