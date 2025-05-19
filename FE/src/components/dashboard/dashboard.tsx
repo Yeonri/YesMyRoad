@@ -38,11 +38,12 @@ export default function Dashboard() {
   const { updateGeoJSONData, defectDetailList, updateDefectDetailList } =
     useDefectStore()
 
-  const [selectedTab, selectTab] = useState<string>('map') // 지도/히트맵/리스트/통계 탭 선택용 상태 변수
-  const [selectedFilter, selectFilter] = useState<string>('timeRange') // 리스트 탭에서 시간/유형/심각도 필터를 고르는 필터
-  const [selectedTimeRange, selectTimeRange] = useState<string>('daily') // 리스트 탭에서 시간 필터
-  const [selectedDefectType, selectDefectType] = useState<string>('all') // 리스트 탭에서 유형 필터
-  const [selectedSeverity, selectSeverity] = useState<string>('daily') // 리스트 탭에서 심각도 필터
+  const [selectedTab, selectTab] = useState<string>('map') // 지도/히트맵/목록/통계 탭 선택용 상태 변수
+  const [selectedFilter, selectFilter] = useState<string>('timeRange') // 목록 탭에서 시간/결함 유형/심각도 필터를 고르는 필터
+  const [selectedTimeRange, selectTimeRange] = useState<string>('all') // 목록 탭에서 시간 필터
+  const [selectedDefectType, selectDefectType] = useState<string>('all') // 목록 탭에서 결함 유형 필터
+  const [selectedSeverity, selectSeverity] = useState<string>('all') // 목록 탭에서 심각도 필터
+  const [selectedProcess, selectProcess] = useState<string>('all') // 목록 탭에서 심각도 필터
   const geoJSONData = useDefectStore((state) => state.geoJSONData)
   const mapBounds = useAddressStore((state) => state.mapBounds)
 
@@ -172,34 +173,12 @@ export default function Dashboard() {
               <TabsList>
                 <TabsTrigger value="map">지도</TabsTrigger>
                 <TabsTrigger value="heatmap">히트맵</TabsTrigger>
-                <TabsTrigger value="list">리스트</TabsTrigger>
+                <TabsTrigger value="list">목록</TabsTrigger>
                 <TabsTrigger value="analytics">통계</TabsTrigger>
               </TabsList>
-              <AddressSelector />
+
+              {(selectedTab === 'map' || selectedTab == 'heatmap') && <AddressSelector />}
             </div>
-            <Button
-              // onClick={() => loadLocationData()}
-              className="active:bg-primary/70 active:translate-y-0.5 active:scale-95"
-            >
-              {/* <RefreshIcon/> */}
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                width="16"
-                height="16"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              >
-                <path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8" />
-                <path d="M21 3v5h-5" />
-                <path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16" />
-                <path d="M3 21v-5h5" />
-              </svg>
-              결함 현황 새로고침
-            </Button>
           </div>
           <TabsContent value="map" className="space-y-4" forceMount>
             {memoizedDefectMap}
@@ -222,10 +201,7 @@ export default function Dashboard() {
               <CardHeader>
                 <div className="flex justify-between">
                   <div>
-                    <CardTitle>결함 리스트</CardTitle>
-                    <CardDescription>
-                      모든 결함을 심각도별로 정렬
-                    </CardDescription>
+                    <CardTitle>결함 목록</CardTitle>
                   </div>
                   <div className="flex flex-wrap gap-2">
                     {selectedFilter === 'timeRange' && (
@@ -237,6 +213,7 @@ export default function Dashboard() {
                           <SelectValue placeholder="Time Range" />
                         </SelectTrigger>
                         <SelectContent>
+                          <SelectItem value="all">전체</SelectItem>
                           <SelectItem value="daily">24시간 이내</SelectItem>
                           <SelectItem value="weekly">7일 이내</SelectItem>
                           <SelectItem value="monthly">30일 이내</SelectItem>
@@ -253,9 +230,8 @@ export default function Dashboard() {
                         </SelectTrigger>
                         <SelectContent>
                           <SelectItem value="all">전체</SelectItem>
-                          <SelectItem value="pothole">포트홀</SelectItem>
-                          <SelectItem value="crack">깨짐</SelectItem>
-                          <SelectItem value="paint">페인트 벗겨짐</SelectItem>
+                          <SelectItem value="pothole">도로 홀</SelectItem>
+                          <SelectItem value="crack">도로균열</SelectItem>
                         </SelectContent>
                       </Select>
                     )}
@@ -270,9 +246,26 @@ export default function Dashboard() {
                         <SelectContent>
                           <SelectItem value="all">전체</SelectItem>
                           <SelectItem value="critical">심각</SelectItem>
-                          <SelectItem value="high">높음</SelectItem>
-                          <SelectItem value="medium">중간</SelectItem>
-                          <SelectItem value="low">낮음</SelectItem>
+                          <SelectItem value="danger">위험</SelectItem>
+                          <SelectItem value="caution">주의</SelectItem>
+                          <SelectItem value="safe">안전</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    )}
+                    {selectedFilter === 'process' && (
+                      <Select
+                        value={selectedProcess}
+                        onValueChange={selectProcess}
+                      >
+                        <SelectTrigger className="h-8 w-[130px]">
+                          <SelectValue placeholder="Process" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="all">전체</SelectItem>
+                          <SelectItem value="REPORTED">REPORTED</SelectItem>
+                          <SelectItem value="RECEIVED">RECEIVED</SelectItem>
+                          <SelectItem value="IN_PROGRESS">IN_PROGRESS</SelectItem>
+                          <SelectItem value="COMPLETED">COMPLETED</SelectItem>
                         </SelectContent>
                       </Select>
                     )}
@@ -281,16 +274,17 @@ export default function Dashboard() {
                         <SelectValue placeholder="필터 선택" />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="timeRange">시간</SelectItem>
-                        <SelectItem value="type">유형</SelectItem>
+                        <SelectItem value="timeRange">발생 시각</SelectItem>
+                        <SelectItem value="type">결함 유형</SelectItem>
                         <SelectItem value="severity">심각도</SelectItem>
+                        <SelectItem value="process">작업 현황</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
                 </div>
               </CardHeader>
               <CardContent>
-                <DefectList />
+                <DefectList filter={selectedFilter} timeRange={selectedTimeRange} defectType={selectedDefectType} severity={selectedSeverity} process={selectedProcess} />
               </CardContent>
             </Card>
           </TabsContent>

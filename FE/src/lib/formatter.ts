@@ -56,5 +56,8 @@ export const getDisplayId = (damageId: number, publicId: string): string => {
     })
     .join('')
 
-  return `DEF-${damageId}-${shortCode}`
+  // damageId를 문자열로 변환하고 4자리가 되도록 앞에 0을 채움
+  const formattedDamageId = String(damageId).padStart(4, '0')
+
+  return `D-${formattedDamageId}-${shortCode}`
 }

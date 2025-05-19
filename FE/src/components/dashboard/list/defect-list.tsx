@@ -1,8 +1,8 @@
 'use client'
 
 import { coordinateAPI } from '@/api/coordinate-api'
-import { defectAPI } from '@/api/defect-api'
 import DefectPaginations from '@/components/dashboard/list/defect-paginations'
+import DefectImage from '@/components/dashboard/list/defect-image'
 import { Button } from '@/components/ui/button'
 import {
   DropdownMenu,
@@ -30,6 +30,7 @@ import {
 } from '@/lib/formatter'
 import { useDefectListStore } from '@/store/defect-list-store'
 import { useDefectStore } from '@/store/defect-store'
+import { useDetailedDefectStore, DetailedDamageType } from '@/store/detailed-defect-list-store'
 import { ProcessStatus } from '@/types/defects'
 import { useQueries } from '@tanstack/react-query'
 import {
@@ -37,9 +38,8 @@ import {
   ChevronUp,
   Clock,
   MapPin,
-  MoreHorizontal,
 } from 'lucide-react'
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useCallback, useRef } from 'react'
 
 type damageType = {
   id: number
@@ -48,32 +48,42 @@ type damageType = {
   updatedAt: string
 }
 
-type detailedDamageType = {
-  defectId: string
-  imageUrl: string
-  type: string
-  location: string
-  category: string
-  detectedAt: string
-  publicId: string
+type DashboardFilterProps = {
+  filter: string
+  timeRange: string
+  defectType: string
   severity: string
-  status: string
+  process: string
 }
 
-export default function DefectList() {
+export default function DefectList({ filter, timeRange, defectType, severity, process }: DashboardFilterProps) {
   const processStatusList: ProcessStatus[] = [
     'REPORTED',
     'RECEIVED',
     'IN_PROGRESS',
     'COMPLETED',
   ]
-  const [sortColumn, setSortColumn] = useState('id')
-  const [sortDirection, setSortDirection] = useState('asc')
-  const defectType = 'all'
-  const severity = 'all'
+
+  // Zustand 스토어에서 필요한 모든 상태와 액션 가져오기 (타입 문제 해결)
+  const {
+    sortColumn,
+    sortDirection,
+    detailedGeoJSONData,
+    setSortColumn,
+    setSortDirection,
+    setDetailedGeoJSONData,
+    updateDefectStatus,
+    getFilteredAndSortedData,
+    getCurrentPageData
+  } = useDetailedDefectStore()
+
   const { currentPage, itemsPerPage, setTotalItems } = useDefectListStore()
   const { geoJSONData } = useDefectStore()
 
+  // 이전 totalItems 값을 저장하는 ref
+  const prevTotalItemsRef = useRef(0)
+
+  // React Query를 사용하여 결함 세부 정보 가져오기
   const defectQueries = useQueries({
     queries: (geoJSONData || []).map((feature) => {
       const publicId = feature.properties.publicId
@@ -85,18 +95,16 @@ export default function DefectList() {
     }),
   })
 
-  // 최적화된 데이터 변환 로직 - useMemo 사용
+  // 결함 세부 정보 데이터 변환 로직
   const detailedData = useMemo(() => {
-    // 모든 쿼리가 완료되었는지 확인
     const allQueriesReady = defectQueries.every(
       (query) => query.isSuccess && query.data?.data,
     )
 
     if (!allQueriesReady || !geoJSONData?.length) {
-      return [] // 준비되지 않았으면 빈 배열 반환
+      return []
     }
 
-    // 데이터 변환 로직 실행 (한 번만 계산됨)
     return geoJSONData.flatMap((feature, index) => {
       const queryResult = defectQueries[index]
       const damages = queryResult.data?.data.damages || []
@@ -106,6 +114,7 @@ export default function DefectList() {
       if (Array.isArray(damages) && risk && imageUrl) {
         return damages.map((damage: damageType) => ({
           defectId: getDisplayId(damage.id, feature.properties.publicId),
+          damageId: damage.id,
           imageUrl: imageUrl,
           type: feature.geometry.type,
           location: feature.properties.address.street,
@@ -118,113 +127,67 @@ export default function DefectList() {
       }
       return []
     })
-  }, [defectQueries, geoJSONData]) // 동일한 의존성 배열 유지
+  }, [defectQueries, geoJSONData, processStatusList])
 
-  // useState + useEffect 조합 대신 useMemo 결과를 직접 사용
-  const [detailedGeoJSONData, setDetailedGeoJSONData] = useState<
-    detailedDamageType[]
-  >([])
+  // 이전 detailedData와 현재 detailedData 비교 후 변경되었을 때만 스토어 업데이트
+  const detailedDataRef = useRef<DetailedDamageType[]>([])
 
-  // 메모이제이션된 값이 변경될 때만 상태 업데이트
   useEffect(() => {
     if (detailedData.length > 0) {
-      // 깊은 비교로 실제 내용이 변경되었는지 확인
-      const isDataChanged =
-        JSON.stringify(detailedData) !== JSON.stringify(detailedGeoJSONData)
-      if (isDataChanged) {
+      // 깊은 비교를 위해 JSON 문자열로 변환하여 비교
+      const prevDataStr = JSON.stringify(detailedDataRef.current)
+      const currentDataStr = JSON.stringify(detailedData)
+
+      // 데이터가 변경된 경우에만 스토어 업데이트
+      if (prevDataStr !== currentDataStr) {
         setDetailedGeoJSONData(detailedData)
+        detailedDataRef.current = [...detailedData]
       }
     }
-  }, [detailedData, detailedGeoJSONData])
+  }, [detailedData, setDetailedGeoJSONData])
 
-  // 필터링과 정렬을 useMemo로 최적화
+  // 필터링 및 정렬된 데이터 계산 (의존성 배열 최소화)
   const filteredAndSortedData = useMemo(() => {
-    // 필터링
-    const filteredGeoJSONData = detailedGeoJSONData.filter((defect) => {
-      const matchesType =
-        defectType === 'all' || defect.type.toLowerCase() === defectType
-      const matchesSeverity = severity === 'all' || defect.severity === severity
-      return matchesType && matchesSeverity
-    })
+    if (detailedGeoJSONData.length === 0) return []
+    return getFilteredAndSortedData()
+  }, [detailedGeoJSONData, sortColumn, sortDirection, getFilteredAndSortedData])
 
-    // 정렬
-    return [...filteredGeoJSONData].sort((a, b) => {
-      if (sortDirection === 'asc') {
-        return a[sortColumn as keyof typeof a]! >
-          b[sortColumn as keyof typeof b]!
-          ? 1
-          : -1
-      } else {
-        return a[sortColumn as keyof typeof a]! <
-          b[sortColumn as keyof typeof b]!
-          ? 1
-          : -1
-      }
-    })
-  }, [detailedGeoJSONData, defectType, severity, sortColumn, sortDirection])
+  // 현재 페이지 데이터 계산 (의존성 배열 최소화)
+  const currentDefects = useMemo(() => {
+    if (filteredAndSortedData.length === 0) return []
+    return getCurrentPageData(currentPage, itemsPerPage)
+  }, [getCurrentPageData, currentPage, itemsPerPage, filteredAndSortedData])
 
-  // sortedGeoJSONData.length가 바뀔 때마다 totalItems 업데이트
+  // 데이터 길이가 실제로 변경될 때만 totalItems 업데이트
   useEffect(() => {
-    setTotalItems(filteredAndSortedData.length)
+    const totalItems = filteredAndSortedData.length
+
+    // 이전 값과 다를 때만 업데이트
+    if (prevTotalItemsRef.current !== totalItems) {
+      setTotalItems(totalItems)
+      prevTotalItemsRef.current = totalItems
+    }
   }, [filteredAndSortedData.length, setTotalItems])
 
-  // 페이지네이션도 useMemo로 최적화
-  const currentDefects = useMemo(() => {
-    const startIndex = (currentPage - 1) * itemsPerPage
-    return filteredAndSortedData.slice(startIndex, startIndex + itemsPerPage)
-  }, [filteredAndSortedData, currentPage, itemsPerPage])
-
-  // 정렬 핸들러
-  const handleSort = (column: string) => {
+  // 정렬 핸들러 (useCallback으로 메모이제이션)
+  const handleSort = useCallback((column: keyof DetailedDamageType) => {
     if (sortColumn === column) {
       setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc')
     } else {
       setSortColumn(column)
       setSortDirection('asc')
     }
-  }
-  // 상태 변경 핸들러
-  const handleStatusChange = async (
+  }, [sortColumn, sortDirection, setSortColumn, setSortDirection])
+
+  // 상태 변경 핸들러 (useCallback으로 메모이제이션)
+  const handleStatusChange = useCallback((
     damageId: number,
     currentStatus: string,
     newStatus: string,
     defectId: string,
   ) => {
-    try {
-      const response = await defectAPI.updateRoadDamageStatus(
-        damageId,
-        newStatus,
-      )
-
-      // 응답 성공 확인
-      if (response.status === 200 || response.data) {
-        console.log("success: ", response.data)
-
-        // defectId를 기준으로 해당 항목의 상태 업데이트
-        setDetailedGeoJSONData((prevData) =>
-          prevData.map((defect) => {
-            // defectId 정확히 일치하는 항목만 업데이트
-            if (defect.defectId === defectId) {
-              console.log(detailedGeoJSONData)
-              
-              return { ...defect, status: newStatus }
-            }
-            return defect
-          }),
-        )
-
-        alert(`Changing defect ${currentStatus} to ${newStatus}`)
-      } else {
-        // 응답은 있지만 성공이 아닌 경우
-        console.error('Status update failed:', response)
-        alert('Failed to change status')
-      }
-    } catch (error) {
-      // 요청 자체가 실패한 경우
-      console.error('API call error:', error)
-      alert('Network error occurred')
-    }
-  }
+    updateDefectStatus(damageId, currentStatus, newStatus, defectId)
+  }, [updateDefectStatus])
 
   return (
     <div className="w-full overflow-auto">
@@ -236,10 +199,10 @@ export default function DefectList() {
                 variant="ghost"
                 size="sm"
                 className="flex items-center gap-1 p-0 font-medium"
-                onClick={() => handleSort('id')}
+                onClick={() => handleSort('defectId')}
               >
                 ID
-                {sortColumn === 'id' &&
+                {sortColumn === 'defectId' &&
                   (sortDirection === 'asc' ? (
                     <ChevronUp className="h-4 w-4" />
                   ) : (
@@ -252,10 +215,10 @@ export default function DefectList() {
                 variant="ghost"
                 size="sm"
                 className="flex items-center gap-1 p-0 font-medium"
-                onClick={() => handleSort('type')}
+                onClick={() => handleSort('category')}
               >
                 결함 유형
-                {sortColumn === 'type' &&
+                {sortColumn === 'category' &&
                   (sortDirection === 'asc' ? (
                     <ChevronUp className="h-4 w-4" />
                   ) : (
@@ -279,20 +242,30 @@ export default function DefectList() {
                   ))}
               </Button>
             </TableHead>
-            <TableHead className="col-span-6 flex items-center pb-2">
-              발생 위치
+            <TableHead className="col-span-6">
+              <Button
+                variant="ghost"
+                size="sm"
+                className="flex items-center gap-1 p-0 font-medium"
+                onClick={() => handleSort('location')}
+              >
+                발생 위치
+                {sortColumn === 'location' &&
+                  (sortDirection === 'asc' ? (
+                    <ChevronUp className="h-4 w-4" />
+                  ) : (
+                    <ChevronDown className="h-4 w-4" />
+                  ))}
+              </Button>
             </TableHead>
             <TableHead className="col-span-4 flex items-center pb-2">
-              발생 시각
-            </TableHead>
-            <TableHead className="col-span-4">
               <Button
                 variant="ghost"
                 size="sm"
                 className="flex items-center gap-1 p-0 font-medium"
                 onClick={() => handleSort('detectedAt')}
               >
-                작업 현황
+                발생 시각
                 {sortColumn === 'detectedAt' &&
                   (sortDirection === 'asc' ? (
                     <ChevronUp className="h-4 w-4" />
@@ -301,14 +274,14 @@ export default function DefectList() {
                   ))}
               </Button>
             </TableHead>
-            <TableHead className="col-span-2">
+            <TableHead className="col-span-3">
               <Button
                 variant="ghost"
                 size="sm"
                 className="flex items-center gap-1 p-0 font-medium"
                 onClick={() => handleSort('status')}
               >
-                작업 더보기
+                작업 현황
                 {sortColumn === 'status' &&
                   (sortDirection === 'asc' ? (
                     <ChevronUp className="h-4 w-4" />
@@ -317,6 +290,7 @@ export default function DefectList() {
                   ))}
               </Button>
             </TableHead>
+            <TableHead className="col-span-3 flex items-center pb-2">이미지 목록</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -325,7 +299,7 @@ export default function DefectList() {
               <TableCell className="col-span-3 font-medium">
                 {defect.defectId}
               </TableCell>
-              <TableCell className="col-span-3">{defect.type}</TableCell>
+              <TableCell className="col-span-3">{defect.category}</TableCell>
               <TableCell className="col-span-2">
                 <StatusBadge className={getSeverityColor(defect.severity)}>
                   {defect.severity.charAt(0).toUpperCase() +
@@ -344,7 +318,7 @@ export default function DefectList() {
                   {formatDate(defect.detectedAt)}
                 </div>
               </TableCell>
-              <TableCell className="col-span-4">
+              <TableCell className="col-span-3">
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
                     <StatusBadge className={getStatusColor(defect.status!)}>
@@ -352,14 +326,14 @@ export default function DefectList() {
                     </StatusBadge>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="start">
-                    <DropdownMenuLabel>작업 상태 변경</DropdownMenuLabel>
+                    <DropdownMenuLabel>다음으로 작업 상태 변경</DropdownMenuLabel>
                     <DropdownMenuSeparator />
                     {processStatusList.map((process) => (
                       <DropdownMenuItem
                         key={process}
                         onClick={() =>
                           handleStatusChange(
-                            1,
+                            defect.damageId,
                             defect.status!,
                             process,
                             defect.defectId,
@@ -372,22 +346,8 @@ export default function DefectList() {
                   </DropdownMenuContent>
                 </DropdownMenu>
               </TableCell>
-              <TableCell className="col-span-2">
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button variant="ghost" size="icon" className="h-8 w-8">
-                      <MoreHorizontal className="h-4 w-4" />
-                      <span className="sr-only">작업 더보기</span>
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end">
-                    <DropdownMenuLabel>작업</DropdownMenuLabel>
-                    <DropdownMenuSeparator />
-                    <DropdownMenuItem>상세 보기</DropdownMenuItem>
-                    <DropdownMenuItem>작업 할당</DropdownMenuItem>
-                    <DropdownMenuItem>수리완료 처리</DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
+              <TableCell className="col-span-3 select-none">
+                <DefectImage imageUrl={defect.imageUrl} alt={`결함 이미지 ${defect.defectId}`} />
               </TableCell>
             </TableRow>
           ))}

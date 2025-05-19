@@ -13,6 +13,9 @@ import {
 } from '@/components/ui/pagination'
 import { useDefectListStore } from '@/store/defect-list-store'
 
+// 텍스트 선택 방지 스타일 추가
+const noSelectStyle = "select-none"
+
 const DefectPaginations: React.FC = () => {
   const {
     currentPage,
@@ -40,11 +43,11 @@ const DefectPaginations: React.FC = () => {
 
   return (
     <Pagination>
-      <PaginationContent>
+      <PaginationContent className={noSelectStyle}>
         <PaginationItem>
           <PaginationPrevious
             onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
-            className={currentPage === 1 ? 'pointer-events-none opacity-50' : ''}
+            className={`${currentPage === 1 ? 'pointer-events-none opacity-50' : ''}`}
           />
         </PaginationItem>
 
@@ -90,7 +93,7 @@ const DefectPaginations: React.FC = () => {
         <PaginationItem>
           <PaginationNext
             onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
-            className={currentPage === totalPages ? 'pointer-events-none opacity-50' : ''}
+            className={`${currentPage === totalPages ? 'pointer-events-none opacity-50' : ''}`}
           />
         </PaginationItem>
       </PaginationContent>
