@@ -66,7 +66,7 @@ export default function DamageSummary() {
 
   if (isLoading) {
     return (
-      <div className={`col-span-2 flex h-auto flex-col gap-4`}>
+      <div className={`col-span-1 flex h-auto flex-col gap-4`}>
         <SummaryCard title="데이터 로딩 중..." value="-" className="grow" />
       </div>
     )
@@ -74,7 +74,7 @@ export default function DamageSummary() {
 
   if (hasError) {
     return (
-      <div className={`col-span-2 flex h-auto flex-col gap-4`}>
+      <div className={`col-span-1 flex h-auto flex-col gap-4`}>
         <SummaryCard
           title="데이터 로드 오류"
           value="다시 시도해주세요"
@@ -100,7 +100,7 @@ export default function DamageSummary() {
   }
 
   return (
-    <div className={`col-span-2 flex h-auto flex-col gap-4`}>
+    <div className={`col-span-1 flex h-auto flex-col gap-4`}>
       <SummaryCard
         title="일간 도로파손 건수"
         value={formatValue(dailyReport?.count, dailyReport?.changeRate, '전일')}

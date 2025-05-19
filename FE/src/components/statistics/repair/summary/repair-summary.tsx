@@ -22,7 +22,7 @@ export default function RepairSummary() {
   // 로딩 중이면 로딩 표시
   if (isLoading) {
     return (
-      <Card className={`col-span-2 flex items-center justify-center`}>
+      <Card className={`col-span-1 flex items-center justify-center`}>
         <div>데이터 로딩 중...</div>
       </Card>
     )
@@ -31,14 +31,14 @@ export default function RepairSummary() {
   // 에러가 있으면 에러 표시
   if (error) {
     return (
-      <Card className={`col-span-2 flex items-center justify-center`}>
+      <Card className={`col-span-1 flex items-center justify-center`}>
         <div>데이터를 불러오는 중 오류가 발생했습니다.</div>
       </Card>
     )
   }
 
   return (
-    <div className={`col-span-2 flex h-auto flex-col gap-4`}>
+    <div className={`col-span-1 flex h-auto flex-col gap-4`}>
       <SummaryCard
         title="일간 도로보수 건수"
         value={(apiResponse?.daily ?? '-') + '건'}
