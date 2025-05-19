@@ -3,8 +3,13 @@ package com.b201.api.service;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.Month;
 import java.time.YearMonth;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
@@ -162,9 +167,54 @@ public class DashboardService {
 	@Transactional(readOnly = true)
 	public List<MonthlyDamageSummaryDto> getMonthlyDamageSummary(String regionName) {
 		log.info("[getMonthlyDamageSummary] 호출됨, regionName={}", regionName);
-		List<MonthlyDamageSummaryDto> list = damageRepo.findMonthlyDamageSummary(regionName);
-		log.debug("[getMonthlyDamageSummary] summary 개수 = {}", list.size());
-		return list;
+
+		// 1) 조회 기간 설정
+		LocalDateTime today = LocalDateTime.now();
+		LocalDateTime start = LocalDate
+			.of(today.getYear(), Month.JANUARY, 1)
+			.atStartOfDay();
+		log.debug("[getMonthlyDamageSummary] 조회기간 start={} ~ end={}", start, today);
+
+		// 2) 실제 데이터가 있는 달만 조회
+		List<MonthlyDamageSummaryDto> rawList =
+			damageRepo.findMonthlyDamageSummary(regionName, start, today);
+		log.debug("[getMonthlyDamageSummary] rawList.size={} → months={}",
+			rawList.size(),
+			rawList.stream().map(MonthlyDamageSummaryDto::getMonth).collect(Collectors.toList())
+		);
+
+		// 3) 조회된 DTO들을 YearMonth 키로 맵핑
+		Map<YearMonth, MonthlyDamageSummaryDto> mapByMonth = rawList.stream()
+			.collect(Collectors.toMap(
+				MonthlyDamageSummaryDto::getMonth,
+				Function.identity()
+			));
+
+		// 4) 1월부터 현재월까지 순회하며, 없으면 0으로 채워서 fullList 구성
+		List<MonthlyDamageSummaryDto> fullList = new ArrayList<>();
+		YearMonth ymStart = YearMonth.of(today.getYear(), Month.JANUARY);
+		YearMonth ymEnd = YearMonth.from(today);
+
+		for (YearMonth ym = ymStart; !ym.isAfter(ymEnd); ym = ym.plusMonths(1)) {
+			if (mapByMonth.containsKey(ym)) {
+				MonthlyDamageSummaryDto dto = mapByMonth.get(ym);
+				log.debug("[{}] 데이터 있음 → crack={}, hole={}, total={}",
+					ym, dto.getCrackCount(), dto.getHoleCount(), dto.getTotalCount());
+				fullList.add(dto);
+			} else {
+				log.debug("[{}] 데이터 없음 → 0으로 채워서 추가", ym);
+				fullList.add(new MonthlyDamageSummaryDto(
+					ym.getYear(),
+					ym.getMonthValue(),
+					0L,
+					0L,
+					0L
+				));
+			}
+		}
+
+		log.debug("[getMonthlyDamageSummary] 전체 summary 개수 = {}", fullList.size());
+		return fullList;
 	}
 
 	/**
