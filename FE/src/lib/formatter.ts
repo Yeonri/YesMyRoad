@@ -6,15 +6,22 @@ export const formatDate = (dateString: string) => {
   return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
 }
 
+export const getSeverity = (risk: number) => {
+  if (0 <= risk && risk < 40) return "심각"
+  else if (40 <= risk && risk < 60) return "위험"
+  else if (60 <= risk && risk < 80) return "주의"
+  else return "안전"
+}
+
 export const getSeverityColor = (severity: string) => {
   switch (severity) {
-    case 'critical':
+    case '심각':
       return 'bg-red-500 text-white'
-    case 'high':
+    case '위험':
       return 'bg-amber-500 text-white'
-    case 'medium':
+    case '주의':
       return 'bg-blue-500 text-white'
-    case 'low':
+    case '안전':
       return 'bg-green-500 text-white'
     default:
       return 'bg-gray-500 text-white'
@@ -36,10 +43,9 @@ export const getStatusColor = (status: string) => {
   }
 }
 
-//   UUID로부터 표시 ID 생성하는 함수
-export const getDisplayId = (uuid: string, damageId: number): string => {
+export const getDisplayId = (damageId: number, publicId: string): string => {
     const validChars = '0123456789ABCDEFGHJKLMNPQRSTUVWXYZ'
-    const hash = crypto.createHash('sha256').update(uuid).digest('hex')
+    const hash = crypto.createHash('sha256').update(publicId).digest('hex')
 
   const shortCode = Array(5)
     .fill(0)

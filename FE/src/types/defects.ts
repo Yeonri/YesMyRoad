@@ -41,4 +41,4 @@ export type DetailedFeaturePoint = {
 }
 
 
-export type ProcessStatus = 'Pending' | 'Assigned' | 'In Progress' | 'Completed'
+export type ProcessStatus = 'REPORTED' | 'RECEIVED' | 'IN_PROGRESS' | 'COMPLETED'
