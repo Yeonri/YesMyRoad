@@ -56,11 +56,13 @@ type DashboardFilterProps = {
   defectType: string
   severity: string
   process: string
+  idSearchQuery: string
+  addrSearchQuery: string
 }
 
 
 
-export default function DefectList({ filter, timeRange, defectType, severity, process }: DashboardFilterProps) {
+export default function DefectList({ filter, timeRange, defectType, severity, process, idSearchQuery, addrSearchQuery }: DashboardFilterProps) {
   const processStatusList: ProcessStatus[] = [
     'REPORTED',
     'RECEIVED',
@@ -84,6 +86,8 @@ export default function DefectList({ filter, timeRange, defectType, severity, pr
     setSeverityFilter,
     setDefectTypeFilter,
     setTimeRangeFilter,
+    setidSearchQuery,
+    setaddrSearchQuery,
   } = useDetailedDefectStore()
 
   const { currentPage, itemsPerPage, setTotalItems } = useDefectListStore()
@@ -155,26 +159,32 @@ export default function DefectList({ filter, timeRange, defectType, severity, pr
     }
   }, [detailedData, setDetailedGeoJSONData])
 
-  // 컴포넌트 마운트 또는 props 변경 시 필터 상태 업데이트
+  // 컴포넌트 마운트 또는 props 변경 시 모든 필터 상태 업데이트
   useEffect(() => {
-    setFilterType(filter as FilterType)
+    setFilterType(filter)
     setProcessFilter(process)
     setSeverityFilter(severity)
     setDefectTypeFilter(defectType)
-    setTimeRangeFilter(timeRange) // 추가: 발생 시각 필터 설정
-  }, [filter, process, severity, defectType, timeRange, setFilterType, setProcessFilter, setSeverityFilter, setDefectTypeFilter, setTimeRangeFilter])
+    setTimeRangeFilter(timeRange)
+    setidSearchQuery(idSearchQuery)
+    setaddrSearchQuery(addrSearchQuery)
+  }, [filter, process, severity, defectType, timeRange, idSearchQuery, addrSearchQuery,
+    setFilterType, setProcessFilter, setSeverityFilter, setDefectTypeFilter, setTimeRangeFilter, setidSearchQuery, setaddrSearchQuery])
 
-  // 필터링 및 정렬된 데이터 계산 (모든 필터 값 사용)
+  // 필터링 및 정렬된 데이터 계산 (검색어 추가)
   const filteredAndSortedData = useMemo(() => {
     if (detailedGeoJSONData.length === 0) return []
-    return getFilteredAndSortedData(filter as FilterType, process, severity, defectType, timeRange)
-  }, [detailedGeoJSONData, sortColumn, sortDirection, getFilteredAndSortedData, filter, process, severity, defectType, timeRange])
+    return getFilteredAndSortedData(filter, process, severity, defectType, timeRange, idSearchQuery, addrSearchQuery)
+  }, [detailedGeoJSONData, sortColumn, sortDirection, getFilteredAndSortedData,
+    filter, process, severity, defectType, timeRange, idSearchQuery, addrSearchQuery])
 
-  // 현재 페이지 데이터 계산 (모든 필터 값 전달)
+  // 현재 페이지 데이터 계산 (검색어 추가)
   const currentDefects = useMemo(() => {
     if (filteredAndSortedData.length === 0) return []
-    return getCurrentPageData(currentPage, itemsPerPage, filter as FilterType, process, severity, defectType, timeRange)
-  }, [getCurrentPageData, currentPage, itemsPerPage, filteredAndSortedData, filter, process, severity, defectType, timeRange])
+    return getCurrentPageData(currentPage, itemsPerPage, filter, process, severity, defectType, timeRange, idSearchQuery, addrSearchQuery)
+  }, [getCurrentPageData, currentPage, itemsPerPage, filteredAndSortedData,
+    filter, process, severity, defectType, timeRange, idSearchQuery, addrSearchQuery])
+
 
 
   // 데이터 길이가 실제로 변경될 때만 totalItems 업데이트

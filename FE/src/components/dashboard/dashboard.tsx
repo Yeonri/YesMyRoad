@@ -1,5 +1,6 @@
 'use client'
 
+import { Input } from '@/components/ui/input'
 import { coordinateAPI } from '@/api/coordinate-api'
 import DefectHeatmap from '@/components/dashboard/defect-heatmap'
 import DefectMap from '@/components/dashboard/defect-map'
@@ -32,6 +33,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react'
 
 // import { statisticAPI } from '@/api/statistic-api'
 import AddressSelector from './address-selector'
+import { Search } from 'lucide-react'
 
 type FilterType = 'timeRange' | 'defectType' | 'severity' | 'process' | ''
 
@@ -46,6 +48,8 @@ export default function Dashboard() {
   const [selectedDefectType, selectDefectType] = useState<string>('all') // 목록 탭에서 결함 유형 필터
   const [selectedSeverity, selectSeverity] = useState<string>('all') // 목록 탭에서 심각도 필터
   const [selectedProcess, selectProcess] = useState<string>('all') // 목록 탭에서 심각도 필터
+  const [idSearchQuery, setidSearchQuery] = useState<string>('') // id 검색어
+  const [addrSearchQuery, setaddrSearchQuery] = useState<string>('') // 주소 검색어
   const geoJSONData = useDefectStore((state) => state.geoJSONData)
   const mapBounds = useAddressStore((state) => state.mapBounds)
 
@@ -206,6 +210,26 @@ export default function Dashboard() {
                     <CardTitle>결함 목록</CardTitle>
                   </div>
                   <div className="flex flex-wrap gap-2">
+                    <div className="relative pr-10">
+                      <Search className="text-muted-foreground absolute top-2.5 left-2.5 h-4 w-4" />
+                      <Input
+                        type="search"
+                        placeholder="결함 ID 검색"
+                        className="bg-background w-full rounded-lg pl-8 md:w-[200px] lg:w-[300px]"
+                        value={idSearchQuery}
+                        onChange={(e) => setidSearchQuery(e.target.value)}
+                      />
+                    </div>
+                    <div className="relative pr-10">
+                      <Search className="text-muted-foreground absolute top-2.5 left-2.5 h-4 w-4" />
+                      <Input
+                        type="search"
+                        placeholder="주소 검색"
+                        className="bg-background w-full rounded-lg pl-8 md:w-[200px] lg:w-[300px]"
+                        value={addrSearchQuery}
+                        onChange={(e) => setaddrSearchQuery(e.target.value)}
+                      />
+                    </div>
                     {selectedFilter === 'timeRange' && (
                       <Select
                         value={selectedTimeRange}
@@ -286,7 +310,15 @@ export default function Dashboard() {
                 </div>
               </CardHeader>
               <CardContent>
-                <DefectList filter={selectedFilter} timeRange={selectedTimeRange} defectType={selectedDefectType} severity={selectedSeverity} process={selectedProcess} />
+                <DefectList
+                  filter={selectedFilter}
+                  timeRange={selectedTimeRange}
+                  defectType={selectedDefectType}
+                  severity={selectedSeverity}
+                  process={selectedProcess}
+                  idSearchQuery={idSearchQuery}
+                  addrSearchQuery={addrSearchQuery}
+                />
               </CardContent>
             </Card>
           </TabsContent>

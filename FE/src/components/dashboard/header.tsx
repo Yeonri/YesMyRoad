@@ -15,7 +15,6 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
-import { Input } from '@/components/ui/input'
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet'
 import { Bell, Menu, Search, Settings, User } from 'lucide-react'
 import { useRouter } from 'next/navigation'
@@ -73,16 +72,8 @@ export default function Header() {
       </div>
 
       <div className="flex flex-1 items-center gap-4 md:gap-2 lg:gap-4">
-        <form className="ml-auto flex-1 md:flex-initial">
-          <div className="relative">
-            <Search className="text-muted-foreground absolute top-2.5 left-2.5 h-4 w-4" />
-            <Input
-              type="search"
-              placeholder="결함 검색"
-              className="bg-background w-full rounded-lg pl-8 md:w-[200px] lg:w-[300px]"
-            />
-          </div>
-        </form>
+        <div className="ml-auto flex-1 md:flex-initial">
+        </div>
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button variant="outline" size="icon" className="relative">
