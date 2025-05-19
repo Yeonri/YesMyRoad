@@ -100,7 +100,7 @@ export default function Dashboard() {
         selectedTab={selectedTab}
       />
     ),
-    [filteredDefectDetailList, selectedTab]
+    [filteredDefectDetailList, selectedTab],
   )
 
   const memoizedDefectHeatmap = useMemo(() => <DefectHeatmap />, [])
@@ -154,7 +154,6 @@ export default function Dashboard() {
   // useEffect(() => {
   //   console.log("GeoJSONData updated:", geoJSONData)
   // }, [geoJSONData])
-
 
   return (
     <div className="bg-muted/40 flex min-h-screen w-full flex-col">

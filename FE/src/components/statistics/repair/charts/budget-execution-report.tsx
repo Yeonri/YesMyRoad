@@ -2,9 +2,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import * as echarts from 'echarts'
 import ReactECharts from 'echarts-for-react'
 
-export default function BudgetExecutionReport(props: { cardHeight: string }) {
-  const { cardHeight = 'h-80' } = props
-
+export default function BudgetExecutionReport() {
   const option: echarts.EChartsOption = {
     color: ['#5470C6', '#91CC75'],
     tooltip: { trigger: 'axis', axisPointer: { type: 'cross' } },
@@ -70,7 +68,7 @@ export default function BudgetExecutionReport(props: { cardHeight: string }) {
   }
 
   return (
-    <Card className={`col-span-3 ${cardHeight}`}>
+    <Card className="col-span-3 h-auto">
       <CardHeader className="p-4">
         <CardTitle className="text-md">예산 집행 현황</CardTitle>
       </CardHeader>

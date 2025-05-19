@@ -73,11 +73,11 @@ const AuthForm: React.FC<AuthFormProps> = ({ isLoginTab, onTabChange }) => {
   // Zustand 스토어에서 필요한 상태와 액션 가져오기
   const { error, clearError } = useUserStore()
 
-  const [isLoading, setIsLoading] = useState(false)  // 로딩 상태
-  const [isSuccess, setIsSuccess] = useState(false)// 성공 상태
-  const [formErrors, setFormErrors] = useState<{ [key: string]: string }>({})  // 폼 에러 메시지 관리
-  const [generalError, setGeneralError] = useState<string>('')  // 일반 에러 메시지 (필드에 매핑되지 않는 에러)
-  const [openRegion, setOpenRegion] = useState(false)  // 지역 선택기 상태
+  const [isLoading, setIsLoading] = useState(false) // 로딩 상태
+  const [isSuccess, setIsSuccess] = useState(false) // 성공 상태
+  const [formErrors, setFormErrors] = useState<{ [key: string]: string }>({}) // 폼 에러 메시지 관리
+  const [generalError, setGeneralError] = useState<string>('') // 일반 에러 메시지 (필드에 매핑되지 않는 에러)
+  const [openRegion, setOpenRegion] = useState(false) // 지역 선택기 상태
 
   // 초기 탭 상태에 따라 아코디언 상태 설정 (항상 배열로 초기화)
   const [accordionValues, setAccordionValues] = useState<string[]>(
@@ -368,7 +368,7 @@ const AuthForm: React.FC<AuthFormProps> = ({ isLoginTab, onTabChange }) => {
         <AccordionPrimitive.Root
           type="multiple"
           value={accordionValues}
-          onValueChange={value => setAccordionValues(isLoginTab ? [] : value)}
+          onValueChange={(value) => setAccordionValues(isLoginTab ? [] : value)}
           className="w-full"
         >
           <AccordionPrimitive.Item value="name-item">
@@ -405,14 +405,15 @@ const AuthForm: React.FC<AuthFormProps> = ({ isLoginTab, onTabChange }) => {
                       variant="outline"
                       role="combobox"
                       aria-expanded={openRegion}
-                      className={`w-full justify-between ${formErrors.region ? 'border-red-500' : ''
-                        }`}
+                      className={`w-full justify-between ${
+                        formErrors.region ? 'border-red-500' : ''
+                      }`}
                       disabled={isLoading || isSuccess}
                     >
                       {formData.region
                         ? Object.entries(regionIdMap).find(
-                          (entry) => entry[1] === formData.region,
-                        )?.[0] || '지역을 선택해주세요'
+                            (entry) => entry[1] === formData.region,
+                          )?.[0] || '지역을 선택해주세요'
                         : '지역을 선택해주세요'}
                       <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                     </Button>
@@ -473,7 +474,11 @@ const AuthForm: React.FC<AuthFormProps> = ({ isLoginTab, onTabChange }) => {
           <Button
             type="submit"
             className={`w-full ${isSuccess ? 'bg-green-600 hover:bg-green-700' : ''}`}
-            disabled={isLoading || isSuccess || (isLoginTab && (!formData.id.trim() || !formData.password.trim()))}
+            disabled={
+              isLoading ||
+              isSuccess ||
+              (isLoginTab && (!formData.id.trim() || !formData.password.trim()))
+            }
           >
             {getButtonText()}
           </Button>

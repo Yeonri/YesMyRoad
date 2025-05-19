@@ -1,35 +1,38 @@
+import { statisticAPI } from '@/api/statistic-api'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { useQuery } from '@tanstack/react-query'
 import * as echarts from 'echarts'
 import ReactECharts from 'echarts-for-react'
-import { statisticAPI } from '@/api/statistic-api'
-import { useQuery } from '@tanstack/react-query'
 
-type category = {
-  categoryName: string
-  count: number
-}
+type category = { categoryName: string; count: number }
 
 export default function CategoryDistribution(props: { cardHeight: string }) {
   const { cardHeight = 'h-80' } = props
 
-  const { data: response, isLoading, error } = useQuery({
+  const {
+    data: response,
+    isLoading,
+    error,
+  } = useQuery({
     queryKey: ['category-distribution'],
     queryFn: statisticAPI.getDamageReportByType,
     refetchOnWindowFocus: false,
     staleTime: 5 * 60 * 1000,
-    retry: 1
+    retry: 1,
   })
 
-  const chartData = response?.data.map((item: category) => ({
-    value: item.count,
-    name: item.categoryName
-  })) || []
-
+  const chartData =
+    response?.data.map((item: category) => ({
+      value: item.count,
+      name: item.categoryName,
+    })) || []
 
   // 로딩 중이면 로딩 표시
   if (isLoading) {
     return (
-      <Card className={`col-span-2 ${cardHeight} flex items-center justify-center`}>
+      <Card
+        className={`col-span-2 ${cardHeight} flex items-center justify-center`}
+      >
         <div>데이터 로딩 중...</div>
       </Card>
     )
@@ -38,7 +41,9 @@ export default function CategoryDistribution(props: { cardHeight: string }) {
   // 에러가 있으면 에러 표시
   if (error) {
     return (
-      <Card className={`col-span-2 ${cardHeight} flex items-center justify-center`}>
+      <Card
+        className={`col-span-2 ${cardHeight} flex items-center justify-center`}
+      >
         <div>데이터를 불러오는 중 오류가 발생했습니다.</div>
       </Card>
     )
@@ -57,7 +62,7 @@ export default function CategoryDistribution(props: { cardHeight: string }) {
         label: { show: false, position: 'center' },
         emphasis: { label: { show: true, fontSize: 16, fontWeight: 'bold' } },
         labelLine: { show: false },
-        data: chartData
+        data: chartData,
       },
     ],
   }

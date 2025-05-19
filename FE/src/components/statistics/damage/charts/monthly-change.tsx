@@ -5,7 +5,7 @@ import * as echarts from 'echarts'
 import ReactECharts from 'echarts-for-react'
 
 type monthItem = {
-  month:string
+  month: string
   crackCount: number
   holeCount: number
   totalCount: number
@@ -14,23 +14,29 @@ type monthItem = {
 export default function MonthlyChange(props: { cardHeight: string }) {
   const { cardHeight = 'h-80' } = props
 
-  const { data: response, isLoading, error } = useQuery({
+  const {
+    data: response,
+    isLoading,
+    error,
+  } = useQuery({
     queryKey: ['monthly-change'],
     queryFn: statisticAPI.getSummarizedDamageMonthlyReport,
     refetchOnWindowFocus: false,
     staleTime: 5 * 60 * 1000,
-    retry: 1
+    retry: 1,
   })
 
   // const month = ["2025-04", "2025-05"]
-  const month = response?.data.map((item:monthItem) => item.month)
-  const crackCounts = response?.data.map((item:monthItem) => item.crackCount)
-  const holeCounts = response?.data.map((item:monthItem) => item.holeCount)
+  const month = response?.data.map((item: monthItem) => item.month)
+  const crackCounts = response?.data.map((item: monthItem) => item.crackCount)
+  const holeCounts = response?.data.map((item: monthItem) => item.holeCount)
 
   // 로딩 중이면 로딩 표시
   if (isLoading) {
     return (
-      <Card className={`col-span-2 ${cardHeight} flex items-center justify-center`}>
+      <Card
+        className={`col-span-2 ${cardHeight} flex items-center justify-center`}
+      >
         <div>데이터 로딩 중...</div>
       </Card>
     )
@@ -39,7 +45,9 @@ export default function MonthlyChange(props: { cardHeight: string }) {
   // 에러가 있으면 에러 표시
   if (error) {
     return (
-      <Card className={`col-span-2 ${cardHeight} flex items-center justify-center`}>
+      <Card
+        className={`col-span-2 ${cardHeight} flex items-center justify-center`}
+      >
         <div>데이터를 불러오는 중 오류가 발생했습니다.</div>
       </Card>
     )
@@ -49,27 +57,12 @@ export default function MonthlyChange(props: { cardHeight: string }) {
     tooltip: { trigger: 'axis', axisPointer: { type: 'shadow' } },
     legend: { show: false },
     grid: { left: '3%', right: '4%', bottom: '3%', containLabel: true },
-    xAxis: [
-      {
-        type: 'category',
-        data: month,
-      },
-    ],
+    xAxis: [{ type: 'category', data: month }],
     yAxis: [{ type: 'value' }],
     series: [
       // month
-      {
-        name: '포트홀',
-        type: 'bar',
-        stack: 'month',
-        data: holeCounts,
-      },
-      {
-        name: '균열',
-        type: 'bar',
-        stack: 'month',
-        data: crackCounts,
-      },
+      { name: '포트홀', type: 'bar', stack: 'month', data: holeCounts },
+      { name: '균열', type: 'bar', stack: 'month', data: crackCounts },
     ],
   }
 
