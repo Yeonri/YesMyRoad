@@ -1,31 +1,12 @@
-import { maintenanceAPI } from '@/api/maintenance-api'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { MonthlyMaintenanceStatusResponseType } from '@/types/stats-api'
 import * as echarts from 'echarts'
 import ReactECharts from 'echarts-for-react'
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 
-export default function MonthlyRepair() {
+export default function MonthlyRepair(props: { cardHeight: string }) {
+  const { cardHeight = 'h-80' } = props
   const chartRef = useRef<ReactECharts>(null)
   const [chartOption, setChartOption] = useState<echarts.EChartsOption>({})
-  const [monthlyMaintenanceStatusReport, setMonthlyMaintenanceStatusReport] =
-    useState<MonthlyMaintenanceStatusResponseType>({ data: [] })
-
-  const fetchLocalMaintenanceStatusReport = useCallback(async () => {
-    const response = await maintenanceAPI.getMonthlyMaintenanceStatus()
-    setMonthlyMaintenanceStatusReport({ ...response.data })
-  }, [])
-
-  useEffect(() => {
-    fetchLocalMaintenanceStatusReport()
-  }, [])
-
-  useEffect(() => {
-    console.log(
-      'monthlyMaintenanceStatusReport: ',
-      monthlyMaintenanceStatusReport,
-    )
-  }, [monthlyMaintenanceStatusReport])
 
   const rawData = useMemo(
     () => [
@@ -57,7 +38,7 @@ export default function MonthlyRepair() {
       const categoryWidth = gridWidth / rawData[0].length
       const barWidth = categoryWidth * 0.6
       const barPadding = (categoryWidth - barWidth) / 2
-      const color = ['#e0e0e0', '#ee6666', '#fac858', '#91cc75']
+      const color = ['#ee6666', '#fac858', '#91cc75']
 
       const series: echarts.BarSeriesOption[] = [
         '미완료',
@@ -81,6 +62,34 @@ export default function MonthlyRepair() {
         }
       })
 
+      const elements = []
+      for (let j = 1, jlen = rawData[0].length; j < jlen; ++j) {
+        const leftX = grid.left + categoryWidth * j - barPadding
+        const rightX = leftX + barPadding * 2
+        let leftY = grid.top + gridHeight
+        let rightY = leftY
+        for (let i = 0, len = series.length; i < len; ++i) {
+          const points = []
+          const leftBarHeight =
+            (rawData[i][j - 1] / totalData[j - 1]) * gridHeight
+          points.push([leftX, leftY])
+          points.push([leftX, leftY - leftBarHeight])
+          const rightBarHeight = (rawData[i][j] / totalData[j]) * gridHeight
+          points.push([rightX, rightY - rightBarHeight])
+          points.push([rightX, rightY])
+          points.push([leftX, leftY])
+
+          leftY -= leftBarHeight
+          rightY -= rightBarHeight
+
+          elements.push({
+            type: 'polygon',
+            shape: { points },
+            style: { fill: color[i], opacity: 0.25 },
+          })
+        }
+      }
+
       const option: echarts.EChartsOption = {
         legend: { selectedMode: false },
         grid,
@@ -103,6 +112,7 @@ export default function MonthlyRepair() {
           ],
         },
         series,
+        graphic: { elements },
       }
 
       setChartOption(option)
@@ -110,7 +120,7 @@ export default function MonthlyRepair() {
   }, [rawData, totalData])
 
   return (
-    <Card className="col-span-2 h-auto">
+    <Card className={`col-span-2 ${cardHeight}`}>
       <CardHeader className="p-4">
         <CardTitle className="text-md">월별 도로보수 현황</CardTitle>
       </CardHeader>
