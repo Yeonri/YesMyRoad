@@ -220,7 +220,7 @@ export default function Dashboard() {
                         </SelectContent>
                       </Select>
                     )}
-                    {selectedFilter === 'type' && (
+                    {selectedFilter === 'defectType' && (
                       <Select
                         value={selectedDefectType}
                         onValueChange={selectDefectType}
@@ -275,7 +275,7 @@ export default function Dashboard() {
                       </SelectTrigger>
                       <SelectContent>
                         <SelectItem value="timeRange">발생 시각</SelectItem>
-                        <SelectItem value="type">결함 유형</SelectItem>
+                        <SelectItem value="defectType">결함 유형</SelectItem>
                         <SelectItem value="severity">심각도</SelectItem>
                         <SelectItem value="process">작업 현황</SelectItem>
                       </SelectContent>
