@@ -32,6 +32,7 @@ import {
 import { formatDate, getSeverityColor, getStatusColor } from '@/lib/formatter'
 import { useDefectStore } from '@/store/defect-store'
 import { useQueries } from '@tanstack/react-query'
+import { DefectTypeFilter, SeverityFilter, useDefectList } from '@/hooks/use-defect-list'
 
 import {
   ChevronDown,
@@ -52,12 +53,30 @@ type DetailedDefect = {
 }
 
 export default function DefectList() {
-  const [sortColumn, setSortColumn] = useState('id')
-  const [sortDirection, setSortDirection] = useState('asc')
-  const [currentPage, setCurrentPage] = useState(1)
-  const itemsPerPage = 5
-  const defectType = 'all'
-  const severity = 'all'
+  // const [sortColumn, setSortColumn] = useState('id')
+  // const [sortDirection, setSortDirection] = useState('asc')
+  // const [currentPage, setCurrentPage] = useState(1)
+  // const itemsPerPage = 5
+  // const defectType = 'all'
+  // const severity = 'all'
+
+    // Zustand 스토어에서 데이터 가져오기
+  const { geoJSONData } = useDefectStore()
+
+    const defectTypeFilter: DefectTypeFilter = 'all'
+  const severityFilter: SeverityFilter   = 'all'
+  
+  const {
+  currentDefects,
+  sortColumn,
+  sortDirection,
+  handleSort,
+  currentPage,
+  totalPages,
+  setCurrentPage,
+  getPageNumbers,
+} = useDefectList(geoJSONData, defectTypeFilter, severityFilter, 5)
+
 
 
   // 상세 정보를 저장할 맵 상태
@@ -65,59 +84,58 @@ export default function DefectList() {
     {},
   )
 
-  // Zustand 스토어에서 데이터 가져오기
-  const { geoJSONData } = useDefectStore()
+
 
   // geoJSONData를 사용하여 defects 배열 생성
-  const mappedDefects = geoJSONData
-    ? geoJSONData.map((feature) => {
-        const publicId = feature.properties.publicId
-        const detail = detailsMap[publicId]
+  // const mappedDefects = geoJSONData
+  //   ? geoJSONData.map((feature) => {
+  //       const publicId = feature.properties.publicId
+  //       const detail = detailsMap[publicId]
 
-        return {
-          id: 'Unknown',
-          // id: feature.properties.displayId || 'Unknown',
-          publicId: publicId, // API 호출용으로 보존
-          type: 'Crack', // 하드코딩 값
-          severity: 'medium', // 하드코딩 값
-          location: feature.properties.address?.street || 'Unknown location',
-          detectedAt: new Date().toISOString(),
-          status: 'Pending', // 하드코딩 값
-          description: 'Auto-generated defect from GeoJSON data',
-          // 상세 정보가 있으면 추가
-          risk: detail?.risk,
-          imageUrl: detail?.imageUrl,
-          damages: detail?.damages,
-        }
-      })
-    : []
+  //       return {
+  //         id: 'Unknown',
+  //         // id: feature.properties.displayId || 'Unknown',
+  //         publicId: publicId, // API 호출용으로 보존
+  //         type: 'Crack', // 하드코딩 값
+  //         severity: 'medium', // 하드코딩 값
+  //         location: feature.properties.address?.street || 'Unknown location',
+  //         detectedAt: new Date().toISOString(),
+  //         status: 'Pending', // 하드코딩 값
+  //         description: 'Auto-generated defect from GeoJSON data',
+  //         // 상세 정보가 있으면 추가
+  //         risk: detail?.risk,
+  //         imageUrl: detail?.imageUrl,
+  //         damages: detail?.damages,
+  //       }
+  //     })
+  //   : []
 
   // 필터링
-  const filteredDefects = mappedDefects.filter((defect) => {
-    const matchesType =
-      defectType === 'all' || defect.type.toLowerCase() === defectType
-    const matchesSeverity = severity === 'all' || defect.severity === severity
-    return matchesType && matchesSeverity
-  })
+  // const filteredDefects = mappedDefects.filter((defect) => {
+  //   const matchesType =
+  //     defectType === 'all' || defect.type.toLowerCase() === defectType
+  //   const matchesSeverity = severity === 'all' || defect.severity === severity
+  //   return matchesType && matchesSeverity
+  // })
 
   // 정렬
-  const sortedDefects = [...filteredDefects].sort((a, b) => {
-    if (sortDirection === 'asc') {
-      return a[sortColumn as keyof typeof a]! > b[sortColumn as keyof typeof b]!
-        ? 1
-        : -1
-    } else {
-      return a[sortColumn as keyof typeof a]! < b[sortColumn as keyof typeof b]!
-        ? 1
-        : -1
-    }
-  })
+  // const sortedDefects = [...filteredDefects].sort((a, b) => {
+  //   if (sortDirection === 'asc') {
+  //     return a[sortColumn as keyof typeof a]! > b[sortColumn as keyof typeof b]!
+  //       ? 1
+  //       : -1
+  //   } else {
+  //     return a[sortColumn as keyof typeof a]! < b[sortColumn as keyof typeof b]!
+  //       ? 1
+  //       : -1
+  //   }
+  // })
 
   // 페이지네이션
-  const totalPages = Math.ceil(sortedDefects.length / itemsPerPage)
-  const startIndex = (currentPage - 1) * itemsPerPage
-  const endIndex = startIndex + itemsPerPage
-  const currentDefects = sortedDefects.slice(startIndex, endIndex)
+  // const totalPages = Math.ceil(sortedDefects.length / itemsPerPage)
+  // const startIndex = (currentPage - 1) * itemsPerPage
+  // const endIndex = startIndex + itemsPerPage
+  // const currentDefects = sortedDefects.slice(startIndex, endIndex)
 
   // 현재 페이지에 표시되는 항목들에 대한 상세 정보만 쿼리
   const detailsQueries = useQueries({
@@ -157,40 +175,40 @@ export default function DefectList() {
   }, [detailsQueries, detailsMap])
 
   // 정렬 핸들러
-  const handleSort = (column: string) => {
-    if (sortColumn === column) {
-      setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc')
-    } else {
-      setSortColumn(column)
-      setSortDirection('asc')
-    }
-  }
+  // const handleSort = (column: string) => {
+  //   if (sortColumn === column) {
+  //     setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc')
+  //   } else {
+  //     setSortColumn(column)
+  //     setSortDirection('asc')
+  //   }
+  // }
 
   // 페이지 번호 배열 생성
-  const getPageNumbers = () => {
-    const pageNumbers = []
-    const maxVisiblePages = 5 // 최대 표시할 페이지 번호 수
+  // const getPageNumbers = () => {
+  //   const pageNumbers = []
+  //   const maxVisiblePages = 5 // 최대 표시할 페이지 번호 수
 
-    if (totalPages <= maxVisiblePages) {
-      for (let i = 1; i <= totalPages; i++) {
-        pageNumbers.push(i)
-      }
-    } else {
-      let startPage = Math.max(1, currentPage - Math.floor(maxVisiblePages / 2))
-      const endPage = Math.min(totalPages, startPage + maxVisiblePages - 1)
+  //   if (totalPages <= maxVisiblePages) {
+  //     for (let i = 1; i <= totalPages; i++) {
+  //       pageNumbers.push(i)
+  //     }
+  //   } else {
+  //     let startPage = Math.max(1, currentPage - Math.floor(maxVisiblePages / 2))
+  //     const endPage = Math.min(totalPages, startPage + maxVisiblePages - 1)
 
-      // 마지막 페이지가 최대 표시 수보다 적은 경우 시작 페이지 조정
-      if (endPage - startPage + 1 < maxVisiblePages) {
-        startPage = Math.max(1, endPage - maxVisiblePages + 1)
-      }
+  //     // 마지막 페이지가 최대 표시 수보다 적은 경우 시작 페이지 조정
+  //     if (endPage - startPage + 1 < maxVisiblePages) {
+  //       startPage = Math.max(1, endPage - maxVisiblePages + 1)
+  //     }
 
-      for (let i = startPage; i <= endPage; i++) {
-        pageNumbers.push(i)
-      }
-    }
+  //     for (let i = startPage; i <= endPage; i++) {
+  //       pageNumbers.push(i)
+  //     }
+  //   }
 
-    return pageNumbers
-  }
+  //   return pageNumbers
+  // }
 
 
   // 상태 변경 핸들러
