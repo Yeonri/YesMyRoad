@@ -42,6 +42,10 @@ export type MonthlyMaintenanceStatusType = {
   completed: number
 }
 
-export interface MonthlyMaintenanceStatusResponseType {
-  data: MonthlyMaintenanceStatusType[]
+export interface DistrictMaintenanceStatusType {
+  name: string
+  reported: number
+  received: number
+  inProgress: number
+  completed: number
 }
