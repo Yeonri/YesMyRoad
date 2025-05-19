@@ -68,7 +68,7 @@ export const statisticAPI = {
       return { data: null, status: 500, error: new Error('Unknown error') }
     }
   },
-  
+
   // 도로파손 분포 Top3 지역
   getTop3Damagedlocations: () =>
     apiCaller(

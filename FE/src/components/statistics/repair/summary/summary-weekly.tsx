@@ -1,9 +1,9 @@
 // import { statisticAPI } from '@/api/statistic-api'
+import SummaryCard from '@/components/statistics/common/SummaryCard'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { RepairWeeklyReportType } from '@/types/stats-api'
 // import { useEffect, useState } from 'react'
 import { useState } from 'react'
-import SummaryCard from '@/components/statistics/common/SummaryCard'
 
 export default function SummaryWeekly() {
   const [weeklyReport, setWeeklyReport] =

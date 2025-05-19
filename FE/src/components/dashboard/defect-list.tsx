@@ -372,7 +372,7 @@ export default function DefectList() {
 
             return (
               <TableRow key={defect.publicId}>
-              {/* <TableRow key={defect.id}> */}
+                {/* <TableRow key={defect.id}> */}
                 <TableCell className="font-medium">{defect.id}</TableCell>
                 <TableCell>{defect.type}</TableCell>
                 <TableCell>

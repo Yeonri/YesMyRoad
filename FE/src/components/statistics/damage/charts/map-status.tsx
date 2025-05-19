@@ -22,12 +22,16 @@ export default function MapStatus(props: { cardHeight: string }) {
   }, [isMapRegistered])
 
   // 지도 등록 후 데이터 로드
-  const { data: response, isLoading, error } = useQuery({
+  const {
+    data: response,
+    isLoading,
+    error,
+  } = useQuery({
     queryKey: ['city-map'],
     queryFn: async () => {
-      const response = await statisticAPI.getLocationallyDamageMap("daejeon")
+      const response = await statisticAPI.getLocationallyDamageMap('daejeon')
       if (response.error) {
-        throw response.error 
+        throw response.error
       }
       return response
     },
@@ -104,7 +108,7 @@ export default function MapStatus(props: { cardHeight: string }) {
       <CardHeader className="p-4">
         <CardTitle className="text-md">구역별 도로파손 현황</CardTitle>
       </CardHeader>
-      <CardContent className="p-4 pt-0 flex items-center justify-center">
+      <CardContent className="flex items-center justify-center p-4 pt-0">
         {content}
       </CardContent>
     </Card>

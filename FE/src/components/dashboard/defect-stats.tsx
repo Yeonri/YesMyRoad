@@ -1,12 +1,11 @@
 'use client'
 
 // import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import DefectStatsDamage from '@/components/statistics/defect-stats-damage'
+import DefectStatsRepair from '@/components/statistics/defect-stats-repair'
 import useEmblaCarousel from 'embla-carousel-react'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
 import { useCallback, useEffect, useState } from 'react'
-
-import DefectStatsDamage from '@/components/statistics/defect-stats-damage'
-import DefectStatsRepair from '@/components/statistics/defect-stats-repair'
 
 export default function DefectStats() {
   const [emblaRef, emblaApi] = useEmblaCarousel()

@@ -46,12 +46,11 @@ export default function Header() {
   }
 
   const defectAPITest = async () => {
-    const response = await defectAPI.updateRoadDamageStatus(10, "COMPLETED")
+    const response = await defectAPI.updateRoadDamageStatus(10, 'COMPLETED')
     if (response.status === 200) {
       console.log(response.data)
-    }
-    else {
-      alert("응 안돼~")
+    } else {
+      alert('응 안돼~')
     }
   }
 
