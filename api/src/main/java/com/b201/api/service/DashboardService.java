@@ -15,9 +15,11 @@ import com.b201.api.dto.dashboard.DailyStatusDto;
 import com.b201.api.dto.dashboard.MonthlyDamageSummaryDto;
 import com.b201.api.dto.dashboard.MonthlyStatusDto;
 import com.b201.api.dto.dashboard.RegionCountDto;
+import com.b201.api.dto.dashboard.RegionNameWithCountDto;
 import com.b201.api.dto.dashboard.TopRegionDto;
 import com.b201.api.dto.dashboard.WeeklyStatusDto;
 import com.b201.api.repository.CaptureDamageRepository;
+import com.b201.api.repository.RegionRepository;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -28,6 +30,7 @@ import lombok.extern.slf4j.Slf4j;
 public class DashboardService {
 
 	private final CaptureDamageRepository damageRepo;
+	private final RegionRepository regionRepo;
 
 	// 유형별 도로 파손 분포 수
 	@Transactional(readOnly = true)
@@ -47,7 +50,6 @@ public class DashboardService {
 		}
 		throw new ArithmeticException("기준 값(이전 기간) 데이터가 없습니다.");
 	}
-
 
 	// 오늘자 파손 건수 + 전일 대비 증감율
 	@Transactional(readOnly = true)
@@ -74,14 +76,14 @@ public class DashboardService {
 			todayStart
 		);
 
-		try{
+		try {
 			// 3) 증감율 계산
 			double rate = calculateRate(todayCount, yesterdayCount);
 
 			log.debug("[getDailyStatusWithChangeRate] todayCount={}, yesterdayCount={}, rate={}",
 				todayCount, yesterdayCount, rate);
 			return new DailyStatusDto(today, todayCount, rate);
-		}catch(ArithmeticException e){
+		} catch (ArithmeticException e) {
 			log.warn("[getDailyStatusWithChangeRate] 0으로 나누기 감지");
 			// 0으로 나눈 경우: todayCount를 음수로 바꿔 리턴
 			return new DailyStatusDto(today, -todayCount, 0.0);
@@ -100,13 +102,13 @@ public class DashboardService {
 
 		long lastWeekSum = damageRepo.countBetween(regionName, lastMon.atStartOfDay(), thisMon.atStartOfDay());
 
-		try{
+		try {
 			double rate = calculateRate(thisWeekSum, lastWeekSum);
 
 			log.debug("[getWeeklyStatusWithChangeRate] thisWeekSum={}, lastWeekSum={}, rate={}",
 				thisWeekSum, lastWeekSum, rate);
 			return new WeeklyStatusDto(thisMon, thisWeekSum, rate);
-		}catch(ArithmeticException e){
+		} catch (ArithmeticException e) {
 			log.warn("[getWeeklyStatusWithChangeRate] 0으로 나누기 감지");
 			return new WeeklyStatusDto(thisMon, -thisWeekSum, 0.0);
 		}
@@ -140,14 +142,14 @@ public class DashboardService {
 			lastEnd
 		);
 
-		try{
+		try {
 			double rate = calculateRate(thisMonthCount, lastMonthCount);
 
 			log.debug("[getMonthlyStatusWithChangeRate] thisMonthCount={}, lastMonthCount={}, rate={}",
 				thisMonthCount, lastMonthCount, rate);
 
 			return new MonthlyStatusDto(YearMonth.from(firstDayThisMon), thisMonthCount, rate);
-		}catch (ArithmeticException e){
+		} catch (ArithmeticException e) {
 			log.warn("[getMonthlyStatusWithChangeRate] 0으로 나누기 감지");
 			return new MonthlyStatusDto(YearMonth.from(firstDayThisMon), -thisMonthCount, 0.0);
 		}
@@ -169,11 +171,19 @@ public class DashboardService {
 	 * 특정 광역시의 구 단위 파손 분포
 	 */
 	@Transactional(readOnly = true)
-	public List<RegionCountDto> getDistrictDistribution(String cityName) {
+	public RegionNameWithCountDto getDistrictDistribution(String cityName) {
 		log.info("[getDistrictDistribution] 호출됨, regionName={}", cityName);
+
+		log.info("[getDistrictDistribution] cityId : {}", regionRepo.findByRegionName(cityName).toString());
+		Integer cityId = regionRepo.findByRegionName(cityName).getId();
+
 		List<RegionCountDto> list = damageRepo.countByCity(cityName);
 		log.debug("[getDistrictDistribution] 구 단위 분포 개수 = {}", list.size());
-		return list;
+
+		return RegionNameWithCountDto.builder()
+			.regionId(cityId)
+			.destrictions(list)
+			.build();
 	}
 
 	/**

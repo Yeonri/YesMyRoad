@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.b201.api.dto.dashboard.CategoryCountDto;
 import com.b201.api.dto.dashboard.DailyStatusDto;
 import com.b201.api.dto.dashboard.MonthlyStatusDto;
-import com.b201.api.dto.dashboard.RegionCountDto;
+import com.b201.api.dto.dashboard.RegionNameWithCountDto;
 import com.b201.api.dto.dashboard.TopRegionDto;
 import com.b201.api.dto.dashboard.WeeklyStatusDto;
 import com.b201.api.security.CustomUserDetails;
@@ -70,12 +70,12 @@ public class DashBoardController {
 	}
 
 	@GetMapping("/districts")
-	public ResponseEntity<List<RegionCountDto>> getDistricts(
+	public ResponseEntity<RegionNameWithCountDto> getDistricts(
 		@AuthenticationPrincipal CustomUserDetails user
 	) {
 		String regionName = user.getRegionName();
-		List<RegionCountDto> list = dashboardService.getDistrictDistribution(regionName);
-		return ResponseEntity.ok(list);
+		RegionNameWithCountDto result = dashboardService.getDistrictDistribution(regionName);
+		return ResponseEntity.ok(result);
 	}
 
 	@GetMapping("/top3")
