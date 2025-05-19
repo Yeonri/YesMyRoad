@@ -51,12 +51,12 @@ export default function MonthlyRepair() {
   useEffect(() => {
     if (chartRef.current) {
       // const chartInstance = chartRef.current.getEchartsInstance()
-      const grid = { left: 100, right: 100, top: 50, bottom: 50 }
       // const gridWidth = chartInstance.getWidth() - grid.left - grid.right
       // const gridHeight = chartInstance.getHeight() - grid.top - grid.bottom
       // const categoryWidth = gridWidth / rawData[0].length
       // const barWidth = categoryWidth * 0.6
       // const barPadding = (categoryWidth - barWidth) / 2
+      const grid = { left: 100, right: 100, top: 50, bottom: 50 }
       const color = ['#e0e0e0', '#ee6666', '#fac858', '#91cc75']
 
       const series: echarts.BarSeriesOption[] = [
@@ -68,7 +68,7 @@ export default function MonthlyRepair() {
           name,
           type: 'bar',
           stack: 'total',
-          barWidth: '60%',
+          barWidth: '50%',
           label: {
             show: true,
             formatter: (params: echarts.DefaultLabelFormatterCallbackParams) =>
@@ -110,7 +110,7 @@ export default function MonthlyRepair() {
   }, [rawData, totalData])
 
   return (
-    <Card className="col-span-2 h-auto">
+    <Card className="col-span-3 h-auto">
       <CardHeader className="p-4">
         <CardTitle className="text-md">월별 도로보수 현황</CardTitle>
       </CardHeader>
