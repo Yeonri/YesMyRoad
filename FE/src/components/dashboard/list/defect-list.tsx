@@ -2,6 +2,7 @@
 
 import { coordinateAPI } from '@/api/coordinate-api'
 import { defectAPI } from '@/api/defect-api'
+import DefectPaginations from '@/components/dashboard/list/defect-paginations'
 import { Button } from '@/components/ui/button'
 import {
   DropdownMenu,
@@ -11,15 +12,6 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
-import {
-  Pagination,
-  PaginationContent,
-  PaginationEllipsis,
-  PaginationItem,
-  PaginationLink,
-  PaginationNext,
-  PaginationPrevious,
-} from '@/components/ui/pagination'
 import { StatusBadge } from '@/components/ui/status-badge'
 import {
   Table,
@@ -30,9 +22,10 @@ import {
   TableRow,
 } from '@/components/ui/table'
 import { formatDate, getSeverityColor, getStatusColor } from '@/lib/formatter'
+import { useDefectListStore } from '@/store/defect-list-store'
 import { useDefectStore } from '@/store/defect-store'
+import { ProcessStatus } from '@/types/defects'
 import { useQueries } from '@tanstack/react-query'
-
 import {
   ChevronDown,
   ChevronUp,
@@ -40,60 +33,107 @@ import {
   MapPin,
   MoreHorizontal,
 } from 'lucide-react'
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 
-export type ProcessStatus = 'Pending' | 'Assigned' | 'In Progress' | 'Completed'
+type damageType = {
+  id: number
+  category: string
+  status: number
+  updatedAt: string
+}
 
-// DetailedDefect 타입 정의
-type DetailedDefect = {
+type detailedDamageType = {
+  id: number
   imageUrl: string
   risk: number
-  damages: { id: number; category: string; status: number; updatedAt: string }[]
+  type: string
+  location: string
+  category: string
+  detectedAt: string
+  publicId: string
+  severity: string
+  status: string
 }
 
 export default function DefectList() {
+  const processStatusList: ProcessStatus[] = [
+    'Pending',
+    'Assigned',
+    'In Progress',
+    'Completed',
+  ]
   const [sortColumn, setSortColumn] = useState('id')
   const [sortDirection, setSortDirection] = useState('asc')
-  const [currentPage, setCurrentPage] = useState(1)
-  const itemsPerPage = 5
   const defectType = 'all'
   const severity = 'all'
-
-
-  // 상세 정보를 저장할 맵 상태
-  const [detailsMap, setDetailsMap] = useState<Record<string, DetailedDefect>>(
-    {},
-  )
-
-  // Zustand 스토어에서 데이터 가져오기
+  const { currentPage, itemsPerPage, setTotalItems } = useDefectListStore()
   const { geoJSONData } = useDefectStore()
 
-  // geoJSONData를 사용하여 defects 배열 생성
-  const mappedDefects = geoJSONData
-    ? geoJSONData.map((feature) => {
-        const publicId = feature.properties.publicId
-        const detail = detailsMap[publicId]
+  const defectQueries = useQueries({
+    queries: (geoJSONData || []).map((feature) => {
+      const publicId = feature.properties.publicId
+      return {
+        queryKey: ['defectDetail', publicId],
+        queryFn: () => coordinateAPI.getDefectDetail(publicId),
+        enabled: !!publicId,
+      }
+    }),
+  })
 
-        return {
-          id: 'Unknown',
-          // id: feature.properties.displayId || 'Unknown',
-          publicId: publicId, // API 호출용으로 보존
-          type: 'Crack', // 하드코딩 값
-          severity: 'medium', // 하드코딩 값
-          location: feature.properties.address?.street || 'Unknown location',
-          detectedAt: new Date().toISOString(),
-          status: 'Pending', // 하드코딩 값
-          description: 'Auto-generated defect from GeoJSON data',
-          // 상세 정보가 있으면 추가
-          risk: detail?.risk,
-          imageUrl: detail?.imageUrl,
-          damages: detail?.damages,
-        }
-      })
-    : []
+  // 최적화된 데이터 변환 로직 - useMemo 사용
+  const detailedData = useMemo(() => {
+    // 모든 쿼리가 완료되었는지 확인
+    const allQueriesReady = defectQueries.every(
+      (query) => query.isSuccess && query.data?.data,
+    )
+
+    if (!allQueriesReady || !geoJSONData?.length) {
+      return [] // 준비되지 않았으면 빈 배열 반환
+    }
+
+    // 데이터 변환 로직 실행 (한 번만 계산됨)
+    return geoJSONData.flatMap((feature, index) => {
+      const queryResult = defectQueries[index]
+      const damages = queryResult.data?.data.damages || []
+      const defectId = ""
+
+      if (Array.isArray(damages)) {
+        return damages.map((damage: damageType) => ({
+          id: defectId,
+          imageUrl: queryResult.data?.data.imageUrl,
+          risk: queryResult.data?.data.risk,
+          type: feature.geometry.type,
+          location: feature.properties.address.street,
+          category: damage.category,
+          detectedAt: damage.updatedAt,
+          publicId: feature.properties.publicId,
+          severity: 'medium',
+          status: 'Pending',
+        }))
+      }
+      return []
+    })
+  }, [defectQueries, geoJSONData]) // 동일한 의존성 배열 유지
+
+  // useState + useEffect 조합 대신 useMemo 결과를 직접 사용
+  const [detailedGeoJSONData, setDetailedGeoJSONData] = useState<
+    detailedDamageType[]
+  >([])
+
+  // 메모이제이션된 값이 변경될 때만 상태 업데이트
+  useEffect(() => {
+    if (detailedData.length > 0) {
+      setDetailedGeoJSONData(detailedData)
+    }
+  }, [detailedData])
+
+  // 검증용 (그대로 유지)
+  useEffect(() => {
+    console.log('업데이트된 데이터:', detailedGeoJSONData)
+  }, [detailedGeoJSONData])
 
   // 필터링
-  const filteredDefects = mappedDefects.filter((defect) => {
+  const filteredGeoJSONData = detailedGeoJSONData.filter((defect) => {
     const matchesType =
       defectType === 'all' || defect.type.toLowerCase() === defectType
     const matchesSeverity = severity === 'all' || defect.severity === severity
@@ -101,7 +141,7 @@ export default function DefectList() {
   })
 
   // 정렬
-  const sortedDefects = [...filteredDefects].sort((a, b) => {
+  const sortedGeoJSONData = [...filteredGeoJSONData].sort((a, b) => {
     if (sortDirection === 'asc') {
       return a[sortColumn as keyof typeof a]! > b[sortColumn as keyof typeof b]!
         ? 1
@@ -113,48 +153,17 @@ export default function DefectList() {
     }
   })
 
-  // 페이지네이션
-  const totalPages = Math.ceil(sortedDefects.length / itemsPerPage)
-  const startIndex = (currentPage - 1) * itemsPerPage
-  const endIndex = startIndex + itemsPerPage
-  const currentDefects = sortedDefects.slice(startIndex, endIndex)
-
-  // 현재 페이지에 표시되는 항목들에 대한 상세 정보만 쿼리
-  const detailsQueries = useQueries({
-    queries: currentDefects.map((defect) => ({
-      queryKey: ['defectDetail', defect.publicId],
-      queryFn: async () => {
-        const response = await coordinateAPI.getDefectDetail(defect.publicId)
-        console.log('good!: ', response.data.damages)
-
-        return { publicId: defect.publicId, data: response.data }
-      },
-      enabled: !!defect.publicId, // publicId가 있는 경우에만 쿼리 실행
-      staleTime: 5 * 60 * 1000, // 5분 동안 캐싱
-    })),
-  })
-
-  // 상세 정보가 로드되면 detailsMap 업데이트
+  // sortedGeoJSONData.length가 바뀔 때마다 totalItems 업데이트
   useEffect(() => {
-    const newDetailsMap = { ...detailsMap }
-    let hasUpdates = false
+    setTotalItems(sortedGeoJSONData.length)
+  }, [sortedGeoJSONData.length, setTotalItems])
 
-    detailsQueries.forEach((query) => {
-      console.log('Q: ', query.data)
-
-      if (query.isSuccess && query.data) {
-        const { publicId, data } = query.data
-        if (!detailsMap[publicId]) {
-          newDetailsMap[publicId] = data
-          hasUpdates = true
-        }
-      }
-    })
-
-    if (hasUpdates) {
-      setDetailsMap(newDetailsMap)
-    }
-  }, [detailsQueries, detailsMap])
+  // 페이지네이션
+  const startIndex = (currentPage - 1) * itemsPerPage
+  const currentDefects = sortedGeoJSONData.slice(
+    startIndex,
+    startIndex + itemsPerPage,
+  )
 
   // 정렬 핸들러
   const handleSort = (column: string) => {
@@ -166,57 +175,19 @@ export default function DefectList() {
     }
   }
 
-  // 페이지 번호 배열 생성
-  const getPageNumbers = () => {
-    const pageNumbers = []
-    const maxVisiblePages = 5 // 최대 표시할 페이지 번호 수
-
-    if (totalPages <= maxVisiblePages) {
-      for (let i = 1; i <= totalPages; i++) {
-        pageNumbers.push(i)
-      }
-    } else {
-      let startPage = Math.max(1, currentPage - Math.floor(maxVisiblePages / 2))
-      const endPage = Math.min(totalPages, startPage + maxVisiblePages - 1)
-
-      // 마지막 페이지가 최대 표시 수보다 적은 경우 시작 페이지 조정
-      if (endPage - startPage + 1 < maxVisiblePages) {
-        startPage = Math.max(1, endPage - maxVisiblePages + 1)
-      }
-
-      for (let i = startPage; i <= endPage; i++) {
-        pageNumbers.push(i)
-      }
-    }
-
-    return pageNumbers
-  }
-
-
   // 상태 변경 핸들러
   const handleStatusChange = async (
-    defectId: number,
+    damageId: number,
     currentStatus: string,
-    newStatus: ProcessStatus,
+    newStatus: string,
   ) => {
-    const response = await defectAPI.updateRoadDamageStatus(defectId, newStatus)
+    const response = await defectAPI.updateRoadDamageStatus(damageId, newStatus)
     console.log(response.data)
-    alert(`Changing defect ${currentStatus} status to ${newStatus}`)
+    alert(`Changing defect ${currentStatus} to ${newStatus}`)
   }
-
-  // 로딩 상태 확인 (전체 페이지에 대한 로딩 상태가 아니라 현재 페이지에 대한 상세 정보만 확인)
-  const isLoading = detailsQueries.some(
-    (query) => query.isLoading && !query.isError,
-  )
 
   return (
     <div className="w-full overflow-auto">
-      {isLoading && (
-        <div className="text-muted-foreground py-2 text-center text-sm">
-          상세 정보를 불러오는 중...
-        </div>
-      )}
-
       <Table>
         <TableHeader>
           <TableRow>
@@ -337,37 +308,20 @@ export default function DefectList() {
                         {defect.status!}
                       </StatusBadge>
                     </DropdownMenuTrigger>
+
                     <DropdownMenuContent align="start">
                       <DropdownMenuLabel>작업 상태 변경</DropdownMenuLabel>
                       <DropdownMenuSeparator />
-                      <DropdownMenuItem
-                        onClick={() =>
-                          handleStatusChange(1, defect.status!, 'Pending')
-                        }
-                      >
-                        Pending
-                      </DropdownMenuItem>
-                      <DropdownMenuItem
-                        onClick={() =>
-                          handleStatusChange(1, defect.status!, 'Assigned')
-                        }
-                      >
-                        Assigned
-                      </DropdownMenuItem>
-                      <DropdownMenuItem
-                        onClick={() =>
-                          handleStatusChange(1, defect.status!, 'In Progress')
-                        }
-                      >
-                        In Progress
-                      </DropdownMenuItem>
-                      <DropdownMenuItem
-                        onClick={() =>
-                          handleStatusChange(1, defect.status!, 'Completed')
-                        }
-                      >
-                        Completed
-                      </DropdownMenuItem>
+                      {processStatusList.map((process) => (
+                        <DropdownMenuItem
+                          key={process}
+                          onClick={() =>
+                            handleStatusChange(1, defect.status!, process)
+                          }
+                        >
+                          {process}
+                        </DropdownMenuItem>
+                      ))}
                     </DropdownMenuContent>
                   </DropdownMenu>
                 </TableCell>
@@ -393,89 +347,7 @@ export default function DefectList() {
           })}
         </TableBody>
       </Table>
-
-      {/* 페이지네이션 추가 */}
-      <div className="mt-4">
-        <Pagination>
-          <PaginationContent>
-            <PaginationItem>
-              <PaginationPrevious
-                onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
-                className={
-                  currentPage === 1
-                    ? 'pointer-events-none opacity-50'
-                    : 'cursor-pointer'
-                }
-              />
-            </PaginationItem>
-
-            {/* 첫 페이지가 아닐 경우 첫 페이지로 가는 링크 표시 */}
-            {getPageNumbers()[0] > 1 && (
-              <>
-                <PaginationItem>
-                  <PaginationLink
-                    onClick={() => setCurrentPage(1)}
-                    className="cursor-pointer"
-                  >
-                    1
-                  </PaginationLink>
-                </PaginationItem>
-                {getPageNumbers()[0] > 2 && (
-                  <PaginationItem>
-                    <PaginationEllipsis />
-                  </PaginationItem>
-                )}
-              </>
-            )}
-
-            {/* 페이지 번호 표시 */}
-            {getPageNumbers().map((page) => (
-              <PaginationItem key={page}>
-                <PaginationLink
-                  isActive={currentPage === page}
-                  onClick={() => setCurrentPage(page)}
-                  className="cursor-pointer"
-                >
-                  {page}
-                </PaginationLink>
-              </PaginationItem>
-            ))}
-
-            {/* 마지막 페이지가 아닐 경우 마지막 페이지로 가는 링크 표시 */}
-            {getPageNumbers()[getPageNumbers().length - 1] < totalPages && (
-              <>
-                {getPageNumbers()[getPageNumbers().length - 1] <
-                  totalPages - 1 && (
-                  <PaginationItem>
-                    <PaginationEllipsis />
-                  </PaginationItem>
-                )}
-                <PaginationItem>
-                  <PaginationLink
-                    onClick={() => setCurrentPage(totalPages)}
-                    className="cursor-pointer"
-                  >
-                    {totalPages}
-                  </PaginationLink>
-                </PaginationItem>
-              </>
-            )}
-
-            <PaginationItem>
-              <PaginationNext
-                onClick={() =>
-                  setCurrentPage(Math.min(totalPages, currentPage + 1))
-                }
-                className={
-                  currentPage === totalPages
-                    ? 'pointer-events-none opacity-50'
-                    : 'cursor-pointer'
-                }
-              />
-            </PaginationItem>
-          </PaginationContent>
-        </Pagination>
-      </div>
+      <DefectPaginations />
     </div>
   )
 }

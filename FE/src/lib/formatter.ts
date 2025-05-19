@@ -37,11 +37,7 @@ export const getStatusColor = (status: string) => {
 }
 
 //   UUID로부터 표시 ID 생성하는 함수
-export const getDisplayId = (
-    uuid: string,
-    damageId: number,
-    prefix: string = 'DEF',
-): string => {
+export const getDisplayId = (uuid: string, damageId: number): string => {
     const validChars = '0123456789ABCDEFGHJKLMNPQRSTUVWXYZ'
     const hash = crypto.createHash('sha256').update(uuid).digest('hex')
 
@@ -54,5 +50,5 @@ export const getDisplayId = (
         })
         .join('')
 
-    return `${prefix}-${damageId}-${shortCode}`
+    return `DEF-${damageId}-${shortCode}`
 }
