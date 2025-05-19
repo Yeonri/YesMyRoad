@@ -2,7 +2,9 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import * as echarts from 'echarts'
 import ReactECharts from 'echarts-for-react'
 
-export default function MapStatus() {
+export default function MapStatus(props: { cardHeight: string }) {
+  const { cardHeight = 'h-80' } = props
+
   // 지역별 파이 차트 데이터
   const regionData: Record<string, Array<{ value: number; name: string }>> = {
     동구: [
@@ -96,7 +98,7 @@ export default function MapStatus() {
   }
 
   return (
-    <Card className="col-span-3 h-auto grow">
+    <Card className={`col-span-3 grow ${cardHeight}`}>
       <CardHeader className="p-4">
         <CardTitle className="text-md">구역별 도로 보수 현황</CardTitle>
       </CardHeader>

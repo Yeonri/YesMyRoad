@@ -7,11 +7,7 @@ interface SummaryCardProps {
   className?: string
 }
 
-export default function SummaryCard({
-  title,
-  value,
-  className,
-}: SummaryCardProps) {
+export default function SummaryCard({ title, value, className }: SummaryCardProps) {
   return (
     <Card className={className}>
       <CardHeader className="p-4">
@@ -24,4 +20,4 @@ export default function SummaryCard({
       </CardContent>
     </Card>
   )
-}
+} 
