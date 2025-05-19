@@ -19,7 +19,7 @@ import {
 } from '@/components/ui/popover'
 // 지역 ID 데이터 임포트
 import regionIdMap from '@/data/region-id.json'
-import { cn } from '@/libs/utils'
+import { cn } from '@/lib/utils'
 import { useUserStore } from '@/store/user-store'
 import { LoginFormData, RegisterFormData } from '@/types/user'
 import * as AccordionPrimitive from '@radix-ui/react-accordion'

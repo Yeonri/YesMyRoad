@@ -1,5 +1,5 @@
 import { Button, buttonVariants } from '@/components/ui/button'
-import { cn } from '@/libs/utils'
+import { cn } from '@/lib/utils'
 import {
   ChevronLeftIcon,
   ChevronRightIcon,

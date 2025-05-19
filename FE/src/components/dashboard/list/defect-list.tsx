@@ -29,7 +29,7 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table'
-import { formatDate, getSeverityColor, getStatusColor } from '@/libs/formatter'
+import { formatDate, getSeverityColor, getStatusColor } from '@/lib/formatter'
 import { useDefectStore } from '@/store/defect-store'
 import { useQueries } from '@tanstack/react-query'
 
