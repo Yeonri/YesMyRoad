@@ -2,11 +2,11 @@
 
 import { coordinateAPI } from '@/api/coordinate-api'
 import DefectHeatmap from '@/components/dashboard/defect-heatmap'
-import DefectList from '@/components/dashboard/list/defect-list'
 import DefectMap from '@/components/dashboard/defect-map'
 import DefectOverall from '@/components/dashboard/defect-overall'
 import DefectStats from '@/components/dashboard/defect-stats'
 import Header from '@/components/dashboard/header'
+import DefectList from '@/components/dashboard/list/defect-list'
 import SeverityBadges from '@/components/dashboard/severity-badges'
 // import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'

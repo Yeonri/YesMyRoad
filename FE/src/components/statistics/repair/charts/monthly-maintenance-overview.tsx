@@ -24,6 +24,13 @@ export default function MonthlyMaintenanceOverview() {
     fetchMonthlyMaintenanceStatus()
   }, [])
 
+  const statusLabels = [
+    { key: 'reported', label: '보고됨', color: '#e0e0e0' },
+    { key: 'received', label: '접수완료', color: '#ee6666' },
+    { key: 'inProgress', label: '작업중', color: '#fac858' },
+    { key: 'completed', label: '작업완료', color: '#91cc75' },
+  ]
+
   const option: echarts.EChartsOption = {
     tooltip: { trigger: 'item' },
     legend: { top: '5%', left: 'center', textStyle: { fontSize: 12 } },
@@ -32,17 +39,18 @@ export default function MonthlyMaintenanceOverview() {
         name: '도로보수 유형',
         type: 'pie',
         radius: ['40%', '70%'],
-        color: ['#e0e0e0', '#ee6666', '#fac858', '#91cc75'],
+        color: statusLabels.map((s) => s.color),
         avoidLabelOverlap: false,
         itemStyle: { borderRadius: 10, borderColor: '#fff', borderWidth: 2 },
         label: { show: false, position: 'center' },
         emphasis: { label: { show: true, fontSize: 16, fontWeight: 'bold' } },
-        data: [
-          { value: monthlyMaintenanceOverview.reported, name: '보고됨' },
-          { value: monthlyMaintenanceOverview.received, name: '접수완료' },
-          { value: monthlyMaintenanceOverview.inProgress, name: '작업중' },
-          { value: monthlyMaintenanceOverview.completed, name: '작업완료' },
-        ],
+        data: statusLabels.map((s) => ({
+          value:
+            monthlyMaintenanceOverview[
+              s.key as keyof MonthlyMaintenanceOverviewType
+            ] ?? 0,
+          name: s.label,
+        })),
       },
     ],
   }
