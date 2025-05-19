@@ -1,9 +1,19 @@
 import crypto from 'crypto'
 
-// 유틸리티 함수들
+// 시간 포맷팅 함수
 export const formatDate = (dateString: string) => {
   const date = new Date(dateString)
-  return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+  
+  const year = date.getFullYear()
+  const month = String(date.getMonth() + 1).padStart(2, '0')
+  const day = String(date.getDate()).padStart(2, '0')
+  
+  const hours = date.getHours()
+  const ampm = hours >= 12 ? '오후' : '오전'
+  const hour12 = hours % 12 || 12 // 12시간 형식 (0은 12로 표시)
+  const minute = String(date.getMinutes()).padStart(2, '0')
+  
+  return `${year}-${month}-${day} ${ampm} ${hour12}:${minute}`
 }
 
 export const getSeverity = (risk: number) => {
@@ -43,10 +53,11 @@ export const getStatusColor = (status: string) => {
   }
 }
 
-export const getDisplayId = (damageId: number, publicId: string): string => {
+// 결함 ID를 생성하는 함수
+export const getDisplayId = (category:string, damageId: number, publicId: string): string => {
   const validChars = '0123456789ABCDEFGHJKLMNPQRSTUVWXYZ'
   const hash = crypto.createHash('sha256').update(publicId).digest('hex')
-
+  const prefix = category === "도로균열" ? "RC" : "RH" // road crack, road hole
   const shortCode = Array(5)
     .fill(0)
     .map((_, i) => {
@@ -59,5 +70,5 @@ export const getDisplayId = (damageId: number, publicId: string): string => {
   // damageId를 문자열로 변환하고 4자리가 되도록 앞에 0을 채움
   const formattedDamageId = String(damageId).padStart(4, '0')
 
-  return `D-${formattedDamageId}-${shortCode}`
+  return `${prefix}-${formattedDamageId}-${shortCode}`
 }

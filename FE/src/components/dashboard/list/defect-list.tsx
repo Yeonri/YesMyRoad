@@ -41,6 +41,8 @@ import {
 } from 'lucide-react'
 import { useEffect, useMemo, useCallback, useRef } from 'react'
 
+type FilterType = 'timeRange' | 'defectType' | 'severity' | 'process' | ''
+
 type damageType = {
   id: number
   category: string
@@ -49,12 +51,14 @@ type damageType = {
 }
 
 type DashboardFilterProps = {
-  filter: string
+  filter: FilterType
   timeRange: string
   defectType: string
   severity: string
   process: string
 }
+
+
 
 export default function DefectList({ filter, timeRange, defectType, severity, process }: DashboardFilterProps) {
   const processStatusList: ProcessStatus[] = [
@@ -74,7 +78,12 @@ export default function DefectList({ filter, timeRange, defectType, severity, pr
     setDetailedGeoJSONData,
     updateDefectStatus,
     getFilteredAndSortedData,
-    getCurrentPageData
+    getCurrentPageData,
+    setFilterType,
+    setProcessFilter,
+    setSeverityFilter,
+    setDefectTypeFilter,
+    setTimeRangeFilter,
   } = useDetailedDefectStore()
 
   const { currentPage, itemsPerPage, setTotalItems } = useDefectListStore()
@@ -113,7 +122,7 @@ export default function DefectList({ filter, timeRange, defectType, severity, pr
 
       if (Array.isArray(damages) && risk && imageUrl) {
         return damages.map((damage: damageType) => ({
-          defectId: getDisplayId(damage.id, feature.properties.publicId),
+          defectId: getDisplayId(damage.category, damage.id, feature.properties.publicId),
           damageId: damage.id,
           imageUrl: imageUrl,
           type: feature.geometry.type,
@@ -146,17 +155,27 @@ export default function DefectList({ filter, timeRange, defectType, severity, pr
     }
   }, [detailedData, setDetailedGeoJSONData])
 
-  // 필터링 및 정렬된 데이터 계산 (의존성 배열 최소화)
+  // 컴포넌트 마운트 또는 props 변경 시 필터 상태 업데이트
+  useEffect(() => {
+    setFilterType(filter as FilterType)
+    setProcessFilter(process)
+    setSeverityFilter(severity)
+    setDefectTypeFilter(defectType)
+    setTimeRangeFilter(timeRange) // 추가: 발생 시각 필터 설정
+  }, [filter, process, severity, defectType, timeRange, setFilterType, setProcessFilter, setSeverityFilter, setDefectTypeFilter, setTimeRangeFilter])
+
+  // 필터링 및 정렬된 데이터 계산 (모든 필터 값 사용)
   const filteredAndSortedData = useMemo(() => {
     if (detailedGeoJSONData.length === 0) return []
-    return getFilteredAndSortedData()
-  }, [detailedGeoJSONData, sortColumn, sortDirection, getFilteredAndSortedData])
+    return getFilteredAndSortedData(filter as FilterType, process, severity, defectType, timeRange)
+  }, [detailedGeoJSONData, sortColumn, sortDirection, getFilteredAndSortedData, filter, process, severity, defectType, timeRange])
 
-  // 현재 페이지 데이터 계산 (의존성 배열 최소화)
+  // 현재 페이지 데이터 계산 (모든 필터 값 전달)
   const currentDefects = useMemo(() => {
     if (filteredAndSortedData.length === 0) return []
-    return getCurrentPageData(currentPage, itemsPerPage)
-  }, [getCurrentPageData, currentPage, itemsPerPage, filteredAndSortedData])
+    return getCurrentPageData(currentPage, itemsPerPage, filter as FilterType, process, severity, defectType, timeRange)
+  }, [getCurrentPageData, currentPage, itemsPerPage, filteredAndSortedData, filter, process, severity, defectType, timeRange])
+
 
   // 데이터 길이가 실제로 변경될 때만 totalItems 업데이트
   useEffect(() => {
@@ -201,7 +220,7 @@ export default function DefectList({ filter, timeRange, defectType, severity, pr
                 className="flex items-center gap-1 p-0 font-medium"
                 onClick={() => handleSort('defectId')}
               >
-                ID
+                결함 ID
                 {sortColumn === 'defectId' &&
                   (sortDirection === 'asc' ? (
                     <ChevronUp className="h-4 w-4" />

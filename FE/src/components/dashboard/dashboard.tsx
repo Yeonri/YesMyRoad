@@ -33,13 +33,15 @@ import { useCallback, useEffect, useMemo, useState } from 'react'
 // import { statisticAPI } from '@/api/statistic-api'
 import AddressSelector from './address-selector'
 
+type FilterType = 'timeRange' | 'defectType' | 'severity' | 'process' | ''
+
 export default function Dashboard() {
   // Get state and actions from Zustand store
   const { updateGeoJSONData, defectDetailList, updateDefectDetailList } =
     useDefectStore()
 
   const [selectedTab, selectTab] = useState<string>('map') // 지도/히트맵/목록/통계 탭 선택용 상태 변수
-  const [selectedFilter, selectFilter] = useState<string>('timeRange') // 목록 탭에서 시간/결함 유형/심각도 필터를 고르는 필터
+  const [selectedFilter, selectFilter] = useState<FilterType>('timeRange') // 목록 탭에서 시간/결함 유형/심각도 필터를 고르는 필터
   const [selectedTimeRange, selectTimeRange] = useState<string>('all') // 목록 탭에서 시간 필터
   const [selectedDefectType, selectDefectType] = useState<string>('all') // 목록 탭에서 결함 유형 필터
   const [selectedSeverity, selectSeverity] = useState<string>('all') // 목록 탭에서 심각도 필터
@@ -230,8 +232,8 @@ export default function Dashboard() {
                         </SelectTrigger>
                         <SelectContent>
                           <SelectItem value="all">전체</SelectItem>
-                          <SelectItem value="pothole">도로 홀</SelectItem>
-                          <SelectItem value="crack">도로균열</SelectItem>
+                          <SelectItem value="도로 홀">도로 홀</SelectItem>
+                          <SelectItem value="도로균열">도로균열</SelectItem>
                         </SelectContent>
                       </Select>
                     )}
@@ -245,10 +247,10 @@ export default function Dashboard() {
                         </SelectTrigger>
                         <SelectContent>
                           <SelectItem value="all">전체</SelectItem>
-                          <SelectItem value="critical">심각</SelectItem>
-                          <SelectItem value="danger">위험</SelectItem>
-                          <SelectItem value="caution">주의</SelectItem>
-                          <SelectItem value="safe">안전</SelectItem>
+                          <SelectItem value="심각">심각</SelectItem>
+                          <SelectItem value="위험">위험</SelectItem>
+                          <SelectItem value="주의">주의</SelectItem>
+                          <SelectItem value="안전">안전</SelectItem>
                         </SelectContent>
                       </Select>
                     )}
@@ -269,7 +271,7 @@ export default function Dashboard() {
                         </SelectContent>
                       </Select>
                     )}
-                    <Select value={selectedFilter} onValueChange={selectFilter}>
+                    <Select value={selectedFilter} onValueChange={(value) => selectFilter(value as FilterType)}>
                       <SelectTrigger className="h-8 w-[130px]">
                         <SelectValue placeholder="필터 선택" />
                       </SelectTrigger>
