@@ -1,7 +1,7 @@
 'use client'
 
 // import { coodAPI } from '@/api/coordinate-api'
-// import { defectAPI } from '@/api/defect-api'
+import { defectAPI } from '@/api/defect-api'
 // import { maintenanceAPI } from '@/api/maintenance-api'
 // import { statisticAPI } from '@/api/statistic-api'
 // API 테스트
@@ -17,17 +17,16 @@ import {
 } from '@/components/ui/dropdown-menu'
 import { Input } from '@/components/ui/input'
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet'
-import { useUserStore } from '@/store/user-store'
 import { Bell, Menu, Search, Settings, User } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 
-import { MobileNav } from './mobile-nav'
+import { MobileNav } from '../mobile-nav'
 
 // const PUBLIC_ID = '23569766-0f5a-4f54-ba9b-dba4dbf0b922'
 
 export default function Header() {
   const router = useRouter() // 라우터 훅 사용
-  const { clearSession } = useUserStore()
+  // const { clearSession } = useUserStore()
 
   const handleLogout = async () => {
     const response = await userAPI.logout()
@@ -38,7 +37,7 @@ export default function Header() {
       localStorage.removeItem('refreshToken')
       localStorage.removeItem('userId')
 
-      clearSession()
+      // clearSession()
       alert('로그아웃하였습니다')
 
       // 로그인 페이지로 리디렉션
@@ -46,8 +45,18 @@ export default function Header() {
     }
   }
 
+  const defectAPITest = async () => {
+    const response = await defectAPI.updateRoadDamageStatus(10, 'COMPLETED')
+    if (response.status === 200) {
+      console.log(response.data)
+    } else {
+      alert('응 안돼~')
+    }
+  }
+
   return (
     <header className="bg-background sticky top-0 z-50 flex h-16 items-center gap-4 border-b px-4 md:px-6">
+      {/* 얘네 뭐하는 코드지? 주석처리해도 고장이 안나는데??? 렌더링 되는것도 전혀 없고 */}
       <Sheet>
         <SheetTrigger asChild>
           <Button variant="outline" size="icon" className="md:hidden">
@@ -56,53 +65,12 @@ export default function Header() {
           </Button>
         </SheetTrigger>
         <SheetContent side="left" className="pr-0">
-          <MobileNav />
+          <MobileNav /> {/* 특히 요녀석 */}
         </SheetContent>
       </Sheet>
       <div className="flex items-center gap-2">
         <div className="hidden font-bold md:flex">YES, MY ROAD</div>
       </div>
-
-      {/* API 연동 테스트용 버튼 */}
-      <Button
-        onClick={async () => {
-          // alert(`모든 api 연동 완료`)
-          // const response = await coodAPI.getDefects() // 통과
-
-          // const response = await statisticAPI.getDamageReportByType() // 통과
-          // const response = await statisticAPI.getDamageDailyReport() // 통과
-          // const response = await statisticAPI.getDamageWeeklyReport() // 통과
-          // const response = await statisticAPI.getDamageMonthlyReport() // 통과
-          // const response = await statisticAPI.getSummarizedDamageMonthlyReport() // 통과
-          // const response = await statisticAPI.getLocationallyDamageMap("대전광역시") // 통과
-          // const response = await statisticAPI.getTop3Damagedlocations() // 통과
-
-          // const response = await maintenanceAPI.getMaintenanceOverview() // 통과
-          // const response = await maintenanceAPI.getMaintenanceCompletionStats() // 통과
-          // const response = await maintenanceAPI.getMonthlyMaintenanceStatus() // 통과
-          // const response = await maintenanceAPI.getLocallyMaintenanceStatus() // 통과
-
-          // const response = await defectAPI.updateRoadDamageStatus(1, 'REPORTED')
-          // const response = await defectAPI.updateRoadDamageStatus(1, 'RECEIVED')
-          // const response = await defectAPI.updateRoadDamageStatus(1, 'IN_PROGRESS')
-          // const response = await defectAPI.updateRoadDamageStatus(1, 'COMPLETED')
-
-          const response = await userAPI.refresh()
-
-          console.log(response)
-
-          if (response.status === 200) {
-            alert(`토큰 재설정 성공: ${response.status}`)
-            console.log(response.data)
-          } else {
-            alert(`토큰 재설정 실패: ${response.status}`)
-            console.log(response.error)
-          }
-        }}
-      >
-        API 테스트
-      </Button>
-      {/* API 연동 테스트용 버튼 */}
 
       <div className="flex flex-1 items-center gap-4 md:gap-2 lg:gap-4">
         <form className="ml-auto flex-1 md:flex-initial">
@@ -152,7 +120,7 @@ export default function Header() {
             <DropdownMenuLabel>내 계정</DropdownMenuLabel>
             <DropdownMenuSeparator />
             <DropdownMenuItem>프로필</DropdownMenuItem>
-            <DropdownMenuItem>설정</DropdownMenuItem>
+            <DropdownMenuItem onClick={defectAPITest}>설정</DropdownMenuItem>
             <DropdownMenuSeparator />
             <DropdownMenuItem onClick={handleLogout}>로그아웃</DropdownMenuItem>
           </DropdownMenuContent>

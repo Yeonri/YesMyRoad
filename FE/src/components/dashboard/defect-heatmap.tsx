@@ -1,34 +1,59 @@
 'use client'
 
+import useAddressStore from '@/store/address-store'
 import { useDefectStore } from '@/store/defect-store'
+import { FeaturePoint } from '@/types/defects'
 import MapboxLanguage from '@mapbox/mapbox-gl-language'
 import { Loader } from 'lucide-react'
 import mapboxgl from 'mapbox-gl'
 import 'mapbox-gl/dist/mapbox-gl.css'
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 
 mapboxgl.accessToken = process.env.NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN as string
 
-export default function DefectHeatmap() {
+// 컴포넌트를 분리해 내부 로직을 별도 컴포넌트로 분리
+function DefectHeatmapContent() {
   const mapContainer = useRef<HTMLDivElement>(null)
   const map = useRef<mapboxgl.Map | null>(null)
   const [loading, setLoading] = useState(true)
 
-  // Get heatmap locations from Zustand store
-  const { heatmapLocations } = useDefectStore()
+  const geoJsonData = useDefectStore((state) => state.geoJSONData)
+
+  // 주소 스토어에서 위도/경도 가져오기
+  const longitude = useAddressStore((state) => state.longitude)
+  const latitude = useAddressStore((state) => state.latitude)
+
+  // GeoJSON 형식으로 데이터 생성 (좌표 순서 위도-경도 -> 경도-위도로 수정)
+  const heatmapData = useMemo(() => {
+    if (!geoJsonData || geoJsonData.length === 0) {
+      return { type: 'FeatureCollection' as const, features: [] }
+    }
+
+    return {
+      type: 'FeatureCollection' as const,
+      features: geoJsonData.map((feature: FeaturePoint) => ({
+        type: 'Feature' as const,
+        properties: feature.properties || {},
+        geometry: {
+          type: 'Point' as const,
+          coordinates: [
+            feature.geometry.coordinates[1], // 경도(longitude)가 먼저
+            feature.geometry.coordinates[0], // 위도(latitude)가 나중에
+          ],
+        },
+      })),
+    } as GeoJSON.FeatureCollection
+  }, [geoJsonData])
 
   useEffect(() => {
     if (!mapContainer.current) return
-
-    // TODO: Replace with actual API call to fetch heatmap data
-    // This would be implemented in the Zustand store
 
     // 지도 초기화
     map.current = new mapboxgl.Map({
       container: mapContainer.current,
       style: 'mapbox://styles/mapbox/dark-v11',
-      center: [127.2984, 36.35518],
-      zoom: 12,
+      center: [longitude!, latitude!],
+      zoom: 13,
     })
 
     // 지도 이동 컨트롤 추가
@@ -41,21 +66,10 @@ export default function DefectHeatmap() {
     map.current.on('load', () => {
       setLoading(false)
 
-      // 결함 위치를 GeoJSON 형식으로 변환
-      const geojsonData = {
-        type: 'FeatureCollection' as const,
-        features: heatmapLocations.map((defect) => ({
-          type: 'Feature' as const,
-          properties: {},
-          geometry: {
-            type: 'Point' as const,
-            coordinates: [defect.lng, defect.lat],
-          },
-        })),
-      }
+      if (heatmapData.features.length === 0) return
 
       // 히트맵 소스 추가
-      map.current!.addSource('defects', { type: 'geojson', data: geojsonData })
+      map.current!.addSource('defects', { type: 'geojson', data: heatmapData })
 
       // 히트맵 레이어 추가
       map.current!.addLayer({
@@ -125,7 +139,14 @@ export default function DefectHeatmap() {
         map.current.remove()
       }
     }
-  }, [heatmapLocations])
+  }, [heatmapData])
+
+  // longitude, latitude가 변경될 때 중심 위치만 변경하는 별도 useEffect
+  useEffect(() => {
+    if (map.current) {
+      map.current.setCenter([longitude!, latitude!])
+    }
+  }, [longitude, latitude])
 
   return (
     <div className="relative h-full min-h-[400px] w-full">
@@ -134,7 +155,7 @@ export default function DefectHeatmap() {
           <div className="flex flex-col items-center gap-2">
             <Loader className="text-primary h-8 w-8 animate-spin" />
             <p className="text-muted-foreground text-sm">
-              Loading heatmap data...
+              히트맵 데이터 로딩중...
             </p>
           </div>
         </div>
@@ -142,4 +163,12 @@ export default function DefectHeatmap() {
       <div ref={mapContainer} className="h-full w-full" />
     </div>
   )
+}
+
+// 메인 컴포넌트는 메모이제이션 된 지도 컴포넌트를 반환
+export default function DefectHeatmap() {
+  // DefectHeatmapContent 컴포넌트를 메모이제이션하여 탭 전환 시 재생성되지 않도록 함
+  const memoizedHeatmapContent = useMemo(() => <DefectHeatmapContent />, [])
+
+  return memoizedHeatmapContent
 }

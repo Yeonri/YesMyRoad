@@ -16,5 +16,7 @@
     "^[./]"
   ],
   "importOrderSeparation": true,
-  "importOrderSortSpecifiers": true
+  "importOrderSortSpecifiers": true,
+  "singleAttributePerLine": false,
+  "bracketSpacing": true
 }

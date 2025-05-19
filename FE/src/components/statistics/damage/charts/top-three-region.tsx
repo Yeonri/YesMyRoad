@@ -1,6 +1,16 @@
+import { statisticAPI } from '@/api/statistic-api'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { useQuery } from '@tanstack/react-query'
 import * as echarts from 'echarts'
 import ReactECharts from 'echarts-for-react'
+
+type BarLabelOption = NonNullable<echarts.BarSeriesOption['label']>
+type Region = {
+  regionName: string
+  totalCount: number
+  holeCount: number
+  crackCount: number
+}
 
 export default function TopThreeRegion(props: { cardHeight: string }) {
   /**
@@ -8,7 +18,47 @@ export default function TopThreeRegion(props: { cardHeight: string }) {
    */
   const { cardHeight = 'h-80' } = props
 
-  type BarLabelOption = NonNullable<echarts.BarSeriesOption['label']>
+  const {
+    data: apiResponse,
+    isLoading,
+    error,
+  } = useQuery({
+    queryKey: ['top-three-region'],
+    queryFn: statisticAPI.getTop3Damagedlocations,
+    refetchOnWindowFocus: false,
+    staleTime: 5 * 60 * 1000,
+    retry: 1,
+  })
+
+  const regionData = apiResponse?.data
+
+  // 로딩 중이면 로딩 표시
+  if (isLoading) {
+    return (
+      <Card
+        className={`col-span-2 ${cardHeight} flex items-center justify-center`}
+      >
+        <div>데이터 로딩 중...</div>
+      </Card>
+    )
+  }
+
+  // 에러가 있으면 에러 표시
+  if (error) {
+    return (
+      <Card
+        className={`col-span-2 ${cardHeight} flex items-center justify-center`}
+      >
+        <div>데이터를 불러오는 중 오류가 발생했습니다.</div>
+      </Card>
+    )
+  }
+
+  // 데이터 추출하기
+  const regions = regionData?.map((region: Region) => region.regionName) || []
+  const holeCounts = regionData?.map((region: Region) => region.holeCount) || []
+  const crackCounts =
+    regionData?.map((region: Region) => region.crackCount) || []
 
   const labelOption: BarLabelOption = { show: true, valueAnimation: true }
 
@@ -17,11 +67,7 @@ export default function TopThreeRegion(props: { cardHeight: string }) {
     legend: {},
     grid: { left: '3%', right: '4%', bottom: '3%', containLabel: true },
     xAxis: { type: 'value', max: 'dataMax' },
-    yAxis: {
-      type: 'category',
-      data: ['동구', '대덕구', '유성구'],
-      inverse: true,
-    },
+    yAxis: { type: 'category', data: regions, inverse: true },
     series: [
       {
         name: '포트홀',
@@ -29,7 +75,7 @@ export default function TopThreeRegion(props: { cardHeight: string }) {
         stack: 'total',
         label: labelOption,
         emphasis: { focus: 'series' },
-        data: [120, 132, 101],
+        data: holeCounts,
       },
       {
         name: '균열',
@@ -37,7 +83,7 @@ export default function TopThreeRegion(props: { cardHeight: string }) {
         stack: 'total',
         label: labelOption,
         emphasis: { focus: 'series' },
-        data: [150, 132, 201],
+        data: crackCounts,
       },
     ],
   }

@@ -23,85 +23,166 @@ import {
 import address from '@/data/address.json'
 import { cn } from '@/lib/utils'
 import useAddressStore from '@/store/address-store'
-import { AddressData } from '@/types/address'
+import { AddressData, LocationInfo } from '@/types/address'
 import { Check, ChevronDown } from 'lucide-react'
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 
-const LocationHeader: React.FC = () => {
-  const addressData: AddressData = address
-  const { setLevel1, setLevel2, setLevel3 } = useAddressStore()
-
-  // 선택된 값들을 상태로 관리
-  const [selectedProvince, setSelectedProvince] = useState<string>('대전광역시')
-  const [selectedCity, setSelectedCity] = useState<string>('유성구')
-  const [selectedDistrict, setSelectedDistrict] = useState<string | null>(null)
+const AddressSelector: React.FC = () => {
+  const addressData = useMemo(() => address as unknown as AddressData, [])
+  const { setId, setLongitude, setLatitude, setLevel1, setLevel2, setLevel3 } =
+    useAddressStore()
 
   // 팝오버 상태 관리
   const [provinceOpen, setProvinceOpen] = useState(false)
   const [cityOpen, setCityOpen] = useState(false)
   const [districtOpen, setDistrictOpen] = useState(false)
 
-  // 가능한 옵션들
-  const [availableCities, setAvailableCities] = useState<string[]>([])
-  const [availableDistricts, setAvailableDistricts] = useState<string[]>([])
+  // 선택된 행정구역 상태
+  const [districtLevel1, setDistrictLevel1] = useState<string | null>(
+    '대전광역시',
+  )
+  const [districtLevel2, setDistrictLevel2] = useState<string | null>('유성구')
+  const [districtLevel3, setDistrictLevel3] = useState<string | null>(null)
 
-  // 시/도 변경시 도시 목록 업데이트 및 초기 도시 선택
+  // 선행 행정구역의 하위 옵션
+  const [districtLevel2Array, setDistrictLevel2Array] = useState<string[]>([])
+  const [districtLevel3Array, setDistrictLevel3Array] = useState<string[]>([])
+
+  // 시/도(level1) 변경시 시/군/구(level2) 목록 업데이트 및 초기 시/군/구(level2) 선택
   useEffect(() => {
-    const cities = Object.keys(addressData[selectedProvince] || {}).filter(
-      (city) => city !== '',
-    )
-    setAvailableCities(cities)
+    if (districtLevel1) {
+      // level1 주소를 스토어에 저장
+      setLevel1(districtLevel1)
 
-    if (cities.length > 0) {
-      setSelectedCity(cities[0])
-    } else {
-      setSelectedCity('')
+      // level1에 해당하는 하위 지역(level2) 목록 가져오기
+      const level1Data = addressData[districtLevel1]
+
+      // 세종특별자치시처럼 직접 데이터를 가진 경우 id 값을 저장하고 level2를 비움
+      if (level1Data && 'id' in level1Data && level1Data.district === null) {
+        const locationInfo = level1Data as LocationInfo
+        if (locationInfo.id) setId(locationInfo.id)
+        if (locationInfo.longitude) setLongitude(locationInfo.longitude)
+        if (locationInfo.latitude) setLatitude(locationInfo.latitude)
+
+        setDistrictLevel2Array([])
+        setDistrictLevel2(null)
+        setLevel2(null)
+        setDistrictLevel3Array([])
+        setDistrictLevel3(null)
+        setLevel3(null)
+      }
+      // 일반적인 지역의 경우 하위 district 목록 가져오기
+      else if (level1Data && 'district' in level1Data && level1Data.district) {
+        const districts = Object.keys(level1Data.district)
+        setDistrictLevel2Array(districts)
+
+        // 이미 설정된 districtLevel2가 없거나, 새로운 districts 목록에 현재 districtLevel2가 없는 경우에만 변경
+        if (!districtLevel2 || !districts.includes(districtLevel2)) {
+          // 첫 번째 district를 기본값으로 설정
+          if (districts.length > 0) {
+            setDistrictLevel2(districts[0])
+          } else {
+            setDistrictLevel2(null)
+          }
+        }
+      } else {
+        setDistrictLevel2Array([])
+        setDistrictLevel2(null)
+      }
     }
+  }, [
+    districtLevel1,
+    addressData,
+    setLevel1,
+    setLevel2,
+    setLevel3,
+    setId,
+    setLongitude,
+    setLatitude,
+    districtLevel2,
+  ])
 
-    setSelectedDistrict(null)
-  }, [selectedProvince, addressData])
-
-  // 도시 변경시 하위 구 목록 업데이트 및 초기 하위 구 선택
+  // 시/군/구(level2) 변경시 하위 구(level3) 목록 업데이트 및 초기 하위 구(level3) 선택
   useEffect(() => {
-    if (!selectedCity) {
-      setAvailableDistricts([])
-      setSelectedDistrict(null)
-      return
+    if (districtLevel1 && districtLevel2) {
+      // level2 주소를 스토어에 저장
+      setLevel2(districtLevel2)
+
+      const level1Data = addressData[districtLevel1]
+
+      if (level1Data && 'district' in level1Data && level1Data.district) {
+        const level2Data = level1Data.district[districtLevel2]
+
+        // 지역 ID, 위도, 경도 정보 스토어에 저장
+        if (level2Data) {
+          if (level2Data.id) setId(level2Data.id)
+          if (level2Data.longitude) setLongitude(level2Data.longitude)
+          if (level2Data.latitude) setLatitude(level2Data.latitude)
+
+          // level3 존재 여부에 따라 처리
+          if (level2Data.district) {
+            const districts = Object.keys(level2Data.district)
+            setDistrictLevel3Array(districts)
+
+            // 첫번째 하위 구를 기본값으로 설정
+            if (districts.length > 0) {
+              setDistrictLevel3(districts[0])
+            } else {
+              setDistrictLevel3(null)
+              setLevel3(null)
+            }
+          } else {
+            setDistrictLevel3Array([])
+            setDistrictLevel3(null)
+            setLevel3(null)
+          }
+        }
+      }
     }
+  }, [
+    districtLevel1,
+    districtLevel2,
+    addressData,
+    setId,
+    setLongitude,
+    setLatitude,
+    setLevel2,
+    setLevel3,
+  ])
 
-    const districts = addressData[selectedProvince]?.[selectedCity] || []
-    setAvailableDistricts(districts)
-
-    if (districts.length > 0) {
-      setSelectedDistrict(districts[0])
-    } else {
-      setSelectedDistrict(null)
-    }
-  }, [selectedProvince, selectedCity, addressData])
-
-  // 주소 스토어 업데이트 (level1)
+  // districtLevel3 변경 시 위치 정보 업데이트
   useEffect(() => {
-    setLevel1(selectedProvince)
-    console.log('주소 스토어 업데이트:', useAddressStore.getState())
-  }, [selectedProvince, setLevel1])
+    if (districtLevel1 && districtLevel2 && districtLevel3) {
+      // level3 주소를 스토어에 저장
+      setLevel3(districtLevel3)
 
-  // 주소 스토어 업데이트 (level2)
-  useEffect(() => {
-    if (selectedCity) {
-      setLevel2(selectedCity)
-      console.log('주소 스토어 업데이트:', useAddressStore.getState())
-    }
-  }, [selectedCity, setLevel2])
+      const level1Data = addressData[districtLevel1]
 
-  // 주소 스토어 업데이트 (level3)
-  useEffect(() => {
-    if (selectedDistrict) {
-      setLevel3(selectedDistrict)
-    } else {
-      setLevel3('')
+      if (level1Data && 'district' in level1Data && level1Data.district) {
+        const level2Data = level1Data.district[districtLevel2]
+
+        if (level2Data && level2Data.district) {
+          const level3Data = level2Data.district[districtLevel3]
+
+          // 지역 ID, 위도, 경도 정보 스토어에 저장
+          if (level3Data) {
+            if (level3Data.id) setId(level3Data.id)
+            if (level3Data.longitude) setLongitude(level3Data.longitude)
+            if (level3Data.latitude) setLatitude(level3Data.latitude)
+          }
+        }
+      }
     }
-    console.log('주소 스토어 업데이트:', useAddressStore.getState())
-  }, [selectedDistrict, setLevel3])
+  }, [
+    districtLevel1,
+    districtLevel2,
+    districtLevel3,
+    addressData,
+    setId,
+    setLongitude,
+    setLatitude,
+    setLevel3,
+  ])
 
   return (
     <>
@@ -117,7 +198,7 @@ const LocationHeader: React.FC = () => {
                   aria-expanded={provinceOpen}
                   className="flex items-center gap-1"
                 >
-                  {selectedProvince}
+                  {districtLevel1}
                   <ChevronDown className="opacity-50" />
                 </Button>
               </PopoverTrigger>
@@ -132,7 +213,7 @@ const LocationHeader: React.FC = () => {
                           key={province}
                           value={province}
                           onSelect={(currentValue) => {
-                            setSelectedProvince(currentValue)
+                            setDistrictLevel1(currentValue)
                             setProvinceOpen(false)
                           }}
                         >
@@ -140,7 +221,7 @@ const LocationHeader: React.FC = () => {
                           <Check
                             className={cn(
                               'ml-auto',
-                              selectedProvince === province
+                              districtLevel1 === province
                                 ? 'opacity-100'
                                 : 'opacity-0',
                             )}
@@ -154,7 +235,7 @@ const LocationHeader: React.FC = () => {
             </Popover>
           </BreadcrumbItem>
 
-          {availableCities.length > 0 && selectedCity !== '' && (
+          {districtLevel2Array.length > 0 && districtLevel2 !== '' && (
             <>
               <BreadcrumbSeparator />
 
@@ -168,7 +249,7 @@ const LocationHeader: React.FC = () => {
                       aria-expanded={cityOpen}
                       className="flex items-center gap-1"
                     >
-                      {selectedCity}
+                      {districtLevel2}
                       <ChevronDown className="opacity-50" />
                     </Button>
                   </PopoverTrigger>
@@ -181,12 +262,12 @@ const LocationHeader: React.FC = () => {
                       <CommandList className="max-h-[200px] overflow-auto">
                         <CommandEmpty>검색 결과가 없습니다.</CommandEmpty>
                         <CommandGroup>
-                          {availableCities.map((city) => (
+                          {districtLevel2Array.map((city) => (
                             <CommandItem
                               key={city}
                               value={city}
                               onSelect={(currentValue) => {
-                                setSelectedCity(currentValue)
+                                setDistrictLevel2(currentValue)
                                 setCityOpen(false)
                               }}
                             >
@@ -194,7 +275,7 @@ const LocationHeader: React.FC = () => {
                               <Check
                                 className={cn(
                                   'ml-auto',
-                                  selectedCity === city
+                                  districtLevel2 === city
                                     ? 'opacity-100'
                                     : 'opacity-0',
                                 )}
@@ -211,7 +292,7 @@ const LocationHeader: React.FC = () => {
           )}
 
           {/* 하위 구가 있는 경우에만 표시 */}
-          {availableDistricts.length > 0 && selectedDistrict && (
+          {districtLevel3Array.length > 0 && districtLevel3 && (
             <>
               <BreadcrumbSeparator />
 
@@ -224,7 +305,7 @@ const LocationHeader: React.FC = () => {
                       aria-expanded={districtOpen}
                       className="flex items-center gap-1"
                     >
-                      {selectedDistrict}
+                      {districtLevel3}
                       <ChevronDown className="opacity-50" />
                     </Button>
                   </PopoverTrigger>
@@ -234,12 +315,12 @@ const LocationHeader: React.FC = () => {
                       <CommandList className="max-h-[200px] overflow-auto">
                         <CommandEmpty>검색 결과가 없습니다.</CommandEmpty>
                         <CommandGroup>
-                          {availableDistricts.map((district) => (
+                          {districtLevel3Array.map((district) => (
                             <CommandItem
                               key={district}
                               value={district}
                               onSelect={(currentValue) => {
-                                setSelectedDistrict(currentValue)
+                                setDistrictLevel3(currentValue)
                                 setDistrictOpen(false)
                               }}
                             >
@@ -247,7 +328,7 @@ const LocationHeader: React.FC = () => {
                               <Check
                                 className={cn(
                                   'ml-auto',
-                                  selectedDistrict === district
+                                  districtLevel3 === district
                                     ? 'opacity-100'
                                     : 'opacity-0',
                                 )}
@@ -268,4 +349,4 @@ const LocationHeader: React.FC = () => {
   )
 }
 
-export default LocationHeader
+export default AddressSelector
