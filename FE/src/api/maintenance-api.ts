@@ -27,7 +27,7 @@ export const maintenanceAPI = {
     ),
 
   // 지역별 보수공사 현황
-  getLocallyMaintenanceStatus: () =>
+  getDistrictMaintenanceStatus: () =>
     apiCaller(
       'get',
       '/api/maintenance/districts',

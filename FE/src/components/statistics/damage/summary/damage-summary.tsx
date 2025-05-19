@@ -1,10 +1,5 @@
 import { statisticAPI } from '@/api/statistic-api'
 import SummaryCard from '@/components/statistics/common/SummaryCard'
-import {
-  DamageDailyReportType,
-  DamageMonthlyReportType,
-  DamageWeeklyReportType,
-} from '@/types/stats-api'
 import { useQuery } from '@tanstack/react-query'
 import { useEffect } from 'react'
 
@@ -71,7 +66,7 @@ export default function DamageSummary() {
 
   if (isLoading) {
     return (
-      <div className={`col-span-2 flex h-auto flex-col gap-4`}>
+      <div className={`col-span-1 flex h-auto flex-col gap-4`}>
         <SummaryCard title="데이터 로딩 중..." value="-" className="grow" />
       </div>
     )
@@ -79,7 +74,7 @@ export default function DamageSummary() {
 
   if (hasError) {
     return (
-      <div className={`col-span-2 flex h-auto flex-col gap-4`}>
+      <div className={`col-span-1 flex h-auto flex-col gap-4`}>
         <SummaryCard
           title="데이터 로드 오류"
           value="다시 시도해주세요"
@@ -101,11 +96,11 @@ export default function DamageSummary() {
     const absoluteCount = Math.abs(count)
     const rateText = count < 0 ? '-%' : `${rate}%`
 
-    return `${absoluteCount} 건, ${period} 대비 ${rateText} 증가`
+    return `${absoluteCount}건, ${period} 대비 ${rateText} 증가`
   }
 
   return (
-    <div className={`col-span-2 flex h-auto flex-col gap-4`}>
+    <div className={`col-span-1 flex h-auto flex-col gap-4`}>
       <SummaryCard
         title="일간 도로파손 건수"
         value={formatValue(dailyReport?.count, dailyReport?.changeRate, '전일')}

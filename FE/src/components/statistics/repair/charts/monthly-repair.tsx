@@ -1,25 +1,61 @@
+import { maintenanceAPI } from '@/api/maintenance-api'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { MonthlyMaintenanceStatusType } from '@/types/stats-api'
 import * as echarts from 'echarts'
 import ReactECharts from 'echarts-for-react'
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 
-export default function MonthlyRepair(props: { cardHeight: string }) {
-  const { cardHeight = 'h-80' } = props
+export default function MonthlyRepair() {
   const chartRef = useRef<ReactECharts>(null)
-  const [chartOption, setChartOption] = useState<echarts.EChartsOption>({})
+  const [monthlyMaintenanceStatusReport, setMonthlyMaintenanceStatusReport] =
+    useState<MonthlyMaintenanceStatusType[]>([])
+
+  const fetchMonthlyMaintenanceStatusReport = useCallback(async () => {
+    const response = await maintenanceAPI.getMonthlyMaintenanceStatus()
+    setMonthlyMaintenanceStatusReport(response.data)
+  }, [])
+
+  useEffect(() => {
+    fetchMonthlyMaintenanceStatusReport()
+  }, [])
+
+  useEffect(() => {
+    console.log(
+      'monthlyMaintenanceStatusReport: ',
+      monthlyMaintenanceStatusReport,
+    )
+  }, [monthlyMaintenanceStatusReport])
+
+  const statusLabels = [
+    { key: 'reported', label: '보고됨', color: '#e0e0e0' },
+    { key: 'received', label: '접수완료', color: '#ee6666' },
+    { key: 'inProgress', label: '작업중', color: '#fac858' },
+    { key: 'completed', label: '작업완료', color: '#91cc75' },
+  ]
+
+  const xAxisData = useMemo(
+    () =>
+      monthlyMaintenanceStatusReport.map((item) => {
+        const date = new Date(`${item.month}-01`)
+        return date.toLocaleString('ko-KR', { month: 'numeric' }) + '월'
+      }),
+    [monthlyMaintenanceStatusReport],
+  )
 
   const rawData = useMemo(
-    () => [
-      [320, 132, 101, 134, 90, 230, 210, 175, 280, 115, 195, 245],
-      [220, 182, 191, 234, 290, 330, 310, 275, 215, 340, 185, 260],
-      [150, 212, 201, 154, 190, 330, 410, 240, 180, 370, 295, 225],
-    ],
-    [],
+    () =>
+      statusLabels.map((status) =>
+        monthlyMaintenanceStatusReport.map(
+          (item) =>
+            item[status.key as keyof MonthlyMaintenanceStatusType] as number,
+        ),
+      ),
+    [monthlyMaintenanceStatusReport],
   )
 
   const totalData = useMemo(() => {
     const result: number[] = []
-    for (let i = 0; i < rawData[0].length; ++i) {
+    for (let i = 0; i < rawData[0]?.length || 0; ++i) {
       let sum = 0
       for (let j = 0; j < rawData.length; ++j) {
         sum += rawData[j][i]
@@ -29,27 +65,16 @@ export default function MonthlyRepair(props: { cardHeight: string }) {
     return result
   }, [rawData])
 
-  useEffect(() => {
-    if (chartRef.current) {
-      const chartInstance = chartRef.current.getEchartsInstance()
-      const grid = { left: 100, right: 100, top: 50, bottom: 50 }
-      const gridWidth = chartInstance.getWidth() - grid.left - grid.right
-      const gridHeight = chartInstance.getHeight() - grid.top - grid.bottom
-      const categoryWidth = gridWidth / rawData[0].length
-      const barWidth = categoryWidth * 0.6
-      const barPadding = (categoryWidth - barWidth) / 2
-      const color = ['#ee6666', '#fac858', '#91cc75']
+  const option = useMemo(() => {
+    const grid = { left: '3%', right: '4%', bottom: '3%', containLabel: true }
 
-      const series: echarts.BarSeriesOption[] = [
-        '미완료',
-        '진행중',
-        '완료',
-      ].map((name, sid) => {
+    const series: echarts.BarSeriesOption[] = statusLabels.map(
+      (status, sid) => {
         return {
-          name,
+          name: status.label,
           type: 'bar',
           stack: 'total',
-          barWidth: '60%',
+          barWidth: '50%',
           label: {
             show: true,
             formatter: (params: echarts.DefaultLabelFormatterCallbackParams) =>
@@ -58,74 +83,27 @@ export default function MonthlyRepair(props: { cardHeight: string }) {
           data: rawData[sid].map((d, did) =>
             totalData[did] <= 0 ? 0 : d / totalData[did],
           ),
-          itemStyle: { color: color[sid] },
+          itemStyle: { color: status.color },
         }
-      })
+      },
+    )
 
-      const elements = []
-      for (let j = 1, jlen = rawData[0].length; j < jlen; ++j) {
-        const leftX = grid.left + categoryWidth * j - barPadding
-        const rightX = leftX + barPadding * 2
-        let leftY = grid.top + gridHeight
-        let rightY = leftY
-        for (let i = 0, len = series.length; i < len; ++i) {
-          const points = []
-          const leftBarHeight =
-            (rawData[i][j - 1] / totalData[j - 1]) * gridHeight
-          points.push([leftX, leftY])
-          points.push([leftX, leftY - leftBarHeight])
-          const rightBarHeight = (rawData[i][j] / totalData[j]) * gridHeight
-          points.push([rightX, rightY - rightBarHeight])
-          points.push([rightX, rightY])
-          points.push([leftX, leftY])
-
-          leftY -= leftBarHeight
-          rightY -= rightBarHeight
-
-          elements.push({
-            type: 'polygon',
-            shape: { points },
-            style: { fill: color[i], opacity: 0.25 },
-          })
-        }
-      }
-
-      const option: echarts.EChartsOption = {
-        legend: { selectedMode: false },
-        grid,
-        yAxis: { type: 'value' },
-        xAxis: {
-          type: 'category',
-          data: [
-            '1월',
-            '2월',
-            '3월',
-            '4월',
-            '5월',
-            '6월',
-            '7월',
-            '8월',
-            '9월',
-            '10월',
-            '11월',
-            '12월',
-          ],
-        },
-        series,
-        graphic: { elements },
-      }
-
-      setChartOption(option)
+    return {
+      legend: { selectedMode: false },
+      grid,
+      yAxis: { type: 'value' },
+      xAxis: { type: 'category', data: xAxisData },
+      series,
     }
-  }, [rawData, totalData])
+  }, [rawData, totalData, xAxisData])
 
   return (
-    <Card className={`col-span-2 ${cardHeight}`}>
+    <Card className="col-span-3 h-auto">
       <CardHeader className="p-4">
         <CardTitle className="text-md">월별 도로보수 현황</CardTitle>
       </CardHeader>
       <CardContent className="p-4 pt-0">
-        <ReactECharts ref={chartRef} option={chartOption} />
+        <ReactECharts ref={chartRef} option={option} />
       </CardContent>
     </Card>
   )
