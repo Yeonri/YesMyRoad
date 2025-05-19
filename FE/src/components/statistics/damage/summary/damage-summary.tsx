@@ -1,10 +1,5 @@
 import { statisticAPI } from '@/api/statistic-api'
 import SummaryCard from '@/components/statistics/common/SummaryCard'
-import {
-  DamageDailyReportType,
-  DamageMonthlyReportType,
-  DamageWeeklyReportType,
-} from '@/types/stats-api'
 import { useQuery } from '@tanstack/react-query'
 import { useEffect } from 'react'
 
@@ -101,7 +96,7 @@ export default function DamageSummary() {
     const absoluteCount = Math.abs(count)
     const rateText = count < 0 ? '-%' : `${rate}%`
 
-    return `${absoluteCount} 건, ${period} 대비 ${rateText} 증가`
+    return `${absoluteCount}건, ${period} 대비 ${rateText} 증가`
   }
 
   return (

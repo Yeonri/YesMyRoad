@@ -31,7 +31,7 @@ import {
 } from '@/components/ui/table'
 import { useDefectStore } from '@/store/defect-store'
 import { useQueries } from '@tanstack/react-query'
-import crypto from 'crypto'
+// import crypto from 'crypto'
 import {
   ChevronDown,
   ChevronUp,
@@ -59,25 +59,25 @@ export default function DefectList() {
   const severity = 'all'
 
   // UUID로부터 표시 ID 생성하는 함수
-  const getDisplayId = (
-    uuid: string,
-    damageId: number,
-    prefix: string = 'DEF',
-  ): string => {
-    const validChars = '0123456789ABCDEFGHJKLMNPQRSTUVWXYZ'
-    const hash = crypto.createHash('sha256').update(uuid).digest('hex')
+  // const getDisplayId = (
+  //   uuid: string,
+  //   damageId: number,
+  //   prefix: string = 'DEF',
+  // ): string => {
+  //   const validChars = '0123456789ABCDEFGHJKLMNPQRSTUVWXYZ'
+  //   const hash = crypto.createHash('sha256').update(uuid).digest('hex')
 
-    const shortCode = Array(5)
-      .fill(0)
-      .map((_, i) => {
-        const index =
-          parseInt(hash.slice(i * 2, i * 2 + 2), 16) % validChars.length
-        return validChars[index]
-      })
-      .join('')
+  //   const shortCode = Array(5)
+  //     .fill(0)
+  //     .map((_, i) => {
+  //       const index =
+  //         parseInt(hash.slice(i * 2, i * 2 + 2), 16) % validChars.length
+  //       return validChars[index]
+  //     })
+  //     .join('')
 
-    return `${prefix}-${damageId}-${shortCode}`
-  }
+  //   return `${prefix}-${damageId}-${shortCode}`
+  // }
 
   // 상세 정보를 저장할 맵 상태
   const [detailsMap, setDetailsMap] = useState<Record<string, DetailedDefect>>(
