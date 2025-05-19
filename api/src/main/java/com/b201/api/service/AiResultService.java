@@ -79,7 +79,7 @@ public class AiResultService {
 				e.getMessage(), e);
 			throw new AddressLookupException(
 				"주소변환 실패: [" + dto.getLocation().getLongitude() + ", "
-				+ dto.getLocation().getLatitude() + "]", e);
+					+ dto.getLocation().getLatitude() + "]", e);
 		}
 	}
 
@@ -98,7 +98,7 @@ public class AiResultService {
 			.accuracyMeters(dto.getLocation().getAccuracyMeters())
 			.risk(dto.getImageInfo().getRisk())
 			.captureTimestamp(dto.getCaptureTimestampUtc())
-			.imageUrl(dto.getImageInfo().getImageUrl())
+			.imageUrl("https://k12b201.p.ssafy.io/images/" + dto.getImageInfo().getImageUrl() + ".jpg")
 			.location(point)
 			.streetAddress(address)
 			.build();

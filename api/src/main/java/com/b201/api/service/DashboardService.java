@@ -3,8 +3,13 @@ package com.b201.api.service;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.Month;
 import java.time.YearMonth;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
@@ -15,9 +20,11 @@ import com.b201.api.dto.dashboard.DailyStatusDto;
 import com.b201.api.dto.dashboard.MonthlyDamageSummaryDto;
 import com.b201.api.dto.dashboard.MonthlyStatusDto;
 import com.b201.api.dto.dashboard.RegionCountDto;
+import com.b201.api.dto.dashboard.RegionNameWithCountDto;
 import com.b201.api.dto.dashboard.TopRegionDto;
 import com.b201.api.dto.dashboard.WeeklyStatusDto;
 import com.b201.api.repository.CaptureDamageRepository;
+import com.b201.api.repository.RegionRepository;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -28,6 +35,7 @@ import lombok.extern.slf4j.Slf4j;
 public class DashboardService {
 
 	private final CaptureDamageRepository damageRepo;
+	private final RegionRepository regionRepo;
 
 	// 유형별 도로 파손 분포 수
 	@Transactional(readOnly = true)
@@ -47,7 +55,6 @@ public class DashboardService {
 		}
 		throw new ArithmeticException("기준 값(이전 기간) 데이터가 없습니다.");
 	}
-
 
 	// 오늘자 파손 건수 + 전일 대비 증감율
 	@Transactional(readOnly = true)
@@ -74,14 +81,14 @@ public class DashboardService {
 			todayStart
 		);
 
-		try{
+		try {
 			// 3) 증감율 계산
 			double rate = calculateRate(todayCount, yesterdayCount);
 
 			log.debug("[getDailyStatusWithChangeRate] todayCount={}, yesterdayCount={}, rate={}",
 				todayCount, yesterdayCount, rate);
 			return new DailyStatusDto(today, todayCount, rate);
-		}catch(ArithmeticException e){
+		} catch (ArithmeticException e) {
 			log.warn("[getDailyStatusWithChangeRate] 0으로 나누기 감지");
 			// 0으로 나눈 경우: todayCount를 음수로 바꿔 리턴
 			return new DailyStatusDto(today, -todayCount, 0.0);
@@ -100,13 +107,13 @@ public class DashboardService {
 
 		long lastWeekSum = damageRepo.countBetween(regionName, lastMon.atStartOfDay(), thisMon.atStartOfDay());
 
-		try{
+		try {
 			double rate = calculateRate(thisWeekSum, lastWeekSum);
 
 			log.debug("[getWeeklyStatusWithChangeRate] thisWeekSum={}, lastWeekSum={}, rate={}",
 				thisWeekSum, lastWeekSum, rate);
 			return new WeeklyStatusDto(thisMon, thisWeekSum, rate);
-		}catch(ArithmeticException e){
+		} catch (ArithmeticException e) {
 			log.warn("[getWeeklyStatusWithChangeRate] 0으로 나누기 감지");
 			return new WeeklyStatusDto(thisMon, -thisWeekSum, 0.0);
 		}
@@ -140,14 +147,14 @@ public class DashboardService {
 			lastEnd
 		);
 
-		try{
+		try {
 			double rate = calculateRate(thisMonthCount, lastMonthCount);
 
 			log.debug("[getMonthlyStatusWithChangeRate] thisMonthCount={}, lastMonthCount={}, rate={}",
 				thisMonthCount, lastMonthCount, rate);
 
 			return new MonthlyStatusDto(YearMonth.from(firstDayThisMon), thisMonthCount, rate);
-		}catch (ArithmeticException e){
+		} catch (ArithmeticException e) {
 			log.warn("[getMonthlyStatusWithChangeRate] 0으로 나누기 감지");
 			return new MonthlyStatusDto(YearMonth.from(firstDayThisMon), -thisMonthCount, 0.0);
 		}
@@ -160,20 +167,73 @@ public class DashboardService {
 	@Transactional(readOnly = true)
 	public List<MonthlyDamageSummaryDto> getMonthlyDamageSummary(String regionName) {
 		log.info("[getMonthlyDamageSummary] 호출됨, regionName={}", regionName);
-		List<MonthlyDamageSummaryDto> list = damageRepo.findMonthlyDamageSummary(regionName);
-		log.debug("[getMonthlyDamageSummary] summary 개수 = {}", list.size());
-		return list;
+
+		// 1) 조회 기간 설정
+		LocalDateTime today = LocalDateTime.now();
+		LocalDateTime start = LocalDate
+			.of(today.getYear(), Month.JANUARY, 1)
+			.atStartOfDay();
+		log.debug("[getMonthlyDamageSummary] 조회기간 start={} ~ end={}", start, today);
+
+		// 2) 실제 데이터가 있는 달만 조회
+		List<MonthlyDamageSummaryDto> rawList =
+			damageRepo.findMonthlyDamageSummary(regionName, start, today);
+		log.debug("[getMonthlyDamageSummary] rawList.size={} → months={}",
+			rawList.size(),
+			rawList.stream().map(MonthlyDamageSummaryDto::getMonth).collect(Collectors.toList())
+		);
+
+		// 3) 조회된 DTO들을 YearMonth 키로 맵핑
+		Map<YearMonth, MonthlyDamageSummaryDto> mapByMonth = rawList.stream()
+			.collect(Collectors.toMap(
+				MonthlyDamageSummaryDto::getMonth,
+				Function.identity()
+			));
+
+		// 4) 1월부터 현재월까지 순회하며, 없으면 0으로 채워서 fullList 구성
+		List<MonthlyDamageSummaryDto> fullList = new ArrayList<>();
+		YearMonth ymStart = YearMonth.of(today.getYear(), Month.JANUARY);
+		YearMonth ymEnd = YearMonth.from(today);
+
+		for (YearMonth ym = ymStart; !ym.isAfter(ymEnd); ym = ym.plusMonths(1)) {
+			if (mapByMonth.containsKey(ym)) {
+				MonthlyDamageSummaryDto dto = mapByMonth.get(ym);
+				log.debug("[{}] 데이터 있음 → crack={}, hole={}, total={}",
+					ym, dto.getCrackCount(), dto.getHoleCount(), dto.getTotalCount());
+				fullList.add(dto);
+			} else {
+				log.debug("[{}] 데이터 없음 → 0으로 채워서 추가", ym);
+				fullList.add(new MonthlyDamageSummaryDto(
+					ym.getYear(),
+					ym.getMonthValue(),
+					0L,
+					0L,
+					0L
+				));
+			}
+		}
+
+		log.debug("[getMonthlyDamageSummary] 전체 summary 개수 = {}", fullList.size());
+		return fullList;
 	}
 
 	/**
 	 * 특정 광역시의 구 단위 파손 분포
 	 */
 	@Transactional(readOnly = true)
-	public List<RegionCountDto> getDistrictDistribution(String cityName) {
+	public RegionNameWithCountDto getDistrictDistribution(String cityName) {
 		log.info("[getDistrictDistribution] 호출됨, regionName={}", cityName);
+
+		log.info("[getDistrictDistribution] cityId : {}", regionRepo.findByRegionName(cityName).toString());
+		Integer cityId = regionRepo.findByRegionName(cityName).getId();
+
 		List<RegionCountDto> list = damageRepo.countByCity(cityName);
 		log.debug("[getDistrictDistribution] 구 단위 분포 개수 = {}", list.size());
-		return list;
+
+		return RegionNameWithCountDto.builder()
+			.regionId(cityId)
+			.destrictions(list)
+			.build();
 	}
 
 	/**
