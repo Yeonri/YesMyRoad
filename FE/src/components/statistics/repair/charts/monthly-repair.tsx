@@ -36,8 +36,8 @@ export default function MonthlyRepair() {
   const xAxisData = useMemo(
     () =>
       monthlyMaintenanceStatusReport.map((item) => {
-        const [year, month] = item.month.split('-')
-        return `${parseInt(month, 10)}월`
+        const date = new Date(`${item.month}-01`)
+        return date.toLocaleString('ko-KR', { month: 'numeric' }) + '월'
       }),
     [monthlyMaintenanceStatusReport],
   )

@@ -32,7 +32,6 @@ import {
 import { formatDate, getSeverityColor, getStatusColor } from '@/lib/formatter'
 import { useDefectStore } from '@/store/defect-store'
 import { useQueries } from '@tanstack/react-query'
-
 import {
   ChevronDown,
   ChevronUp,
@@ -58,7 +57,6 @@ export default function DefectList() {
   const itemsPerPage = 5
   const defectType = 'all'
   const severity = 'all'
-
 
   // 상세 정보를 저장할 맵 상태
   const [detailsMap, setDetailsMap] = useState<Record<string, DetailedDefect>>(
@@ -191,7 +189,6 @@ export default function DefectList() {
 
     return pageNumbers
   }
-
 
   // 상태 변경 핸들러
   const handleStatusChange = async (
