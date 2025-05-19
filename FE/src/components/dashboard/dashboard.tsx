@@ -210,7 +210,7 @@ export default function Dashboard() {
                     <CardTitle>결함 목록</CardTitle>
                   </div>
                   <div className="flex flex-wrap gap-2">
-                    <div className="relative pr-10">
+                    <div className="relative pr-2">
                       <Search className="text-muted-foreground absolute top-2.5 left-2.5 h-4 w-4" />
                       <Input
                         type="search"
@@ -220,7 +220,7 @@ export default function Dashboard() {
                         onChange={(e) => setidSearchQuery(e.target.value)}
                       />
                     </div>
-                    <div className="relative pr-10">
+                    <div className="relative pr-2">
                       <Search className="text-muted-foreground absolute top-2.5 left-2.5 h-4 w-4" />
                       <Input
                         type="search"
