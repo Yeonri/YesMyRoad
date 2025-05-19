@@ -60,12 +60,14 @@ public interface CaptureDamageRepository extends JpaRepository<CaptureDamage, In
 				  join d.capturePoint.region r
 						  join r.parentRegion pr
 								  where pr.regionName = :regionName
+										  and d.capturePoint.captureTimestamp between :start and :end
 		  GROUP BY YEAR(d.capturePoint.captureTimestamp),
 		           MONTH(d.capturePoint.captureTimestamp)
 		  ORDER BY YEAR(d.capturePoint.captureTimestamp),
 		           MONTH(d.capturePoint.captureTimestamp)
 		""")
-	List<MonthlyDamageSummaryDto> findMonthlyDamageSummary(@Param("regionName") String regionName);
+	List<MonthlyDamageSummaryDto> findMonthlyDamageSummary(@Param("regionName") String regionName,
+		@Param("start") LocalDateTime start, @Param("end") LocalDateTime end);
 
 	/**
 	 * cityName을 받아
