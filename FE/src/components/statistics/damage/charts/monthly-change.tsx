@@ -35,7 +35,7 @@ export default function MonthlyChange(props: { cardHeight: string }) {
   if (isLoading) {
     return (
       <Card
-        className={`col-span-2 ${cardHeight} flex items-center justify-center`}
+        className={`col-span-3 ${cardHeight} flex items-center justify-center`}
       >
         <div>데이터 로딩 중...</div>
       </Card>
@@ -46,7 +46,7 @@ export default function MonthlyChange(props: { cardHeight: string }) {
   if (error) {
     return (
       <Card
-        className={`col-span-2 ${cardHeight} flex items-center justify-center`}
+        className={`col-span-3 ${cardHeight} flex items-center justify-center`}
       >
         <div>데이터를 불러오는 중 오류가 발생했습니다.</div>
       </Card>
@@ -67,7 +67,7 @@ export default function MonthlyChange(props: { cardHeight: string }) {
   }
 
   return (
-    <Card className={`col-span-2 ${cardHeight}`}>
+    <Card className={`col-span-3 ${cardHeight}`}>
       <CardHeader className="p-4">
         <CardTitle className="text-md">월별 도로파손 현황</CardTitle>
         <CardContent className="p-4 pt-0">
