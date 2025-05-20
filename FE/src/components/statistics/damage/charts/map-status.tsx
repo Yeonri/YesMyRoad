@@ -41,7 +41,7 @@ export default function MapStatus(props: { cardHeight: string }) {
   })
 
   const mapData = response?.data.destrictions
-  console.log('지역 ID: ', response?.data.regionId)
+  // console.log('지역 ID: ', response?.data.regionId)
 
   // 데이터가 변경될 때마다 차트 옵션 업데이트
   useEffect(() => {

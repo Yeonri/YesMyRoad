@@ -130,12 +130,10 @@ export default function Dashboard() {
   }, [geoJSONData, updateDefectDetailList])
 
   const loadLocationData = useCallback(async () => {
-    console.log(`GeoJSON 데이터 로딩 시작`)
+    // console.log(`GeoJSON 데이터 로딩 시작`)
     const response = await coordinateAPI.getDefectLocations()
     if (response.status === 200 && response.data) {
-      console.log(
-        `GeoJSON 데이터 로드 성공: ${response.data.features!.length || 0} 개의 데이터`,
-      )
+      // console.log(        `GeoJSON 데이터 로드 성공: ${response.data.features!.length || 0} 개의 데이터`,      )
       updateGeoJSONData(response.data.features!)
     }
   }, [updateGeoJSONData])
@@ -150,7 +148,7 @@ export default function Dashboard() {
   }, [geoJSONData])
 
   useEffect(() => {
-    console.log('defectDetailList: ', defectDetailList)
+    // console.log('defectDetailList: ', defectDetailList)
   }, [defectDetailList])
 
   return (

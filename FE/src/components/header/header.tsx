@@ -17,7 +17,7 @@ export default function Header() {
   const router = useRouter() // 라우터 훅 사용
   const handleLogout = async () => {
     const response = await userAPI.logout()
-    console.log(response)
+    // console.log(response)
     if (response.status === 200) {
       // 로컬 스토리지에서 인증 관련 데이터 삭제
       localStorage.removeItem('accessToken')

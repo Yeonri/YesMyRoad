@@ -74,18 +74,18 @@ const useAddressStore = create<addressStore>((set, get) => ({
   },
   logMapBounds: () => {
     const state = get()
-    console.log('지도 경계 좌표:', state.mapBounds)
+    // console.log('지도 경계 좌표:', state.mapBounds)
   },
   logState: () => {
     const state = get()
-    console.log('주소 정보 업데이트:', {
-      id: state.id,
-      longitude: state.longitude,
-      latitude: state.latitude,
-      level1Addr: state.level1Addr,
-      level2Addr: state.level2Addr,
-      level3Addr: state.level3Addr,
-    })
+    // console.log('주소 정보 업데이트:', {
+    //   id: state.id,
+    //   longitude: state.longitude,
+    //   latitude: state.latitude,
+    //   level1Addr: state.level1Addr,
+    //   level2Addr: state.level2Addr,
+    //   level3Addr: state.level3Addr,
+    // })
   },
   getAddressInfo: () => {
     const state = get()

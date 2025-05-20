@@ -20,10 +20,7 @@ export default function MonthlyRepair() {
   }, [])
 
   useEffect(() => {
-    console.log(
-      'monthlyMaintenanceStatusReport: ',
-      monthlyMaintenanceStatusReport,
-    )
+    // console.log(      'monthlyMaintenanceStatusReport: ',      monthlyMaintenanceStatusReport,    )
   }, [monthlyMaintenanceStatusReport])
 
   const statusLabels = [
