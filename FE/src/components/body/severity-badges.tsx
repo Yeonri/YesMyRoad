@@ -1,28 +1,45 @@
+import { statisticAPI } from '@/api/statistic-api'
 import { Badge } from '@/components/ui/badge'
+import { useQuery } from '@tanstack/react-query'
 
 const SeverityBadges: React.FC = () => {
+  // const { data: RiskList } = useQuery({
+  //   queryKey: ['risk-list'],
+  //   queryFn: async () => {
+  //     const response = await statisticAPI.getRiskList() // 함수 갈아 끼워 넣기
+  //     if (response.error) {
+  //       throw response.error
+  //     }
+  //     return response
+  //   },
+  //   refetchOnWindowFocus: false,
+  //   staleTime: 5 * 60 * 1000,
+  //   retry: 1,
+  // })
+
+  const critical = 7
+  const danger = 23
+  const caution = 48
+  const safe = 92
+
   return (
     <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
       <div className="flex flex-wrap gap-2">
         <Badge variant="default" className="rounded-md px-3 py-1">
           <div className="mr-1 h-2 w-2 rounded-full bg-red-500" />
-          심각: 7 {/* TODO: replace real value*/}
-          {/* 심각: {severityCounts.critical} */}
+          심각: {critical}
         </Badge>
         <Badge variant="default" className="rounded-md px-3 py-1">
           <div className="mr-1 h-2 w-2 rounded-full bg-amber-500" />
-          위험: 23 {/* TODO: replace real value*/}
-          {/* 위험: {severityCounts.high} */}
+          위험: {danger}
         </Badge>
         <Badge variant="default" className="rounded-md px-3 py-1">
           <div className="mr-1 h-2 w-2 rounded-full bg-blue-500" />
-          주의: 48 {/* TODO: replace real value*/}
-          {/* 주의: {severityCounts.medium} */}
+          주의: {caution}
         </Badge>
         <Badge variant="default" className="rounded-md px-3 py-1">
           <div className="mr-1 h-2 w-2 rounded-full bg-green-500" />
-          안전: 92 {/* TODO: replace real value*/}
-          {/* 안전: {severityCounts.low} */}
+          안전: {safe}
         </Badge>
       </div>
     </div>

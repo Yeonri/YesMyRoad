@@ -1,13 +1,13 @@
 'use client'
 
 import { coordinateAPI } from '@/api/coordinate-api'
-import DefectHeatmap from '@/components/dashboard/defect-heatmap'
+import DefectHeatmap from '@/components/dashboard/heat-map/defect-heatmap'
 import DefectMap from '@/components/dashboard/defect-map'
-import DefectOverall from '@/components/dashboard/defect-overall'
+import DefectOverall from '@/components/body/defect-overall'
 import DefectStats from '@/components/dashboard/defect-stats'
-import Header from '@/components/dashboard/header'
+import Header from '@/components/header/header'
 import DefectList from '@/components/dashboard/list/defect-list'
-import SeverityBadges from '@/components/dashboard/severity-badges'
+import SeverityBadges from '@/components/body/severity-badges'
 import {
   Card,
   CardContent,
@@ -30,7 +30,7 @@ import { DefectDetail } from '@/types/defects'
 import { Search } from 'lucide-react'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 
-import AddressSelector from './address-selector'
+import AddressSelector from '@/components/dashboard/address-selector'
 
 type FilterType = 'timeRange' | 'defectType' | 'severity' | 'process' | ''
 

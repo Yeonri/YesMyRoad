@@ -2,8 +2,8 @@ import type { Metadata } from 'next'
 import type React from 'react'
 
 // 라우팅 보호 활성화시 아래 코드의 주석을 해제하세요
-import ClientLayout from './client-layout'
-import './globals.css'
+import ClientLayout from '@/app/client-layout'
+import '@/app/globals.css'
 
 export const metadata: Metadata = {
   title: 'Road Defect Monitoring System',

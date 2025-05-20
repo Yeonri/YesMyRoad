@@ -4,6 +4,22 @@ import apiCaller from '@/api/api-utils'
 import axios from 'axios'
 
 export const statisticAPI = {
+  // 도로균열 기준별 심각도 현황
+  getRiskList: () =>
+    apiCaller(
+      'get',
+      '/api/dashboard/risk',
+      '도로균열 기준별 심각도 현황 조회 실패',
+    ),
+
+  // 도로파손 감지된 주소 개수
+  getDefectAddressCount: () =>
+    apiCaller(
+      'get',
+      'api/dashboard/damage-address-count',
+      '도로파손 감지된 주소 개수 조회 실패',
+    ),
+
   // 유형별 도로파손 분포
   getDamageReportByType: () =>
     apiCaller(

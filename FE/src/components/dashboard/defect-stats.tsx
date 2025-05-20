@@ -1,6 +1,5 @@
 'use client'
 
-// import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import DefectStatsDamage from '@/components/statistics/defect-stats-damage'
 import DefectStatsRepair from '@/components/statistics/defect-stats-repair'
 import useEmblaCarousel from 'embla-carousel-react'
