@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.b201.api.dto.dashboard.CategoryCountDto;
 import com.b201.api.dto.dashboard.DailyStatusDto;
+import com.b201.api.dto.dashboard.DistinctRegionCountDto;
 import com.b201.api.dto.dashboard.MonthlyStatusDto;
 import com.b201.api.dto.dashboard.RegionNameWithCountDto;
 import com.b201.api.dto.dashboard.RiskStatusDto;
@@ -93,6 +94,14 @@ public class DashBoardController {
 	) {
 		String regionName = user.getRegionName();
 		return ResponseEntity.ok(dashboardService.getRiskStatus(regionName));
+	}
+
+	@GetMapping("/region-count")
+	public ResponseEntity<DistinctRegionCountDto> getDistinctRegionCount(
+		@AuthenticationPrincipal CustomUserDetails user
+	) {
+		String regionName = user.getRegionName();
+		return ResponseEntity.ok(dashboardService.getDistinctRegionCount(regionName));
 	}
 
 }
