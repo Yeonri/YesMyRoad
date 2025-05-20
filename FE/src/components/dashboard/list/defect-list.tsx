@@ -1,8 +1,8 @@
 'use client'
 
 import { coordinateAPI } from '@/api/coordinate-api'
-import DefectPaginations from '@/components/dashboard/list/defect-paginations'
 import DefectImage from '@/components/dashboard/list/defect-image'
+import DefectPaginations from '@/components/dashboard/list/defect-paginations'
 import { Button } from '@/components/ui/button'
 import {
   DropdownMenu,
@@ -30,16 +30,14 @@ import {
 } from '@/lib/formatter'
 import { useDefectListStore } from '@/store/defect-list-store'
 import { useDefectStore } from '@/store/defect-store'
-import { useDetailedDefectStore, DetailedDamageType } from '@/store/detailed-defect-list-store'
+import {
+  DetailedDamageType,
+  useDetailedDefectStore,
+} from '@/store/detailed-defect-list-store'
 import { ProcessStatus } from '@/types/defects'
 import { useQueries } from '@tanstack/react-query'
-import {
-  ChevronDown,
-  ChevronUp,
-  Clock,
-  MapPin,
-} from 'lucide-react'
-import { useEffect, useMemo, useCallback, useRef } from 'react'
+import { ChevronDown, ChevronUp, Clock, MapPin } from 'lucide-react'
+import { useCallback, useEffect, useMemo, useRef } from 'react'
 
 type FilterType = 'timeRange' | 'defectType' | 'severity' | 'process' | ''
 
@@ -47,7 +45,7 @@ type damageType = {
   id: number
   category: string
   status: number
-  updatedAt: string
+  createdAt: string
 }
 
 type DashboardFilterProps = {
@@ -60,17 +58,28 @@ type DashboardFilterProps = {
   addrSearchQuery: string
 }
 
-
-
-export default function DefectList({ filter, timeRange, defectType, severity, process, idSearchQuery, addrSearchQuery }: DashboardFilterProps) {
+export default function DefectList({
+  filter,
+  timeRange,
+  defectType,
+  severity,
+  process,
+  idSearchQuery,
+  addrSearchQuery,
+}: DashboardFilterProps) {
   const processStatusList: ProcessStatus[] = [
     'REPORTED',
     'RECEIVED',
     'IN_PROGRESS',
     'COMPLETED',
   ]
+  const processStatusListKR: Record<ProcessStatus, string> = {
+    REPORTED: '보고됨',
+    RECEIVED: '접수됨',
+    IN_PROGRESS: '작업 중',
+    COMPLETED: '작업 완료',
+  }
 
-  // Zustand 스토어에서 필요한 모든 상태와 액션 가져오기 (타입 문제 해결)
   const {
     sortColumn,
     sortDirection,
@@ -126,13 +135,17 @@ export default function DefectList({ filter, timeRange, defectType, severity, pr
 
       if (Array.isArray(damages) && risk && imageUrl) {
         return damages.map((damage: damageType) => ({
-          defectId: getDisplayId(damage.category, damage.id, feature.properties.publicId),
+          defectId: getDisplayId(
+            damage.category,
+            damage.id,
+            feature.properties.publicId,
+          ),
           damageId: damage.id,
           imageUrl: imageUrl,
           type: feature.geometry.type,
           location: feature.properties.address.street,
           category: damage.category,
-          detectedAt: damage.updatedAt,
+          createdAt: damage.createdAt,
           publicId: feature.properties.publicId,
           severity: getSeverity(risk),
           status: processStatusList[damage.status],
@@ -168,24 +181,76 @@ export default function DefectList({ filter, timeRange, defectType, severity, pr
     setTimeRangeFilter(timeRange)
     setidSearchQuery(idSearchQuery)
     setaddrSearchQuery(addrSearchQuery)
-  }, [filter, process, severity, defectType, timeRange, idSearchQuery, addrSearchQuery,
-    setFilterType, setProcessFilter, setSeverityFilter, setDefectTypeFilter, setTimeRangeFilter, setidSearchQuery, setaddrSearchQuery])
+  }, [
+    filter,
+    process,
+    severity,
+    defectType,
+    timeRange,
+    idSearchQuery,
+    addrSearchQuery,
+    setFilterType,
+    setProcessFilter,
+    setSeverityFilter,
+    setDefectTypeFilter,
+    setTimeRangeFilter,
+    setidSearchQuery,
+    setaddrSearchQuery,
+  ])
 
   // 필터링 및 정렬된 데이터 계산 (검색어 추가)
   const filteredAndSortedData = useMemo(() => {
     if (detailedGeoJSONData.length === 0) return []
-    return getFilteredAndSortedData(filter, process, severity, defectType, timeRange, idSearchQuery, addrSearchQuery)
-  }, [detailedGeoJSONData, sortColumn, sortDirection, getFilteredAndSortedData,
-    filter, process, severity, defectType, timeRange, idSearchQuery, addrSearchQuery])
+    return getFilteredAndSortedData(
+      filter,
+      process,
+      severity,
+      defectType,
+      timeRange,
+      idSearchQuery,
+      addrSearchQuery,
+    )
+  }, [
+    detailedGeoJSONData,
+    sortColumn,
+    sortDirection,
+    getFilteredAndSortedData,
+    filter,
+    process,
+    severity,
+    defectType,
+    timeRange,
+    idSearchQuery,
+    addrSearchQuery,
+  ])
 
   // 현재 페이지 데이터 계산 (검색어 추가)
   const currentDefects = useMemo(() => {
     if (filteredAndSortedData.length === 0) return []
-    return getCurrentPageData(currentPage, itemsPerPage, filter, process, severity, defectType, timeRange, idSearchQuery, addrSearchQuery)
-  }, [getCurrentPageData, currentPage, itemsPerPage, filteredAndSortedData,
-    filter, process, severity, defectType, timeRange, idSearchQuery, addrSearchQuery])
-
-
+    return getCurrentPageData(
+      currentPage,
+      itemsPerPage,
+      filter,
+      process,
+      severity,
+      defectType,
+      timeRange,
+      idSearchQuery,
+      addrSearchQuery,
+    )
+  }, [
+    getCurrentPageData,
+    currentPage,
+    itemsPerPage,
+    filteredAndSortedData,
+    filter,
+    process,
+    severity,
+    defectType,
+    timeRange,
+    idSearchQuery,
+    addrSearchQuery,
+  ])
 
   // 데이터 길이가 실제로 변경될 때만 totalItems 업데이트
   useEffect(() => {
@@ -199,24 +264,30 @@ export default function DefectList({ filter, timeRange, defectType, severity, pr
   }, [filteredAndSortedData.length, setTotalItems])
 
   // 정렬 핸들러 (useCallback으로 메모이제이션)
-  const handleSort = useCallback((column: keyof DetailedDamageType) => {
-    if (sortColumn === column) {
-      setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc')
-    } else {
-      setSortColumn(column)
-      setSortDirection('asc')
-    }
-  }, [sortColumn, sortDirection, setSortColumn, setSortDirection])
+  const handleSort = useCallback(
+    (column: keyof DetailedDamageType) => {
+      if (sortColumn === column) {
+        setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc')
+      } else {
+        setSortColumn(column)
+        setSortDirection('asc')
+      }
+    },
+    [sortColumn, sortDirection, setSortColumn, setSortDirection],
+  )
 
   // 상태 변경 핸들러 (useCallback으로 메모이제이션)
-  const handleStatusChange = useCallback((
-    damageId: number,
-    currentStatus: string,
-    newStatus: string,
-    defectId: string,
-  ) => {
-    updateDefectStatus(damageId, currentStatus, newStatus, defectId)
-  }, [updateDefectStatus])
+  const handleStatusChange = useCallback(
+    (
+      damageId: number,
+      currentStatus: string,
+      newStatus: string,
+      defectId: string,
+    ) => {
+      updateDefectStatus(damageId, currentStatus, newStatus, defectId)
+    },
+    [updateDefectStatus],
+  )
 
   return (
     <div className="w-full overflow-auto">
@@ -292,10 +363,10 @@ export default function DefectList({ filter, timeRange, defectType, severity, pr
                 variant="ghost"
                 size="sm"
                 className="flex items-center gap-1 p-0 font-medium"
-                onClick={() => handleSort('detectedAt')}
+                onClick={() => handleSort('createdAt')}
               >
                 발생 시각
-                {sortColumn === 'detectedAt' &&
+                {sortColumn === 'createdAt' &&
                   (sortDirection === 'asc' ? (
                     <ChevronUp className="h-4 w-4" />
                   ) : (
@@ -319,7 +390,9 @@ export default function DefectList({ filter, timeRange, defectType, severity, pr
                   ))}
               </Button>
             </TableHead>
-            <TableHead className="col-span-3 flex items-center pb-2">이미지 목록</TableHead>
+            <TableHead className="col-span-3 flex items-center pb-2">
+              이미지 목록
+            </TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -344,18 +417,20 @@ export default function DefectList({ filter, timeRange, defectType, severity, pr
               <TableCell className="col-span-4">
                 <div className="flex items-center gap-1">
                   <Clock className="text-muted-foreground h-3 w-3" />
-                  {formatDate(defect.detectedAt)}
+                  {formatDate(defect.createdAt)}
                 </div>
               </TableCell>
               <TableCell className="col-span-3">
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
                     <StatusBadge className={getStatusColor(defect.status!)}>
-                      {defect.status!}
+                      {processStatusListKR[defect.status as ProcessStatus]}
                     </StatusBadge>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="start">
-                    <DropdownMenuLabel>다음으로 작업 상태 변경</DropdownMenuLabel>
+                    <DropdownMenuLabel>
+                      다음으로 작업 상태 변경
+                    </DropdownMenuLabel>
                     <DropdownMenuSeparator />
                     {processStatusList.map((process) => (
                       <DropdownMenuItem
@@ -369,14 +444,17 @@ export default function DefectList({ filter, timeRange, defectType, severity, pr
                           )
                         }
                       >
-                        {process}
+                        {processStatusListKR[process]}
                       </DropdownMenuItem>
                     ))}
                   </DropdownMenuContent>
                 </DropdownMenu>
               </TableCell>
               <TableCell className="col-span-3 select-none">
-                <DefectImage imageUrl={defect.imageUrl} alt={`결함 이미지 ${defect.defectId}`} />
+                <DefectImage
+                  imageUrl={defect.imageUrl}
+                  alt={`결함 이미지 ${defect.defectId}`}
+                />
               </TableCell>
             </TableRow>
           ))}

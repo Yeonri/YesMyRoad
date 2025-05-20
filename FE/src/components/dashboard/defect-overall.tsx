@@ -1,7 +1,52 @@
+import { maintenanceAPI } from '@/api/maintenance-api'
+import { statisticAPI } from '@/api/statistic-api'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { useQuery } from '@tanstack/react-query'
 import { AlertTriangle, BarChart3, Clock, MapPin } from 'lucide-react'
 
 const DefectOverall: React.FC = () => {
+  const { data: totalDefectsData } = useQuery({
+    queryKey: ['total-defects'],
+    queryFn: async () => {
+      const response = await statisticAPI.getDamageReportByType() // 함수 갈아 끼워 넣기
+      if (response.error) {
+        throw response.error
+      }
+      return response
+    },
+    refetchOnWindowFocus: false,
+    staleTime: 5 * 60 * 1000,
+    retry: 1,
+  })
+
+  // const totalDefects =
+  // totalDefectsData?.data[0].count + totalDefectsData?.data[1].count
+
+  const { data: completedRateData } = useQuery({
+    queryKey: ['completed-rate'],
+    queryFn: async () => {
+      const response = await maintenanceAPI.getMaintenanceOverview()
+      if (response.error) {
+        throw response.error
+      }
+      return response
+    },
+    refetchOnWindowFocus: false,
+    staleTime: 5 * 60 * 1000,
+    retry: 1,
+  })
+
+  const totalCount =
+    completedRateData?.data.reported +
+    completedRateData?.data.received +
+    completedRateData?.data.inProgress +
+    completedRateData?.data.completed
+  const completedRate =
+    Math.round(
+      ((completedRateData?.data.completed || 0) / (totalCount || 1)) *
+        100 *
+        100,
+    ) / 100
   return (
     <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
       <Card>
@@ -10,47 +55,29 @@ const DefectOverall: React.FC = () => {
           <BarChart3 className="text-muted-foreground h-4 w-4" />
         </CardHeader>
         <CardContent>
-          {/* <div className="text-2xl font-bold">
-                {reportData?.data?.count || 0}
-              </div>
-              <p className="text-muted-foreground text-xs">
-                {{ D: '어제', W: '지난 주', M: '지난 달' }[timeRange] || ''}{' '}
-                대비{' '}
-                {reportData?.data?.changeRate === null ? '-' : (reportData?.data?.changeRate || 0)}{' '}
-                % 증가
-              </p> */}
-        </CardContent>
-      </Card>
-      <Card>
-        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-          <CardTitle className="text-sm font-medium">심각한 결함 수</CardTitle>
-          <AlertTriangle className="text-muted-foreground h-4 w-4" />
-        </CardHeader>
-        <CardContent>
-          <div className="text-2xl font-bold">
-            {/* {dashboardMetrics.criticalIssues} */}0
-          </div>
-          <p className="text-muted-foreground text-xs">
-            지난 주 대비 n % 증가
-            {/* 지난 주 대비 {dashboardMetrics.criticalIssuesChange} */}
-          </p>
+          <div className="text-2xl font-bold">{totalCount} 건</div>
         </CardContent>
       </Card>
       <Card>
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
           <CardTitle className="text-sm font-medium">
-            평균 작업 착수 시간
+            심각한 결함 비율
+          </CardTitle>
+          <AlertTriangle className="text-muted-foreground h-4 w-4" />
+        </CardHeader>
+        <CardContent>
+          <div className="text-2xl font-bold">{0} %</div>
+        </CardContent>
+      </Card>
+      <Card>
+        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+          <CardTitle className="text-sm font-medium">
+            전체 작업 대비 완료 작업 비율
           </CardTitle>
           <Clock className="text-muted-foreground h-4 w-4" />
         </CardHeader>
         <CardContent>
-          <div className="text-2xl font-bold">
-            0{/* {dashboardMetrics.avgResponseTime} */}
-          </div>
-          <p className="text-muted-foreground text-xs">
-            지난 주 대비 n % 증가
-            {/* 지난 주 대비 {dashboardMetrics.avgResponseTimeChange} */}
-          </p>
+          <div className="text-2xl font-bold">{completedRate} % 완료됨</div>
         </CardContent>
       </Card>
       <Card>
@@ -61,13 +88,7 @@ const DefectOverall: React.FC = () => {
           <MapPin className="text-muted-foreground h-4 w-4" />
         </CardHeader>
         <CardContent>
-          <div className="text-2xl font-bold">
-            0{/* {dashboardMetrics.affectedAreas} */}
-          </div>
-          <p className="text-muted-foreground text-xs">
-            지난 주 대비 n % 증가
-            {/* 지난 주 대비 {dashboardMetrics.affectedAreasChange} */}
-          </p>
+          <div className="text-2xl font-bold">{0} 곳</div>
         </CardContent>
       </Card>
     </div>

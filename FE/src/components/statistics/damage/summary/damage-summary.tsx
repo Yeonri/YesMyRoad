@@ -99,34 +99,34 @@ export default function DamageSummary() {
     return `${absoluteCount}건, ${period} 대비 ${rateText} 증가`
   }
 
-return (
-  <div className={`col-span-1 flex h-auto flex-col gap-4`}>
-    <SummaryCard
-      title="일간 도로파손 건수"
-      value={formatValue(dailyReport?.count, dailyReport?.changeRate, '전일')}
-      textSize="small" // 작은 텍스트 크기 지정
-      className="grow"
-    />
-    <SummaryCard
-      title="주간 도로파손 건수"
-      value={formatValue(
-        weeklyReport?.count,
-        weeklyReport?.changeRate,
-        '전주',
-      )}
-      textSize="small" // 작은 텍스트 크기 지정
-      className="grow"
-    />
-    <SummaryCard
-      title="월간 도로파손 건수"
-      value={formatValue(
-        monthlyReport?.count,
-        monthlyReport?.changeRate,
-        '전월',
-      )}
-      textSize="small" // 작은 텍스트 크기 지정
-      className="grow"
-    />
-  </div>
-)
+  return (
+    <div className={`col-span-1 flex h-auto flex-col gap-4`}>
+      <SummaryCard
+        title="일간 도로파손 건수"
+        value={formatValue(dailyReport?.count, dailyReport?.changeRate, '전일')}
+        textSize="small" // 작은 텍스트 크기 지정
+        className="grow"
+      />
+      <SummaryCard
+        title="주간 도로파손 건수"
+        value={formatValue(
+          weeklyReport?.count,
+          weeklyReport?.changeRate,
+          '전주',
+        )}
+        textSize="small" // 작은 텍스트 크기 지정
+        className="grow"
+      />
+      <SummaryCard
+        title="월간 도로파손 건수"
+        value={formatValue(
+          monthlyReport?.count,
+          monthlyReport?.changeRate,
+          '전월',
+        )}
+        textSize="small" // 작은 텍스트 크기 지정
+        className="grow"
+      />
+    </div>
+  )
 }

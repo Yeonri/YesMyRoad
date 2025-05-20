@@ -1,6 +1,5 @@
 'use client'
 
-import { Input } from '@/components/ui/input'
 import { coordinateAPI } from '@/api/coordinate-api'
 import DefectHeatmap from '@/components/dashboard/defect-heatmap'
 import DefectMap from '@/components/dashboard/defect-map'
@@ -9,8 +8,6 @@ import DefectStats from '@/components/dashboard/defect-stats'
 import Header from '@/components/dashboard/header'
 import DefectList from '@/components/dashboard/list/defect-list'
 import SeverityBadges from '@/components/dashboard/severity-badges'
-// import { Badge } from '@/components/ui/badge'
-import { Button } from '@/components/ui/button'
 import {
   Card,
   CardContent,
@@ -18,6 +15,7 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card'
+import { Input } from '@/components/ui/input'
 import {
   Select,
   SelectContent,
@@ -29,16 +27,14 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import useAddressStore from '@/store/address-store'
 import { useDefectStore } from '@/store/defect-store'
 import { DefectDetail } from '@/types/defects'
+import { Search } from 'lucide-react'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 
-// import { statisticAPI } from '@/api/statistic-api'
 import AddressSelector from './address-selector'
-import { Search } from 'lucide-react'
 
 type FilterType = 'timeRange' | 'defectType' | 'severity' | 'process' | ''
 
 export default function Dashboard() {
-  // Get state and actions from Zustand store
   const { updateGeoJSONData, defectDetailList, updateDefectDetailList } =
     useDefectStore()
 
@@ -157,11 +153,6 @@ export default function Dashboard() {
     console.log('defectDetailList: ', defectDetailList)
   }, [defectDetailList])
 
-  // // 스토어가 제대로 작동하는지 확인용 -> 정상 작동 확인완료
-  // useEffect(() => {
-  //   console.log("GeoJSONData updated:", geoJSONData)
-  // }, [geoJSONData])
-
   return (
     <div className="bg-muted/40 flex min-h-screen w-full flex-col">
       <Header />
@@ -183,7 +174,9 @@ export default function Dashboard() {
                 <TabsTrigger value="analytics">통계</TabsTrigger>
               </TabsList>
 
-              {(selectedTab === 'map' || selectedTab == 'heatmap') && <AddressSelector />}
+              {(selectedTab === 'map' || selectedTab == 'heatmap') && (
+                <AddressSelector />
+              )}
             </div>
           </div>
           <TabsContent value="map" className="space-y-4" forceMount>
@@ -288,14 +281,19 @@ export default function Dashboard() {
                         </SelectTrigger>
                         <SelectContent>
                           <SelectItem value="all">전체</SelectItem>
-                          <SelectItem value="REPORTED">REPORTED</SelectItem>
-                          <SelectItem value="RECEIVED">RECEIVED</SelectItem>
-                          <SelectItem value="IN_PROGRESS">IN_PROGRESS</SelectItem>
-                          <SelectItem value="COMPLETED">COMPLETED</SelectItem>
+                          <SelectItem value="REPORTED">보고됨</SelectItem>
+                          <SelectItem value="RECEIVED">접수됨</SelectItem>
+                          <SelectItem value="IN_PROGRESS">작업 중</SelectItem>
+                          <SelectItem value="COMPLETED">작업완료</SelectItem>
                         </SelectContent>
                       </Select>
                     )}
-                    <Select value={selectedFilter} onValueChange={(value) => selectFilter(value as FilterType)}>
+                    <Select
+                      value={selectedFilter}
+                      onValueChange={(value) =>
+                        selectFilter(value as FilterType)
+                      }
+                    >
                       <SelectTrigger className="h-8 w-[130px]">
                         <SelectValue placeholder="필터 선택" />
                       </SelectTrigger>

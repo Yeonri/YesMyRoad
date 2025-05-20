@@ -3,7 +3,7 @@ export type DamageItem = {
   id: number
   category: string
   status: number
-  updatedAt: string
+  createdAt: string
 }
 
 export type DefectDetail = {

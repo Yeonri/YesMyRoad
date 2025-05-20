@@ -3,16 +3,16 @@ import crypto from 'crypto'
 // 시간 포맷팅 함수
 export const formatDate = (dateString: string) => {
   const date = new Date(dateString)
-  
+
   const year = date.getFullYear()
   const month = String(date.getMonth() + 1).padStart(2, '0')
   const day = String(date.getDate()).padStart(2, '0')
-  
+
   const hours = date.getHours()
   const ampm = hours >= 12 ? '오후' : '오전'
   const hour12 = hours % 12 || 12 // 12시간 형식 (0은 12로 표시)
   const minute = String(date.getMinutes()).padStart(2, '0')
-  
+
   return `${year}-${month}-${day} ${ampm} ${hour12}:${minute}`
 }
 
@@ -54,10 +54,14 @@ export const getStatusColor = (status: string) => {
 }
 
 // 결함 ID를 생성하는 함수
-export const getDisplayId = (category:string, damageId: number, publicId: string): string => {
+export const getDisplayId = (
+  category: string,
+  damageId: number,
+  publicId: string,
+): string => {
   const validChars = '0123456789ABCDEFGHJKLMNPQRSTUVWXYZ'
   const hash = crypto.createHash('sha256').update(publicId).digest('hex')
-  const prefix = category === "도로균열" ? "RC" : "RH" // road crack, road hole
+  const prefix = category === '도로균열' ? 'RC' : 'RH' // road crack, road hole
   const shortCode = Array(5)
     .fill(0)
     .map((_, i) => {
