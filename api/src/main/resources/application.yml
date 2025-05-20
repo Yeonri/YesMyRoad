@@ -5,7 +5,7 @@ spring:
   # MySQL
   datasource:
     driver-class-name: ${MYSQL_DRIVER}
-    url: jdbc:mysql://${MYSQL_URL}/${MYSQL_DATABASE}?serverTimezone=Asia/Seoul
+    url: jdbc:mysql://${MYSQL_URL}/${MYSQL_DATABASE}?serverTimezone=Asia/Seoul&useLegacyDatetimeCode=false
     username: ${MYSQL_USER}
     password: ${MYSQL_PASSWORD}
     hikari:
