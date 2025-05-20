@@ -17,6 +17,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.b201.api.dto.dashboard.CategoryCountDto;
 import com.b201.api.dto.dashboard.DailyStatusDto;
+import com.b201.api.dto.dashboard.DistinctRegionCountDto;
 import com.b201.api.dto.dashboard.MonthlyDamageSummaryDto;
 import com.b201.api.dto.dashboard.MonthlyStatusDto;
 import com.b201.api.dto.dashboard.RegionCountDto;
@@ -25,6 +26,7 @@ import com.b201.api.dto.dashboard.RiskStatusDto;
 import com.b201.api.dto.dashboard.TopRegionDto;
 import com.b201.api.dto.dashboard.WeeklyStatusDto;
 import com.b201.api.repository.CaptureDamageRepository;
+import com.b201.api.repository.CapturePointRepository;
 import com.b201.api.repository.RegionRepository;
 
 import lombok.RequiredArgsConstructor;
@@ -36,6 +38,7 @@ import lombok.extern.slf4j.Slf4j;
 public class DashboardService {
 
 	private final CaptureDamageRepository damageRepo;
+	private final CapturePointRepository capturePointRepo;
 	private final RegionRepository regionRepo;
 
 	// 유형별 도로 파손 분포 수
@@ -257,5 +260,17 @@ public class DashboardService {
 		RiskStatusDto riskStatusDto = damageRepo.getRiskStatusByRegion(regionName);
 		log.debug("[getRiskStatus] riskStatusDto={}", riskStatusDto);
 		return riskStatusDto;
+	}
+
+	/**
+	 * 도로파손 감지된 주소 개수
+	 */
+	@Transactional(readOnly = true)
+	public DistinctRegionCountDto getDistinctRegionCount(String regionName) {
+		log.info("[getDistinctRegionCount] 호출됨, regionName={}", regionName);
+		DistinctRegionCountDto distinctRegionCountDto = capturePointRepo.getDistinctRegionCountDto(regionName);
+		log.info("[getDistinctRegionCount] 완료. regionName={}, count={}",
+			regionName, distinctRegionCountDto.getRegionCount());
+		return distinctRegionCountDto;
 	}
 }
