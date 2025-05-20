@@ -21,6 +21,7 @@ import com.b201.api.dto.dashboard.MonthlyDamageSummaryDto;
 import com.b201.api.dto.dashboard.MonthlyStatusDto;
 import com.b201.api.dto.dashboard.RegionCountDto;
 import com.b201.api.dto.dashboard.RegionNameWithCountDto;
+import com.b201.api.dto.dashboard.RiskStatusDto;
 import com.b201.api.dto.dashboard.TopRegionDto;
 import com.b201.api.dto.dashboard.WeeklyStatusDto;
 import com.b201.api.repository.CaptureDamageRepository;
@@ -245,5 +246,16 @@ public class DashboardService {
 		List<TopRegionDto> list = damageRepo.findTopRegions(regionName, PageRequest.of(0, 3));
 		log.debug("[getTop3Regions] top regions 개수 = {}", list.size());
 		return list;
+	}
+
+	/**
+	 * 도로균열 기준별 심각도 현황
+	 */
+	@Transactional(readOnly = true)
+	public RiskStatusDto getRiskStatus(String regionName) {
+		log.info("[getRiskStatus] 호출됨, regionName={}", regionName);
+		RiskStatusDto riskStatusDto = damageRepo.getRiskStatusByRegion(regionName);
+		log.debug("[getRiskStatus] riskStatusDto={}", riskStatusDto);
+		return riskStatusDto;
 	}
 }

@@ -12,6 +12,7 @@ import com.b201.api.dto.dashboard.CategoryCountDto;
 import com.b201.api.dto.dashboard.DailyStatusDto;
 import com.b201.api.dto.dashboard.MonthlyStatusDto;
 import com.b201.api.dto.dashboard.RegionNameWithCountDto;
+import com.b201.api.dto.dashboard.RiskStatusDto;
 import com.b201.api.dto.dashboard.TopRegionDto;
 import com.b201.api.dto.dashboard.WeeklyStatusDto;
 import com.b201.api.security.CustomUserDetails;
@@ -85,4 +86,13 @@ public class DashBoardController {
 		String regionName = user.getRegionName();
 		return dashboardService.getTop3Regions(regionName);
 	}
+
+	@GetMapping("/risk")
+	public ResponseEntity<RiskStatusDto> getRisk(
+		@AuthenticationPrincipal CustomUserDetails user
+	) {
+		String regionName = user.getRegionName();
+		return ResponseEntity.ok(dashboardService.getRiskStatus(regionName));
+	}
+
 }
