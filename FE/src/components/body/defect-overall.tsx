@@ -2,7 +2,7 @@ import { maintenanceAPI } from '@/api/maintenance-api'
 import { statisticAPI } from '@/api/statistic-api'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { useQuery } from '@tanstack/react-query'
-import { AlertTriangle, BarChart3, Clock, Hammer, MapPin, MessageCircleWarning } from 'lucide-react'
+import { AlertTriangle, Hammer, MapPin, MessageCircleWarning } from 'lucide-react'
 
 const DefectOverall: React.FC = () => {
   // const { data: riskList } = useQuery({
