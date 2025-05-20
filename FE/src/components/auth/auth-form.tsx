@@ -2,29 +2,29 @@
 
 import { userAPI } from '@/api/user-api'
 import { Button } from '@/components/ui/button'
-import {
-  Command,
-  CommandEmpty,
-  CommandGroup,
-  CommandInput,
-  CommandItem,
-  CommandList,
-} from '@/components/ui/command'
+// import {
+//   Command,
+//   CommandEmpty,
+//   CommandGroup,
+//   CommandInput,
+//   CommandItem,
+//   CommandList,
+// } from '@/components/ui/command'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from '@/components/ui/popover'
+// import {
+//   Popover,
+//   PopoverContent,
+//   PopoverTrigger,
+// } from '@/components/ui/popover'
 // 지역 ID 데이터 임포트
-import regionIdMap from '@/data/region-id.json'
+// import regionIdMap from '@/data/region-id.json'
 import { cn } from '@/lib/utils'
 import { useUserStore } from '@/store/user-store'
 import { LoginFormData, RegisterFormData } from '@/types/user'
 import * as AccordionPrimitive from '@radix-ui/react-accordion'
 import { isAxiosError } from 'axios'
-import { Check, ChevronsUpDown } from 'lucide-react'
+// import { Check, ChevronsUpDown } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import React, { useEffect, useState } from 'react'
 
@@ -77,7 +77,7 @@ const AuthForm: React.FC<AuthFormProps> = ({ isLoginTab, onTabChange }) => {
   const [isSuccess, setIsSuccess] = useState(false) // 성공 상태
   const [formErrors, setFormErrors] = useState<{ [key: string]: string }>({}) // 폼 에러 메시지 관리
   const [generalError, setGeneralError] = useState<string>('') // 일반 에러 메시지 (필드에 매핑되지 않는 에러)
-  const [openRegion, setOpenRegion] = useState(false) // 지역 선택기 상태
+  // const [openRegion, setOpenRegion] = useState(false) // 지역 선택기 상태
 
   // 초기 탭 상태에 따라 아코디언 상태 설정 (항상 배열로 초기화)
   const [accordionValues, setAccordionValues] = useState<string[]>(
@@ -89,7 +89,7 @@ const AuthForm: React.FC<AuthFormProps> = ({ isLoginTab, onTabChange }) => {
     id: '',
     password: '',
     name: '',
-    region: 0,
+    region: 7,
   })
 
   // 아이디 중복 확인용 플래그 변수 (-1: 미확인, 0: 중복, 1: 사용가능)
@@ -97,7 +97,7 @@ const AuthForm: React.FC<AuthFormProps> = ({ isLoginTab, onTabChange }) => {
 
   // 탭 변경 시 상태 초기화
   useEffect(() => {
-    setFormData({ id: '', password: '', name: '', region: 0 })
+    setFormData({ id: '', password: '', name: '', region: 7 })
     setIdAvailability(-1)
     clearError()
     setIsLoading(false)
@@ -217,11 +217,11 @@ const AuthForm: React.FC<AuthFormProps> = ({ isLoginTab, onTabChange }) => {
           return
         }
 
-        if (!formData.region) {
-          setFormErrors((prev) => ({ ...prev, region: '지역을 선택해주세요' }))
-          setIsLoading(false)
-          return
-        }
+        // if (!formData.region) {
+        //   setFormErrors((prev) => ({ ...prev, region: '지역을 선택해주세요' }))
+        //   setIsLoading(false)
+        //   return
+        // }
 
         // 아이디 중복 확인 여부 검사
         if (idAvailability !== 1) {
@@ -243,7 +243,7 @@ const AuthForm: React.FC<AuthFormProps> = ({ isLoginTab, onTabChange }) => {
           onTabChange(true)
 
           // 폼과 상태 초기화
-          setFormData({ id: '', password: '', name: '', region: 0 })
+          setFormData({ id: '', password: '', name: '', region: 7 })
           setIsLoading(false)
           setIsSuccess(false)
         }
@@ -392,7 +392,7 @@ const AuthForm: React.FC<AuthFormProps> = ({ isLoginTab, onTabChange }) => {
             </AccordionContent>
           </AccordionPrimitive.Item>
 
-          <AccordionPrimitive.Item value="region-item">
+          {/* <AccordionPrimitive.Item value="region-item">
             <AccordionContent>
               <div className="space-y-1">
                 <Label htmlFor="region">지역</Label>
@@ -457,7 +457,6 @@ const AuthForm: React.FC<AuthFormProps> = ({ isLoginTab, onTabChange }) => {
                     </Command>
                   </PopoverContent>
                 </Popover>
-                {/* 지역 필드 에러 메시지 */}
                 {formErrors.region && (
                   <div className="mt-1 text-sm text-red-600">
                     {formErrors.region}
@@ -465,8 +464,8 @@ const AuthForm: React.FC<AuthFormProps> = ({ isLoginTab, onTabChange }) => {
                 )}
               </div>
             </AccordionContent>
-          </AccordionPrimitive.Item>
-        </AccordionPrimitive.Root>
+          </AccordionPrimitive.Item>*/}
+        </AccordionPrimitive.Root> 
 
         <div className="pt-6">
           <Button
