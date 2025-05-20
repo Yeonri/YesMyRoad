@@ -281,12 +281,10 @@ export default function Dashboard() {
                         </SelectTrigger>
                         <SelectContent>
                           <SelectItem value="all">전체</SelectItem>
-                          <SelectItem value="REPORTED">REPORTED</SelectItem>
-                          <SelectItem value="RECEIVED">RECEIVED</SelectItem>
-                          <SelectItem value="IN_PROGRESS">
-                            IN_PROGRESS
-                          </SelectItem>
-                          <SelectItem value="COMPLETED">COMPLETED</SelectItem>
+                          <SelectItem value="REPORTED">보고됨</SelectItem>
+                          <SelectItem value="RECEIVED">접수됨</SelectItem>
+                          <SelectItem value="IN_PROGRESS">작업 중</SelectItem>
+                          <SelectItem value="COMPLETED">작업완료</SelectItem>
                         </SelectContent>
                       </Select>
                     )}

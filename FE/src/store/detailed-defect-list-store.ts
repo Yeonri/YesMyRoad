@@ -10,7 +10,7 @@ export type DetailedDamageType = {
   type: string
   location: string
   category: string
-  detectedAt: string
+  createdAt: string
   publicId: string
   severity: string
   status: string
@@ -176,8 +176,8 @@ export const useDetailedDefectStore = create<DetailedDefectState>(
         const now = new Date()
 
         filteredData = filteredData.filter((defect) => {
-          const detectedDate = new Date(defect.detectedAt)
-          const diffInMilliseconds = now.getTime() - detectedDate.getTime()
+          const createdDate = new Date(defect.createdAt)
+          const diffInMilliseconds = now.getTime() - createdDate.getTime()
           const diffInDays = diffInMilliseconds / (1000 * 60 * 60 * 24)
 
           switch (timeRangeFilter) {

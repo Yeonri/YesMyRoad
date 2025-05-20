@@ -1,6 +1,6 @@
 'use client'
 
-import background from '@/assets/background.png'
+import background from '@/assets/images/background.png'
 import AuthForm from '@/components/auth/auth-form'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'

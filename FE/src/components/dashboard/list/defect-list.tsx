@@ -45,7 +45,7 @@ type damageType = {
   id: number
   category: string
   status: number
-  updatedAt: string
+  createdAt: string
 }
 
 type DashboardFilterProps = {
@@ -73,6 +73,12 @@ export default function DefectList({
     'IN_PROGRESS',
     'COMPLETED',
   ]
+  const processStatusListKR: Record<ProcessStatus, string> = {
+    REPORTED: '보고됨',
+    RECEIVED: '접수됨',
+    IN_PROGRESS: '작업 중',
+    COMPLETED: '작업 완료',
+  }
 
   const {
     sortColumn,
@@ -139,7 +145,7 @@ export default function DefectList({
           type: feature.geometry.type,
           location: feature.properties.address.street,
           category: damage.category,
-          detectedAt: damage.updatedAt,
+          createdAt: damage.createdAt,
           publicId: feature.properties.publicId,
           severity: getSeverity(risk),
           status: processStatusList[damage.status],
@@ -357,10 +363,10 @@ export default function DefectList({
                 variant="ghost"
                 size="sm"
                 className="flex items-center gap-1 p-0 font-medium"
-                onClick={() => handleSort('detectedAt')}
+                onClick={() => handleSort('createdAt')}
               >
                 발생 시각
-                {sortColumn === 'detectedAt' &&
+                {sortColumn === 'createdAt' &&
                   (sortDirection === 'asc' ? (
                     <ChevronUp className="h-4 w-4" />
                   ) : (
@@ -411,14 +417,14 @@ export default function DefectList({
               <TableCell className="col-span-4">
                 <div className="flex items-center gap-1">
                   <Clock className="text-muted-foreground h-3 w-3" />
-                  {formatDate(defect.detectedAt)}
+                  {formatDate(defect.createdAt)}
                 </div>
               </TableCell>
               <TableCell className="col-span-3">
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
                     <StatusBadge className={getStatusColor(defect.status!)}>
-                      {defect.status!}
+                      {processStatusListKR[defect.status as ProcessStatus]}
                     </StatusBadge>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="start">
@@ -438,7 +444,7 @@ export default function DefectList({
                           )
                         }
                       >
-                        {process}
+                        {processStatusListKR[process]}
                       </DropdownMenuItem>
                     ))}
                   </DropdownMenuContent>

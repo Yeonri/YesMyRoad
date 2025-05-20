@@ -10,11 +10,9 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
-import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet'
-import { Bell, Menu, Settings, User } from 'lucide-react'
+import { Sheet, SheetTrigger } from '@/components/ui/sheet'
+import { Menu, User } from 'lucide-react'
 import { useRouter } from 'next/navigation'
-
-import { MobileNav } from '../mobile-nav'
 
 export default function Header() {
   const router = useRouter() // 라우터 훅 사용
@@ -45,9 +43,6 @@ export default function Header() {
             <span className="sr-only">메뉴 토글</span>
           </Button>
         </SheetTrigger>
-        <SheetContent side="left" className="pr-0">
-          <MobileNav /> {/* 특히 요녀석 */}
-        </SheetContent>
       </Sheet>
       <div className="flex items-center gap-2">
         <div className="hidden font-bold md:flex">YES, MY ROAD</div>
@@ -57,42 +52,13 @@ export default function Header() {
         <div className="ml-auto flex-1 md:flex-initial"></div>
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="outline" size="icon" className="relative">
-              <Bell className="h-4 w-4" />
-              <span className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-red-600 text-[10px] font-medium text-white">
-                3
-              </span>
-              <span className="sr-only">알림</span>
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            <DropdownMenuLabel>알림</DropdownMenuLabel>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem>
-              심각 수준의 포트홀이 한밭대로에 발생
-            </DropdownMenuItem>
-            <DropdownMenuItem>
-              위험 수준의 도로 균열이 동서대로에 발생
-            </DropdownMenuItem>
-            <DropdownMenuItem>유지관리 팀이 현충원로 작업 중</DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
-        <Button variant="outline" size="icon">
-          <Settings className="h-4 w-4" />
-          <span className="sr-only">설정</span>
-        </Button>
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
             <Button variant="outline" size="icon">
               <User className="h-4 w-4" />
               <span className="sr-only">유저</span>
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
-            <DropdownMenuLabel>내 계정</DropdownMenuLabel>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem>프로필</DropdownMenuItem>
-            <DropdownMenuItem>설정</DropdownMenuItem>
+            <DropdownMenuLabel>계정 관리</DropdownMenuLabel>
             <DropdownMenuSeparator />
             <DropdownMenuItem onClick={handleLogout}>로그아웃</DropdownMenuItem>
           </DropdownMenuContent>
