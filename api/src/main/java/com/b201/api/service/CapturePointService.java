@@ -93,7 +93,6 @@ public class CapturePointService {
 			.status(captureDamage.getStatus().getNumber())
 			.createdAt(captureDamage.getCreatedAt())
 			.build();
-
 		log.debug("[mapToDamageDto] createdAt={}", dto.getCreatedAt());
 		log.trace("[mapToDamageDto] damageId={} 변환 완료", captureDamage.getDamageId());
 		return dto;
