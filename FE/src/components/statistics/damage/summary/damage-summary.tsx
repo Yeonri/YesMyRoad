@@ -104,6 +104,7 @@ export default function DamageSummary() {
       <SummaryCard
         title="일간 도로파손 건수"
         value={formatValue(dailyReport?.count, dailyReport?.changeRate, '전일')}
+        textSize="small" // 작은 텍스트 크기 지정
         className="grow"
       />
       <SummaryCard
@@ -113,6 +114,7 @@ export default function DamageSummary() {
           weeklyReport?.changeRate,
           '전주',
         )}
+        textSize="small" // 작은 텍스트 크기 지정
         className="grow"
       />
       <SummaryCard
@@ -122,6 +124,7 @@ export default function DamageSummary() {
           monthlyReport?.changeRate,
           '전월',
         )}
+        textSize="small" // 작은 텍스트 크기 지정
         className="grow"
       />
     </div>

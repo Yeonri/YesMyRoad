@@ -66,7 +66,7 @@ export default function DefectMap({
             className="w-full"
             onClick={() => onSelectTab && onSelectTab('list')}
           >
-            전체 이력 보기
+            전체 결함 목록 보기
             <ArrowRight className="ml-2 h-4 w-4" />
           </Button>
         </CardFooter>

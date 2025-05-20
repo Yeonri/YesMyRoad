@@ -1,10 +1,5 @@
 'use client'
 
-// import { coodAPI } from '@/api/coordinate-api'
-import { defectAPI } from '@/api/defect-api'
-// import { maintenanceAPI } from '@/api/maintenance-api'
-// import { statisticAPI } from '@/api/statistic-api'
-// API 테스트
 import { userAPI } from '@/api/user-api'
 import { Button } from '@/components/ui/button'
 import {
@@ -15,19 +10,12 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
-import { Input } from '@/components/ui/input'
-import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet'
-import { Bell, Menu, Search, Settings, User } from 'lucide-react'
+import { Sheet, SheetTrigger } from '@/components/ui/sheet'
+import { Menu, User } from 'lucide-react'
 import { useRouter } from 'next/navigation'
-
-import { MobileNav } from '../mobile-nav'
-
-// const PUBLIC_ID = '23569766-0f5a-4f54-ba9b-dba4dbf0b922'
 
 export default function Header() {
   const router = useRouter() // 라우터 훅 사용
-  // const { clearSession } = useUserStore()
-
   const handleLogout = async () => {
     const response = await userAPI.logout()
     console.log(response)
@@ -45,15 +33,6 @@ export default function Header() {
     }
   }
 
-  const defectAPITest = async () => {
-    const response = await defectAPI.updateRoadDamageStatus(10, 'COMPLETED')
-    if (response.status === 200) {
-      console.log(response.data)
-    } else {
-      alert('응 안돼~')
-    }
-  }
-
   return (
     <header className="bg-background sticky top-0 z-50 flex h-16 items-center gap-4 border-b px-4 md:px-6">
       {/* 얘네 뭐하는 코드지? 주석처리해도 고장이 안나는데??? 렌더링 되는것도 전혀 없고 */}
@@ -64,51 +43,13 @@ export default function Header() {
             <span className="sr-only">메뉴 토글</span>
           </Button>
         </SheetTrigger>
-        <SheetContent side="left" className="pr-0">
-          <MobileNav /> {/* 특히 요녀석 */}
-        </SheetContent>
       </Sheet>
       <div className="flex items-center gap-2">
         <div className="hidden font-bold md:flex">YES, MY ROAD</div>
       </div>
 
       <div className="flex flex-1 items-center gap-4 md:gap-2 lg:gap-4">
-        <form className="ml-auto flex-1 md:flex-initial">
-          <div className="relative">
-            <Search className="text-muted-foreground absolute top-2.5 left-2.5 h-4 w-4" />
-            <Input
-              type="search"
-              placeholder="결함 검색"
-              className="bg-background w-full rounded-lg pl-8 md:w-[200px] lg:w-[300px]"
-            />
-          </div>
-        </form>
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="outline" size="icon" className="relative">
-              <Bell className="h-4 w-4" />
-              <span className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-red-600 text-[10px] font-medium text-white">
-                3
-              </span>
-              <span className="sr-only">알림</span>
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            <DropdownMenuLabel>알림</DropdownMenuLabel>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem>
-              심각 수준의 포트홀이 한밭대로에 발생
-            </DropdownMenuItem>
-            <DropdownMenuItem>
-              위험 수준의 도로 균열이 동서대로에 발생
-            </DropdownMenuItem>
-            <DropdownMenuItem>유지관리 팀이 현충원로 작업 중</DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
-        <Button variant="outline" size="icon">
-          <Settings className="h-4 w-4" />
-          <span className="sr-only">설정</span>
-        </Button>
+        <div className="ml-auto flex-1 md:flex-initial"></div>
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button variant="outline" size="icon">
@@ -117,10 +58,7 @@ export default function Header() {
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
-            <DropdownMenuLabel>내 계정</DropdownMenuLabel>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem>프로필</DropdownMenuItem>
-            <DropdownMenuItem onClick={defectAPITest}>설정</DropdownMenuItem>
+            <DropdownMenuLabel>계정 관리</DropdownMenuLabel>
             <DropdownMenuSeparator />
             <DropdownMenuItem onClick={handleLogout}>로그아웃</DropdownMenuItem>
           </DropdownMenuContent>

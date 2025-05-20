@@ -109,7 +109,7 @@ export default function DefectListOnMap({
                           <p className="flex items-center gap-1">
                             <Clock className="h-3 w-3" />
                             {defectDetail.damages.length > 0
-                              ? formatDate(defectDetail.damages[0].updatedAt)
+                              ? formatDate(defectDetail.damages[0].createdAt)
                               : ''}
                           </p>
                         </div>

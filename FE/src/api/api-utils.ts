@@ -34,8 +34,6 @@ const apiCaller = async (
     return { data: response.data, status: response.status, error: null }
   } catch (error) {
     if (axios.isAxiosError(error)) {
-      // console.error(`${errorMessage}: ${error.message}`)
-      // 로그인 endpoint는 401일 때 throw
       if (url.endsWith('/api/users/login')) {
         throw error
       }

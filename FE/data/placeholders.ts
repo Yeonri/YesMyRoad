@@ -40,7 +40,7 @@ export const defects = [
     type: "Pothole",
     severity: "critical",
     location: "Main St & 5th Ave",
-    detectedAt: "2025-04-24T08:30:00",
+    createdAt: "2025-04-24T08:30:00",
     status: "Pending",
   },
   {
@@ -48,7 +48,7 @@ export const defects = [
     type: "Crack",
     severity: "high",
     location: "Broadway & 42nd St",
-    detectedAt: "2025-04-24T09:15:00",
+    createdAt: "2025-04-24T09:15:00",
     status: "Assigned",
   },
   {
@@ -56,7 +56,7 @@ export const defects = [
     type: "Paint Peeling",
     severity: "medium",
     location: "Park Ave & 23rd St",
-    detectedAt: "2025-04-24T07:45:00",
+    createdAt: "2025-04-24T07:45:00",
     status: "In Progress",
   },
   {
@@ -64,7 +64,7 @@ export const defects = [
     type: "Pothole",
     severity: "high",
     location: "Lexington Ave & 59th St",
-    detectedAt: "2025-04-24T10:20:00",
+    createdAt: "2025-04-24T10:20:00",
     status: "Pending",
   },
   {
@@ -72,7 +72,7 @@ export const defects = [
     type: "Crack",
     severity: "low",
     location: "Canal St & Bowery",
-    detectedAt: "2025-04-24T11:05:00",
+    createdAt: "2025-04-24T11:05:00",
     status: "Assigned",
   },
   {
@@ -80,7 +80,7 @@ export const defects = [
     type: "Paint Peeling",
     severity: "low",
     location: "Houston St & Lafayette St",
-    detectedAt: "2025-04-24T08:50:00",
+    createdAt: "2025-04-24T08:50:00",
     status: "Completed",
   },
   {
@@ -88,7 +88,7 @@ export const defects = [
     type: "Pothole",
     severity: "critical",
     location: "West St & Chambers St",
-    detectedAt: "2025-04-24T09:30:00",
+    createdAt: "2025-04-24T09:30:00",
     status: "In Progress",
   },
 ]
@@ -100,7 +100,7 @@ export const recentAlerts = [
     type: "Pothole",
     severity: "critical",
     location: "Main St & 5th Ave",
-    detectedAt: "2025-04-24T08:30:00",
+    createdAt: "2025-04-24T08:30:00",
     description: "Large pothole causing traffic hazard",
   },
   {
@@ -108,7 +108,7 @@ export const recentAlerts = [
     type: "Pothole",
     severity: "critical",
     location: "West St & Chambers St",
-    detectedAt: "2025-04-24T09:30:00",
+    createdAt: "2025-04-24T09:30:00",
     description: "Deep pothole with exposed rebar",
   },
   {
@@ -116,7 +116,7 @@ export const recentAlerts = [
     type: "Crack",
     severity: "high",
     location: "Broadway & 42nd St",
-    detectedAt: "2025-04-24T09:15:00",
+    createdAt: "2025-04-24T09:15:00",
     description: "Extensive cracking across two lanes",
   },
   {
@@ -124,7 +124,7 @@ export const recentAlerts = [
     type: "Pothole",
     severity: "high",
     location: "Lexington Ave & 59th St",
-    detectedAt: "2025-04-24T10:20:00",
+    createdAt: "2025-04-24T10:20:00",
     description: "Multiple potholes in intersection",
   },
 ]
