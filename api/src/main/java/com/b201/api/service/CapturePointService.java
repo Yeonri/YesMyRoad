@@ -89,7 +89,7 @@ public class CapturePointService {
 			.id(captureDamage.getDamageId())
 			.category(captureDamage.getDamageCategory().getCategoryName())
 			.status(captureDamage.getStatus().getNumber())
-			.updatedAt(captureDamage.getUpdatedAt())
+			.createdAt(captureDamage.getCreatedAt())
 			.build();
 
 		log.trace("[mapToDamageDto] damageId={} 변환 완료", captureDamage.getDamageId());
