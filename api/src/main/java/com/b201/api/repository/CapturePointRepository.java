@@ -10,6 +10,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import com.b201.api.domain.CapturePoint;
+import com.b201.api.dto.dashboard.DistinctRegionCountDto;
 
 @Repository
 public interface CapturePointRepository extends JpaRepository<CapturePoint, Integer> {
@@ -23,5 +24,14 @@ public interface CapturePointRepository extends JpaRepository<CapturePoint, Inte
 	// ② EntityGraph로 연관된 CaptureDamage까지 한 번에 페치
 	@EntityGraph(attributePaths = {"captureDamages", "captureDamages.damageCategory"})
 	Optional<CapturePoint> findByPublicId(String publicId);
+
+	@Query("""
+		select new com.b201.api.dto.dashboard.DistinctRegionCountDto(
+			count(distinct cp.streetAddress)
+		)
+		from CapturePoint cp
+			where cp.region.parentRegion.regionName = :regionName
+		""")
+	DistinctRegionCountDto getDistinctRegionCountDto(@Param("regionName") String regionName);
 }
 
