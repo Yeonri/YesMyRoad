@@ -465,7 +465,7 @@ const AuthForm: React.FC<AuthFormProps> = ({ isLoginTab, onTabChange }) => {
               </div>
             </AccordionContent>
           </AccordionPrimitive.Item>*/}
-        </AccordionPrimitive.Root> 
+        </AccordionPrimitive.Root>
 
         <div className="pt-6">
           <Button

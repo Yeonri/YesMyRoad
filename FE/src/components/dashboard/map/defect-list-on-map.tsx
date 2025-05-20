@@ -10,6 +10,7 @@ import {
 import { Badge } from '@/components/ui/badge'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Separator } from '@/components/ui/separator'
+import { getSeverity, getSeverityColor } from '@/lib/formatter'
 import { DamageItem, DefectDetail } from '@/types/defects'
 import { AlertTriangle, Clock, MapPin } from 'lucide-react'
 import Image, { StaticImageData } from 'next/image'
@@ -47,12 +48,6 @@ export default function DefectListOnMap({
       .join(', ')
   }
 
-  // 위험도에 따라 심각도 결정
-  const getSeverity = (risk: number) => {
-    if (risk >= 0.7) return 'critical'
-    return 'warning'
-  }
-
   const [imgSrcMap, setImgSrcMap] = useState<
     Record<string, string | StaticImageData>
   >({})
@@ -67,18 +62,14 @@ export default function DefectListOnMap({
             <div key={defectDetail.publicId}>
               <div className="flex items-start gap-2">
                 <div
-                  className={`mt-0.5 rounded-full p-1 ${
-                    getSeverity(defectDetail.risk) === 'critical'
-                      ? 'bg-red-100'
-                      : 'bg-amber-100'
-                  }`}
+                  className={`mt-0.5 rounded-full p-1 ${getSeverityColor(
+                    getSeverity(defectDetail.risk),
+                  )}`}
                 >
                   <AlertTriangle
-                    className={`h-4 w-4 ${
-                      getSeverity(defectDetail.risk) === 'critical'
-                        ? 'text-red-600'
-                        : 'text-amber-600'
-                    }`}
+                    className={`h-4 w-4 ${getSeverityColor(
+                      getSeverity(defectDetail.risk),
+                    )}`}
                   />
                 </div>
                 <div className="flex-1 space-y-1">
@@ -87,15 +78,11 @@ export default function DefectListOnMap({
                       {getDamageSummary(defectDetail.damages)}
                     </p>
                     <Badge
-                      className={
-                        getSeverity(defectDetail.risk) === 'critical'
-                          ? 'bg-red-500'
-                          : 'bg-amber-500'
-                      }
+                      className={getSeverityColor(
+                        getSeverity(defectDetail.risk),
+                      )}
                     >
-                      {getSeverity(defectDetail.risk) === 'critical'
-                        ? '심각'
-                        : '경고'}
+                      {getSeverity(defectDetail.risk)}
                     </Badge>
                   </div>
                   <AccordionItem value={`item-${defectDetail.publicId}`}>

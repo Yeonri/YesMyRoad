@@ -73,11 +73,11 @@ const useAddressStore = create<addressStore>((set, get) => ({
     set({ mapBounds: bounds })
   },
   logMapBounds: () => {
-    const state = get()
+    // const state = get()
     // console.log('지도 경계 좌표:', state.mapBounds)
   },
   logState: () => {
-    const state = get()
+    // const state = get()
     // console.log('주소 정보 업데이트:', {
     //   id: state.id,
     //   longitude: state.longitude,

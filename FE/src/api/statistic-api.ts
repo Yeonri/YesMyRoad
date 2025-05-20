@@ -16,7 +16,7 @@ export const statisticAPI = {
   getDefectAddressCount: () =>
     apiCaller(
       'get',
-      'api/dashboard/damage-address-count',
+      'api/dashboard/region-count',
       '도로파손 감지된 주소 개수 조회 실패',
     ),
 

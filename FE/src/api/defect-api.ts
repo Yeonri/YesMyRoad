@@ -1,7 +1,6 @@
 // src/api/defect-api.ts
-import axios from 'axios'
-
 import apiClient from '@/api/api-client'
+import axios from 'axios'
 
 export const defectAPI = {
   // 도로 파손 건의 상태 변경
