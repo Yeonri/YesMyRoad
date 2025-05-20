@@ -2,6 +2,20 @@ import numpy as np
 import cv2
 import matplotlib.pyplot as plt
 import os
+from matplotlib import font_manager, rc
+
+def set_korean_font():
+    """matplotlib에서 한글 폰트를 사용할 수 있도록 설정합니다."""
+    # 윈도우의 경우
+    if os.name == 'nt':
+        font_name = font_manager.FontProperties(fname="c:/Windows/Fonts/malgun.ttf").get_name()
+        rc('font', family=font_name)
+    # macOS의 경우
+    elif os.name == 'posix':
+        rc('font', family='AppleGothic')
+    
+    # 음수 표시 문제 해결
+    plt.rcParams['axes.unicode_minus'] = False
 
 def undistort_single_image(calibration_file, input_image_path, output_image_path=None, visualize=True):
     """
@@ -78,6 +92,9 @@ def undistort_single_image(calibration_file, input_image_path, output_image_path
     
     # 5. 결과 시각화 (옵션)
     if visualize:
+        # 한글 폰트 설정
+        set_korean_font()
+        
         plt.figure(figsize=(15, 10))
         
         plt.subplot(221)
@@ -111,11 +128,13 @@ def undistort_single_image(calibration_file, input_image_path, output_image_path
     print("왜곡 보정 완료!")
     return dst_cropped
 
-# 사용 예시
 if __name__ == "__main__":
+    # 한글 폰트 설정 (메인에서도 추가)
+    set_korean_font()
+    
     # 매개변수 설정
     calibration_file = "./model/camera_calibration_result.npy"  # 캘리브레이션 결과 파일
-    input_image = "./image/test_image_18.jpg"  # 보정할 이미지 경로
+    input_image = "./image/test/test_image_18.jpg"  # 보정할 이미지 경로
     output_image = "./result/checkerboard_01_undistorted.jpg"  # 결과 저장 경로
     
     # 이미지 왜곡 보정 실행
@@ -125,3 +144,4 @@ if __name__ == "__main__":
         output_image_path=output_image,
         visualize=True
     )
+    

@@ -29,7 +29,7 @@ if not images:
 print(f"발견된 이미지 파일 수: {len(images)}")
 
 # 코너 검출 결과를 시각화할지 여부
-visualize = True
+visualize = False
 
 # 이미지 크기를 저장할 변수
 img_shape = None
