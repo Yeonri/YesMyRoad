@@ -3,6 +3,7 @@ package com.b201.api.service;
 import java.util.List;
 import java.util.Optional;
 
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -64,6 +65,7 @@ public class CapturePointService {
 			.build();
 	}
 
+	@Cacheable(cacheNames = "capture_damage", key = "#publicId", unless = "#result==null")
 	public Optional<DamageDetailResponseDto> findDamageDetail(String publicId) {
 		log.info("[findDamageDetail] 호출됨, publicId={}", publicId);
 
