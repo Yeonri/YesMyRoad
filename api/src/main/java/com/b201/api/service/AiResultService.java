@@ -118,6 +118,7 @@ public class AiResultService {
 				return CaptureDamage.builder()
 					.capturePoint(capturePoint)
 					.damageCategory(category)
+					.createdAt(capturePoint.getCaptureTimestamp())
 					.build();
 			})
 			.toList();
