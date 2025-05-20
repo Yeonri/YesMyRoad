@@ -38,18 +38,18 @@ export default function ClientLayout({
   // 앱 초기화 시 세션 유효성 검증
   useEffect(() => {
     const validateSession = async () => {
-      console.log('[ClientLayout] 마운트됨')
-      console.log('[ClientLayout] 현재 경로:', pathname)
+      // console.log('[ClientLayout] 마운트됨')
+      // console.log('[ClientLayout] 현재 경로:', pathname)
       setIsChecking(true)
 
       // 토큰이 있는지 확인
       const hasTokens = TokenService.hasTokens()
-      console.log('[ClientLayout] 토큰 존재 여부:', hasTokens)
+      // console.log('[ClientLayout] 토큰 존재 여부:', hasTokens)
 
       if (hasTokens) {
         // 토큰 유효성 검증 및 필요시 갱신
         const isValid = await userAPI.validateSession()
-        console.log('[ClientLayout] 토큰 유효성:', isValid)
+        // console.log('[ClientLayout] 토큰 유효성:', isValid)
 
         // 토큰이 유효하지 않으면 로그인 페이지로
         if (!isValid && protectedRoutes.includes(pathname)) {
@@ -58,17 +58,13 @@ export default function ClientLayout({
         }
         // 토큰이 유효하고 로그인 페이지에 접근하면 메인으로
         else if (isValid && authRoutes.includes(pathname)) {
-          console.log(
-            '[인증 보호] 인증된 사용자가 로그인 페이지에 접근: 메인 페이지로 리다이렉션',
-          )
+          // console.log(            '[인증 보호] 인증된 사용자가 로그인 페이지에 접근: 메인 페이지로 리다이렉션',          )
           router.push('/')
         }
       }
       // 토큰이 없고 보호된 경로에 접근하면 로그인 페이지로
       else if (protectedRoutes.includes(pathname)) {
-        console.log(
-          '[인증 보호] 인증되지 않은 사용자가 보호된 경로에 접근: 로그인 페이지로 리다이렉션',
-        )
+        // console.log(          '[인증 보호] 인증되지 않은 사용자가 보호된 경로에 접근: 로그인 페이지로 리다이렉션'      )
         router.push('/auth')
       }
 

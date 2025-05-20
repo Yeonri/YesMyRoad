@@ -118,7 +118,7 @@ export const useDetailedDefectStore = create<DetailedDefectState>(
         )
 
         if (response.status === 200 || response.data) {
-          console.log('success: ', response.data)
+          // console.log('success: ', response.data)
 
           // 상태 업데이트
           set((state) => ({

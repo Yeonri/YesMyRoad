@@ -53,9 +53,9 @@ export default function DamageSummary() {
   })
 
   useEffect(() => {
-    console.log('dailyReport: ', dailyReport)
-    console.log('weeklyReport: ', weeklyReport)
-    console.log('monthlyReport: ', monthlyReport)
+    // console.log('dailyReport: ', dailyReport)
+    // console.log('weeklyReport: ', weeklyReport)
+    // console.log('monthlyReport: ', monthlyReport)
   }, [dailyReport, weeklyReport, monthlyReport])
 
   // 로딩 상태 표시
