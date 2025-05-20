@@ -16,5 +16,5 @@ public class DamageDto {
 	private Integer id;
 	private String category;
 	private int status;
-	private LocalDateTime updatedAt;
+	private LocalDateTime createdAt;
 }
