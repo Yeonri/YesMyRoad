@@ -2,7 +2,6 @@ package com.b201.api.domain;
 
 import java.time.LocalDateTime;
 
-import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
@@ -56,7 +55,6 @@ public class CaptureDamage {
 	@Column(name = "description")
 	private String description;
 
-	@CreatedDate
 	@Column(name = "created_at", nullable = false, updatable = false)
 	private LocalDateTime createdAt;
 
@@ -76,12 +74,14 @@ public class CaptureDamage {
 		CapturePoint capturePoint,
 		DamageCategory damageCategory,
 		String description,
-		DamageStatus status  // <- 상태를 명시적으로 받거나
+		DamageStatus status,  // <- 상태를 명시적으로 받거나
+		LocalDateTime createdAt
 	) {
 		this.capturePoint = capturePoint;
 		this.damageCategory = damageCategory;
 		this.description = description;
 		this.status = status != null ? status : DamageStatus.REPORTED;
+		this.createdAt = createdAt;
 	}
 
 	@Getter
