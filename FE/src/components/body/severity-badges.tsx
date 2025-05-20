@@ -3,7 +3,7 @@ import { Badge } from '@/components/ui/badge'
 import { useQuery } from '@tanstack/react-query'
 
 const SeverityBadges: React.FC = () => {
-  // const { data: RiskList } = useQuery({
+  // const { data: riskList } = useQuery({
   //   queryKey: ['risk-list'],
   //   queryFn: async () => {
   //     const response = await statisticAPI.getRiskList() // 함수 갈아 끼워 넣기
@@ -16,6 +16,11 @@ const SeverityBadges: React.FC = () => {
   //   staleTime: 5 * 60 * 1000,
   //   retry: 1,
   // })
+
+  // const critical = riskList?.data.critical
+  // const danger = riskList?.data.highRisk
+  // const caution = riskList?.data.warning
+  // const safe = riskList?.data.safe
 
   const critical = 7
   const danger = 23

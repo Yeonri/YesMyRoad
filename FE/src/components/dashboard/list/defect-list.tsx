@@ -99,7 +99,7 @@ export default function DefectList({
     setaddrSearchQuery,
   } = useDetailedDefectStore()
 
-  const { currentPage, itemsPerPage, setTotalItems } = useDefectListStore()
+  const { currentPage, itemsPerPage, setTotalItems,setCurrentPage  } = useDefectListStore()
   const { geoJSONData } = useDefectStore()
 
   // 이전 totalItems 값을 저장하는 ref
@@ -197,6 +197,20 @@ export default function DefectList({
     setidSearchQuery,
     setaddrSearchQuery,
   ])
+
+  useEffect(() => {
+    // 필터 또는 검색어가 변경되면 페이지를 1로 리셋
+    setCurrentPage(1);
+  }, [
+    filter, 
+    process, 
+    severity, 
+    defectType, 
+    timeRange, 
+    idSearchQuery, 
+    addrSearchQuery, 
+    setCurrentPage
+  ]);
 
   // 필터링 및 정렬된 데이터 계산 (검색어 추가)
   const filteredAndSortedData = useMemo(() => {

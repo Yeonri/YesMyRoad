@@ -19,6 +19,11 @@ const DefectOverall: React.FC = () => {
   //   retry: 1,
   // })
 
+  // const critical = riskList?.data.critical
+  // const danger = riskList?.data.highRisk
+  // const caution = riskList?.data.warning
+  // const safe = riskList?.data.safe
+
   const critical = 100
   const danger = 0
   const caution = 0
@@ -65,6 +70,7 @@ const DefectOverall: React.FC = () => {
   //   retry: 1,
   // })
 
+  // const addrCnt = addressCount?.data.regionCount
   const addrCnt = 8
 
   return (
