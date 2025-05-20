@@ -1,20 +1,19 @@
-// src/components/dashboard/list/defect-paginations.tsx
 'use client'
 
-import React from 'react'
 import {
   Pagination,
   PaginationContent,
+  PaginationEllipsis,
   PaginationItem,
   PaginationLink,
-  PaginationPrevious,
   PaginationNext,
-  PaginationEllipsis,
+  PaginationPrevious,
 } from '@/components/ui/pagination'
 import { useDefectListStore } from '@/store/defect-list-store'
+import React from 'react'
 
 // 텍스트 선택 방지 스타일 추가
-const noSelectStyle = "select-none"
+const noSelectStyle = 'select-none'
 
 const DefectPaginations: React.FC = () => {
   const {
@@ -32,7 +31,7 @@ const DefectPaginations: React.FC = () => {
       return Array.from({ length: totalPages }, (_, i) => i + 1)
     }
     let start = Math.max(1, currentPage - Math.floor(maxVisiblePages / 2))
-    let end = Math.min(totalPages, start + maxVisiblePages - 1)
+    const end = Math.min(totalPages, start + maxVisiblePages - 1)
     if (end - start + 1 < maxVisiblePages) {
       start = Math.max(1, end - maxVisiblePages + 1)
     }
@@ -54,7 +53,9 @@ const DefectPaginations: React.FC = () => {
         {pageNumbers[0] > 1 && (
           <>
             <PaginationItem>
-              <PaginationLink onClick={() => setCurrentPage(1)}>1</PaginationLink>
+              <PaginationLink onClick={() => setCurrentPage(1)}>
+                1
+              </PaginationLink>
             </PaginationItem>
             {pageNumbers[0] > 2 && (
               <PaginationItem>
@@ -92,7 +93,9 @@ const DefectPaginations: React.FC = () => {
 
         <PaginationItem>
           <PaginationNext
-            onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
+            onClick={() =>
+              setCurrentPage(Math.min(totalPages, currentPage + 1))
+            }
             className={`${currentPage === totalPages ? 'pointer-events-none opacity-50' : ''}`}
           />
         </PaginationItem>

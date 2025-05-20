@@ -249,8 +249,6 @@ const AuthForm: React.FC<AuthFormProps> = ({ isLoginTab, onTabChange }) => {
         }
       }
     } catch (error) {
-      // console.error('API 호출 실패:', error)
-
       // 에러 메시지 표시 (개선된 에러 처리)
       if (isAxiosError(error) && error.response?.data) {
         try {

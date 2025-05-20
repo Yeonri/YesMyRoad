@@ -1,10 +1,5 @@
 'use client'
 
-// import { coodAPI } from '@/api/coordinate-api'
-import { defectAPI } from '@/api/defect-api'
-// import { maintenanceAPI } from '@/api/maintenance-api'
-// import { statisticAPI } from '@/api/statistic-api'
-// API 테스트
 import { userAPI } from '@/api/user-api'
 import { Button } from '@/components/ui/button'
 import {
@@ -16,17 +11,13 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet'
-import { Bell, Menu, Search, Settings, User } from 'lucide-react'
+import { Bell, Menu, Settings, User } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 
 import { MobileNav } from '../mobile-nav'
 
-// const PUBLIC_ID = '23569766-0f5a-4f54-ba9b-dba4dbf0b922'
-
 export default function Header() {
   const router = useRouter() // 라우터 훅 사용
-  // const { clearSession } = useUserStore()
-
   const handleLogout = async () => {
     const response = await userAPI.logout()
     console.log(response)
@@ -41,15 +32,6 @@ export default function Header() {
 
       // 로그인 페이지로 리디렉션
       router.push('/auth')
-    }
-  }
-
-  const defectAPITest = async () => {
-    const response = await defectAPI.updateRoadDamageStatus(10, 'COMPLETED')
-    if (response.status === 200) {
-      console.log(response.data)
-    } else {
-      alert('응 안돼~')
     }
   }
 
@@ -72,8 +54,7 @@ export default function Header() {
       </div>
 
       <div className="flex flex-1 items-center gap-4 md:gap-2 lg:gap-4">
-        <div className="ml-auto flex-1 md:flex-initial">
-        </div>
+        <div className="ml-auto flex-1 md:flex-initial"></div>
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button variant="outline" size="icon" className="relative">
@@ -111,7 +92,7 @@ export default function Header() {
             <DropdownMenuLabel>내 계정</DropdownMenuLabel>
             <DropdownMenuSeparator />
             <DropdownMenuItem>프로필</DropdownMenuItem>
-            <DropdownMenuItem onClick={defectAPITest}>설정</DropdownMenuItem>
+            <DropdownMenuItem>설정</DropdownMenuItem>
             <DropdownMenuSeparator />
             <DropdownMenuItem onClick={handleLogout}>로그아웃</DropdownMenuItem>
           </DropdownMenuContent>
