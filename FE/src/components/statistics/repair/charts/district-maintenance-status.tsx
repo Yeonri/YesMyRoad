@@ -12,7 +12,7 @@ export default function DistrictMaintenanceStatus() {
 
   const fetchDistrictMaintenanceStatus = useCallback(async () => {
     const response = await maintenanceAPI.getDistrictMaintenanceStatus()
-    console.log('getDistrictMaintenanceStatus: ', response)
+    // console.log('getDistrictMaintenanceStatus: ', response)
     setDistrictMaintenanceStatus(response.data)
   }, [])
 
@@ -21,7 +21,7 @@ export default function DistrictMaintenanceStatus() {
   }, [])
 
   useEffect(() => {
-    console.log('districtMaintenanceStatus: ', districtMaintenanceStatus)
+    // console.log('districtMaintenanceStatus: ', districtMaintenanceStatus)
   }, [districtMaintenanceStatus])
 
   // 상태별 label 및 색상 정의

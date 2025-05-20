@@ -16,7 +16,7 @@ export default function MonthlyMaintenanceOverview() {
 
   const fetchMonthlyMaintenanceStatus = useCallback(async () => {
     const response = await maintenanceAPI.getMaintenanceOverview()
-    console.log('getMaintenanceOverview: ', response)
+    // console.log('getMaintenanceOverview: ', response)
     setMonthlyMaintenanceOverview({ ...response.data })
   }, [])
 

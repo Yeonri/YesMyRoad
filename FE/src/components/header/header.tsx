@@ -10,15 +10,14 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
-import { Sheet, SheetTrigger } from '@/components/ui/sheet'
-import { Menu, User } from 'lucide-react'
+import { User } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 
 export default function Header() {
   const router = useRouter() // 라우터 훅 사용
   const handleLogout = async () => {
     const response = await userAPI.logout()
-    console.log(response)
+    // console.log(response)
     if (response.status === 200) {
       // 로컬 스토리지에서 인증 관련 데이터 삭제
       localStorage.removeItem('accessToken')
@@ -35,15 +34,6 @@ export default function Header() {
 
   return (
     <header className="bg-background sticky top-0 z-50 flex h-16 items-center gap-4 border-b px-4 md:px-6">
-      {/* 얘네 뭐하는 코드지? 주석처리해도 고장이 안나는데??? 렌더링 되는것도 전혀 없고 */}
-      <Sheet>
-        <SheetTrigger asChild>
-          <Button variant="outline" size="icon" className="md:hidden">
-            <Menu className="h-5 w-5" />
-            <span className="sr-only">메뉴 토글</span>
-          </Button>
-        </SheetTrigger>
-      </Sheet>
       <div className="flex items-center gap-2">
         <div className="hidden font-bold md:flex">YES, MY ROAD</div>
       </div>
