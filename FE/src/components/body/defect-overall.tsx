@@ -1,16 +1,34 @@
 import { maintenanceAPI } from '@/api/maintenance-api'
 import { statisticAPI } from '@/api/statistic-api'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { useQuery } from '@tanstack/react-query'
+import { useQuery, useQueryClient } from '@tanstack/react-query'
 import {
   AlertTriangle,
   Hammer,
   MapPin,
   MessageCircleWarning,
 } from 'lucide-react'
+import { useEffect } from 'react'
+import { useDetailedDefectStore } from '@/store/detailed-defect-list-store'
 
 const DefectOverall: React.FC = () => {
-  const { data: riskList } = useQuery({
+  // QueryClient 인스턴스 가져오기
+  const queryClient = useQueryClient()
+  
+  // 상태 변경을 감지하기 위해 defectStore에서 필요한 상태 구독
+  const defectDetailList = useDetailedDefectStore((state) => state.detailedGeoJSONData)
+  
+  // 상태 변경 시 쿼리 무효화 (데이터 다시 가져오기) - 타입 오류 수정
+  useEffect(() => {
+    if (defectDetailList) {
+      // 각 쿼리를 개별적으로 무효화 (객체 형태로 전달)
+      queryClient.invalidateQueries({ queryKey: ['risk-list'] })
+      queryClient.invalidateQueries({ queryKey: ['completed-rate'] })
+      queryClient.invalidateQueries({ queryKey: ['address-count'] })
+    }
+  }, [defectDetailList, queryClient])
+
+  const { data: riskList, refetch: refetchRiskList } = useQuery({
     queryKey: ['risk-list'],
     queryFn: async () => {
       const response = await statisticAPI.getRiskList()
@@ -20,7 +38,7 @@ const DefectOverall: React.FC = () => {
       return response
     },
     refetchOnWindowFocus: false,
-    staleTime: 5 * 60 * 1000,
+    staleTime: 5 * 60 * 1000, 
     retry: 1,
   })
 
@@ -33,7 +51,7 @@ const DefectOverall: React.FC = () => {
 
   const criticalRate = Math.round((critical / totalRisks) * 100 * 100) / 100
 
-  const { data: completedRateData } = useQuery({
+  const { data: completedRateData, refetch: refetchCompletedRate } = useQuery({
     queryKey: ['completed-rate'],
     queryFn: async () => {
       const response = await maintenanceAPI.getMaintenanceOverview()
@@ -59,7 +77,7 @@ const DefectOverall: React.FC = () => {
         100,
     ) / 100
 
-  const { data: addressCount } = useQuery({
+  const { data: addressCount, refetch: refetchAddressCount } = useQuery({
     queryKey: ['address-count'],
     queryFn: async () => {
       const response = await statisticAPI.getDefectAddressCount()
@@ -74,6 +92,27 @@ const DefectOverall: React.FC = () => {
   })
 
   const addrCnt = addressCount?.data.regionCount
+
+  // 필요에 따라 수동으로 새로고침할 수 있는 함수
+  const refreshAllData = () => {
+    refetchRiskList();
+    refetchCompletedRate();
+    refetchAddressCount();
+  }
+
+  // 다른 특정 이벤트(예: 커스텀 이벤트)를 수신하여 데이터 새로고침
+  useEffect(() => {
+    const handleDataChange = () => {
+      refreshAllData();
+    };
+
+    // 커스텀 이벤트 리스너 추가
+    window.addEventListener('defect-data-changed', handleDataChange);
+    
+    return () => {
+      window.removeEventListener('defect-data-changed', handleDataChange);
+    };
+  }, []);
 
   return (
     <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
@@ -100,7 +139,7 @@ const DefectOverall: React.FC = () => {
       <Card>
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
           <CardTitle className="text-sm font-medium">
-            전체 작업 대비 완료 작업 비율
+             완료 작업 비율
           </CardTitle>
           <Hammer className="text-muted-foreground h-4 w-4" />
         </CardHeader>
@@ -116,7 +155,7 @@ const DefectOverall: React.FC = () => {
           <MapPin className="text-muted-foreground h-4 w-4" />
         </CardHeader>
         <CardContent>
-          <div className="text-2xl font-bold">{addrCnt} 곳</div>
+          <div className="text-2xl font-bold">{addrCnt} 개소</div>
         </CardContent>
       </Card>
     </div>
