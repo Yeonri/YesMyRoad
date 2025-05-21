@@ -29,6 +29,7 @@ public class CapturePointService {
 
 	private final CapturePointRepository capturePointRepository;
 
+	@Cacheable(cacheNames = "capture_points_all")
 	public CapturePointResponseDto findAllFeatures(String regionName) {
 		log.info("[findAllFeatures] 호출됨 : {}", regionName);
 
@@ -54,6 +55,7 @@ public class CapturePointService {
 
 		PropertiesDto propertiesDto = PropertiesDto.builder()
 			.publicId(capturePoint.getPublicId())
+			.display(checkDamageStatus(capturePoint))
 			.address(new AddressDto(capturePoint.getStreetAddress()))
 			.accuracyMeters(capturePoint.getAccuracyMeters())
 			.build();
@@ -63,6 +65,20 @@ public class CapturePointService {
 			.geometry(geometryDto)
 			.properties(propertiesDto)
 			.build();
+	}
+
+	public int checkDamageStatus(CapturePoint capturePoint) {
+		log.info("[checkDamageStatus] capturePoint의 하위 데미지들 상태 체크, capturePointId = {}",
+			capturePoint.getCapturePointId());
+		for (CaptureDamage captureDamage : capturePoint.getCaptureDamages()) {
+			log.info("damage status 상태 : {}", captureDamage.getStatus());
+			if (!CaptureDamage.DamageStatus.COMPLETED.equals(captureDamage.getStatus())) {
+				log.info("[checkDamageStauts] return = {}", 1);
+				return 1;
+			}
+		}
+		log.info("[checkDamageStauts] return = {}", 0);
+		return 0;
 	}
 
 	@Cacheable(cacheNames = "capture_damage", key = "#publicId", unless = "#result==null")

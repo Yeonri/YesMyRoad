@@ -41,7 +41,7 @@ public class RedisConfig {
 			.serializeKeysWith(RedisSerializationContext.SerializationPair.fromSerializer(new StringRedisSerializer()))
 			.serializeValuesWith(
 				RedisSerializationContext.SerializationPair.fromSerializer(jsonSerializer))
-			.entryTtl(Duration.ofMinutes(1));
+			.entryTtl(Duration.ofMinutes(30));
 
 		return RedisCacheManager.builder(redisConnectionFactory).cacheDefaults(redisCacheConfiguration).build();
 	}
