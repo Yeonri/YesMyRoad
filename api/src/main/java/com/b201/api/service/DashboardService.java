@@ -1,5 +1,7 @@
 package com.b201.api.service;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -52,7 +54,9 @@ public class DashboardService {
 
 	private double calculateRate(long current, long previous) {
 		if (previous > 0) {
-			return (current - previous) * 100.0 / previous;
+			return BigDecimal.valueOf((current - previous) * 100.0 / previous)
+				.setScale(2, RoundingMode.HALF_UP)
+				.doubleValue();
 		}
 		if (current == previous) {
 			return 0.0;
