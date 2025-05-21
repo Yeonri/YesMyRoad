@@ -29,7 +29,7 @@ public class CapturePointService {
 
 	private final CapturePointRepository capturePointRepository;
 
-	// @Cacheable(cacheNames = "capture_points_all")
+	@Cacheable(cacheNames = "capture_points_all")
 	public CapturePointResponseDto findAllFeatures(String regionName) {
 		log.info("[findAllFeatures] 호출됨 : {}", regionName);
 
