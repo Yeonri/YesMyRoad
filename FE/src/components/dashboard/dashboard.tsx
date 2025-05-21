@@ -105,9 +105,9 @@ export default function Dashboard() {
     })
   }, [defectDetailList, filteredPublicIdsByBounds])
 
-  useEffect(() => {
-    console.log('filteredDefectDetailList: ', filteredDefectDetailList)
-  }, [filteredDefectDetailList])
+  // useEffect(() => {
+  //   console.log('filteredDefectDetailList: ', filteredDefectDetailList)
+  // }, [filteredDefectDetailList])
 
   // DefectMap과 DefectHeatmap 컴포넌트를 메모이제이션
   // const memoizedDefectMap = useMemo(
