@@ -119,7 +119,7 @@ const AuthForm: React.FC<AuthFormProps> = ({ isLoginTab, onTabChange }) => {
   ) => {
     e.preventDefault()
     if (formData.id.length === 0) {
-      alert('아이디를 입력해주세요')
+      // alert('아이디를 입력해주세요')
       return
     }
 
@@ -130,14 +130,14 @@ const AuthForm: React.FC<AuthFormProps> = ({ isLoginTab, onTabChange }) => {
       setIdAvailability(available)
 
       // 중복 확인 결과에 따른 alert 표시 (useEffect에서 이동)
-      if (available === 1) {
-        alert('사용할 수 있는 아이디입니다')
-      } else if (available === 0) {
-        alert('이미 존재하는 아이디입니다')
-      }
+      // if (available === 1) {
+      //   // alert('사용할 수 있는 아이디입니다')
+      // } else if (available === 0) {
+      //   // alert('이미 존재하는 아이디입니다')
+      // }
     } catch (error) {
-      console.error('아이디 중복 확인 실패:', error)
-      alert('아이디 중복 확인에 실패했습니다.')
+      // console.error('아이디 중복 확인 실패:', error)
+      // alert('아이디 중복 확인에 실패했습니다.')
       setIdAvailability(-1)
     } finally {
       setIsLoading(false) // 중복 확인 완료 후 로딩 상태 비활성화
@@ -206,7 +206,7 @@ const AuthForm: React.FC<AuthFormProps> = ({ isLoginTab, onTabChange }) => {
           setIsSuccess(true)
 
           // 성공 메시지 및 리디렉션
-          alert('로그인 성공! 대시보드로 이동합니다.')
+          // alert('로그인 성공! 대시보드로 이동합니다.')
           router.push('/')
         }
       } else {
@@ -310,7 +310,7 @@ const AuthForm: React.FC<AuthFormProps> = ({ isLoginTab, onTabChange }) => {
             />
             {!isLoginTab && (
               <Button
-                className="ml-5"
+                className="ml-5 select-none"
                 onClick={handleCheckIdDuplication}
                 disabled={isLoading || isSuccess || !formData.id}
               >
@@ -470,7 +470,7 @@ const AuthForm: React.FC<AuthFormProps> = ({ isLoginTab, onTabChange }) => {
         <div className="pt-6">
           <Button
             type="submit"
-            className={`w-full ${isSuccess ? 'bg-green-600 hover:bg-green-700' : ''}`}
+            className={`select-none w-full ${isSuccess ? 'bg-green-600 hover:bg-green-700' : ''}`}
             disabled={
               isLoading ||
               isSuccess ||

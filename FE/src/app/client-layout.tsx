@@ -53,7 +53,7 @@ export default function ClientLayout({
 
         // 토큰이 유효하지 않으면 로그인 페이지로
         if (!isValid && protectedRoutes.includes(pathname)) {
-          alert('[인증 보호] 세션이 유효하지 않음: 로그인 페이지로 리다이렉션')
+          // alert('[인증 보호] 세션이 유효하지 않음: 로그인 페이지로 리다이렉션')
           router.push('/auth')
         }
         // 토큰이 유효하고 로그인 페이지에 접근하면 메인으로
