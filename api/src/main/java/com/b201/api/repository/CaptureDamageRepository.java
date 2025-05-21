@@ -54,7 +54,7 @@ public interface CaptureDamageRepository extends JpaRepository<CaptureDamage, In
 			YEAR(d.capturePoint.captureTimestamp),
 			MONTH(d.capturePoint.captureTimestamp),
 			SUM(CASE WHEN d.damageCategory.categoryName = '도로균열' THEN 1 ELSE 0 END),
-			SUM(CASE WHEN d.damageCategory.categoryName = '도로홀'    THEN 1 ELSE 0 END),
+			SUM(CASE WHEN d.damageCategory.categoryName = '도로 홀'    THEN 1 ELSE 0 END),
 			COUNT(d)
 			)
 			FROM CaptureDamage d
@@ -98,7 +98,7 @@ public interface CaptureDamageRepository extends JpaRepository<CaptureDamage, In
 			r.regionName,
 			count(cd),
 			coalesce(sum(case when cd.damageCategory.categoryName = '도로균열' then 1 ELSE 0 END),0),
-			coalesce(sum(case when cd.damageCategory.categoryName = '도로홀' then 1 ELSE 0 END),0)
+			coalesce(sum(case when cd.damageCategory.categoryName = '도로 홀' then 1 ELSE 0 END),0)
 			)
 			from Region r
 				join r.parentRegion pr
