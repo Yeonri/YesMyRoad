@@ -1,4 +1,5 @@
 'use client'
+
 import {
   AlertDialog,
   AlertDialogAction,
@@ -23,7 +24,7 @@ export default function DefectImage({
 }: DefectImageProps) {
   const [isOpen, setIsOpen] = useState(false)
   const [imageError, setImageError] = useState(false)
-  
+
   return (
     <AlertDialog open={isOpen} onOpenChange={setIsOpen}>
       <AlertDialogTrigger asChild>
@@ -33,7 +34,7 @@ export default function DefectImage({
         <AlertDialogHeader>
           <AlertDialogTitle>{alt}</AlertDialogTitle>
         </AlertDialogHeader>
-        <div className="flex justify-center items-center my-4">
+        <div className="my-4 flex items-center justify-center">
           <Image
             src={imageError ? '/assets/images/image-not-found.png' : imageUrl}
             width={600}
