@@ -57,7 +57,7 @@ JWT_SECRET=your_jwt_secret_key
 1. **레포지토리 클론**
 
    ```bash
-   git clone https://github.com/your_org/S12P31B201.git
+   git clone -b BE/dev https://lab.ssafy.com/s12-final/S12P31B201.git
    cd S12P31B201/api
    ```
 
