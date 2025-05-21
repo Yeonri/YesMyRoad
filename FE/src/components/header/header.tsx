@@ -25,7 +25,7 @@ export default function Header() {
       localStorage.removeItem('userId')
 
       // clearSession()
-      alert('로그아웃하였습니다')
+      // alert('로그아웃하였습니다')
 
       // 로그인 페이지로 리디렉션
       router.push('/auth')
@@ -35,7 +35,7 @@ export default function Header() {
   return (
     <header className="bg-background sticky top-0 z-50 flex h-16 items-center gap-4 border-b px-4 md:px-6">
       <div className="flex items-center gap-2">
-        <div className="hidden font-bold md:flex">YES, MY ROAD</div>
+        <div className="hidden font-bold md:flex select-none">YES, MY ROAD</div>
       </div>
 
       <div className="flex flex-1 items-center gap-4 md:gap-2 lg:gap-4">

@@ -126,7 +126,7 @@ apiClient.interceptors.response.use(
             } else {
               processQueue(new Error('토큰 갱신 실패'), null)
               reject(error)
-              alert('세션이 만료되었습니다. 다시 로그인해주세요.')
+              // alert('세션이 만료되었습니다. 다시 로그인해주세요.')
               handleLogout()
             }
           } catch (refreshError) {
@@ -137,7 +137,7 @@ apiClient.interceptors.response.use(
                 : new Error('토큰 갱신 실패'),
               null,
             )
-            alert('세션이 만료되었습니다. 다시 로그인해주세요.')
+            // alert('세션이 만료되었습니다. 다시 로그인해주세요.')
             handleLogout()
             reject(refreshError)
           }

@@ -10,20 +10,24 @@ import { useState } from 'react'
 export default function AuthPage() {
   // 로그인/회원가입 탭 상태 관리
   const [isLoginTab, setIsLoginTab] = useState<boolean>(true)
+  const [backgroundError, setBackgroundError] = useState(false)
 
   return (
     <>
       <header className="bg-background sticky top-0 z-50 flex h-16 items-center gap-4 border-b px-4 md:px-6">
-        <div className="hidden font-bold md:flex">YES, MY ROAD</div>
+        <div className="select-none hidden font-bold md:flex">YES, MY ROAD</div>
       </header>
-      <div className="relative h-[calc(100vh-4rem)] w-full">
+      <div className="relative h-[calc(100vh-4rem)] w-full select-none">
         <Image
-          src={background}
+          src={
+            backgroundError ? '/assets/images/image-not-found.png' : background
+          }
           alt="로그인 배경"
           fill
           style={{ objectFit: 'cover' }}
           priority
           className="z-0"
+          onError={() => setBackgroundError(true)}
         />
         <div className="bg-white-500 absolute inset-0 z-10 flex items-center justify-center">
           <Tabs
@@ -32,7 +36,7 @@ export default function AuthPage() {
               setIsLoginTab(value === 'login')
               // 'login'이면 로그인, 'register'면 회원가입
             }}
-            className="w-[400px]"
+            className="w-[400px] select-none"
           >
             <TabsList className="grid w-full grid-cols-2">
               <TabsTrigger value="login">로그인</TabsTrigger>
