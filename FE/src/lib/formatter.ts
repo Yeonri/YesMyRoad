@@ -76,3 +76,21 @@ export const getDisplayId = (
 
   return `${prefix}-${formattedDamageId}-${shortCode}`
 }
+
+// 결함 ID를 생성하는 함수: publicId만 해싱
+export const getDisplayIdPublic = (
+  publicId: string,
+): string => {
+  const validChars = '0123456789ABCDEFGHJKLMNPQRSTUVWXYZ'
+  const hash = crypto.createHash('sha256').update(publicId).digest('hex')
+  const shortCode = Array(5)
+    .fill(0)
+    .map((_, i) => {
+      const index =
+        parseInt(hash.slice(i * 2, i * 2 + 2), 16) % validChars.length
+      return validChars[index]
+    })
+    .join('')
+  
+  return `${shortCode}`
+}
