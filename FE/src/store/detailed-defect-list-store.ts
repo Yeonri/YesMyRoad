@@ -2,6 +2,20 @@
 import { defectAPI } from '@/api/defect-api'
 import { create } from 'zustand'
 
+const newStatusLabels: { [key: string]: string } = {
+  'REPORTED': '보고됨으로',
+  'RECEIVED': '접수됨로',
+  'IN_PROGRESS': '작업중으로',
+  'COMPLETED': '작업완료로',
+}
+
+const currStatusLabels: { [key: string]: string } = {
+  'REPORTED': '보고됨',
+  'RECEIVED': '접수됨',
+  'IN_PROGRESS': '작업중',
+  'COMPLETED': '작업완료',
+}
+
 // 타입 정의
 export type DetailedDamageType = {
   defectId: string
@@ -131,7 +145,7 @@ export const useDetailedDefectStore = create<DetailedDefectState>(
           }))
 
           alert(
-            `작업 상태를 ${currentStatus}에서 ${newStatus}로 변경하였습니다`,
+            `작업 상태를 ${currStatusLabels[currentStatus]}에서 ${newStatusLabels[newStatus]} 변경하였습니다`,
           )
         } else {
           console.error('Status update failed:', response)

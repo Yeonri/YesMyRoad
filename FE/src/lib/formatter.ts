@@ -92,3 +92,11 @@ export const getDisplayIdPublic = (publicId: string): string => {
 
   return `${shortCode}`
 }
+
+  // 상태별 label 및 색상 정의
+ export const statusLabels = [
+    { key: 'reported', label: '보고됨', color: '#e0e0e0' },
+    { key: 'received', label: '접수완료', color: '#ee6666' },
+    { key: 'inProgress', label: '작업중', color: '#fac858' },
+    { key: 'completed', label: '작업완료', color: '#91cc75' },
+  ]
