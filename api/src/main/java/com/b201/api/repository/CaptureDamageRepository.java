@@ -32,8 +32,7 @@ public interface CaptureDamageRepository extends JpaRepository<CaptureDamage, In
 			FROM CaptureDamage d
 				join d.capturePoint.region r
 					join r.parentRegion pr
-						where d.status = 'COMPLETED'
-							and pr.regionName = :regionName
+							where pr.regionName = :regionName
 			GROUP BY d.damageCategory.categoryName
 		""")
 	List<CategoryCountDto> countByCategoryName(@Param("regionName") String regionName);
