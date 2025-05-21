@@ -1,295 +1,166 @@
+"""
+시각화 관련 모듈
+
+이 모듈은 도로 손상 감지 및 분석 결과를 시각화하는 기능을 제공합니다.
+"""
+
 import cv2
 import numpy as np
-import os
 import matplotlib.pyplot as plt
-from utils.font_utils import put_text_on_image
+from .font_utils import put_text_on_image
+from .analysis import get_lrpci_grade, calculate_lrpci
+from .detection import analyze_crack_severity, check_pothole_emergency
 
-def save_analysis_results(road_area, crack_area, pothole_area, warped_road_area, warped_crack_area, warped_pothole_area, img_num):
-    """분석 결과를 텍스트 파일로 저장하는 함수"""
-    # 결과 저장 경로
-    result_dir = './result/'
-    
-    # 디렉토리가 없으면 생성
-    os.makedirs(result_dir, exist_ok=True)
-    
-    # 파일 경로 설정
-    file_path = os.path.join(result_dir, f'analysis_result_{img_num}.txt')
-    
-    # 결과 작성
-    with open(file_path, 'w', encoding='utf-8') as f:
-        f.write(f"도로 영역 분석 결과:\n")
-        f.write(f"도로 면적: {road_area} 픽셀\n")
-        f.write(f"균열 면적: {crack_area} 픽셀 ({crack_area/road_area*100:.2f}%)\n")
-        f.write(f"포트홀 면적: {pothole_area} 픽셀 ({pothole_area/road_area*100:.2f}%)\n")
-        f.write(f"총 손상 면적: {crack_area + pothole_area} 픽셀 ({(crack_area + pothole_area)/road_area*100:.2f}%)\n\n")
-        
-        f.write(f"원근 보정된 도로 영역 분석 결과:\n")
-        f.write(f"도로 면적: {warped_road_area} 픽셀\n")
-        f.write(f"균열 면적: {warped_crack_area} 픽셀 ({warped_crack_area/warped_road_area*100:.2f}%)\n")
-        f.write(f"포트홀 면적: {warped_pothole_area} 픽셀 ({warped_pothole_area/warped_road_area*100:.2f}%)\n")
-        f.write(f"총 손상 면적: {warped_crack_area + warped_pothole_area} 픽셀 ({(warped_crack_area + warped_pothole_area)/warped_road_area*100:.2f}%)\n")
-    
-    print(f"분석 결과가 {file_path}에 저장되었습니다.")
 
-def save_key_images(original_img, overlay_original, img_with_points, overlay_warped, img_num):
-    """핵심 이미지 4개를 하나의 이미지 파일로 저장하는 함수"""
-    # 결과 저장 경로
-    result_dir = './result/'
-    
-    # 디렉토리가 없으면 생성
-    os.makedirs(result_dir, exist_ok=True)
-    
-    # 파일 경로 설정
-    file_path = os.path.join(result_dir, f'key_images_{img_num}.jpg')
-    
-    # 2x2 그리드로 이미지 배치
-    plt.figure(figsize=(15, 12))
-    
-    plt.subplot(2, 2, 1)
-    plt.imshow(original_img)
-    plt.title('원본 이미지')
-    plt.axis('off')
-    
-    plt.subplot(2, 2, 2)
-    plt.imshow(overlay_original)
-    plt.title('손상 감지 (원본)')
-    plt.axis('off')
-    
-    plt.subplot(2, 2, 3)
-    plt.imshow(img_with_points)
-    plt.title('원근 변환 포인트')
-    plt.axis('off')
-    
-    plt.subplot(2, 2, 4)
-    plt.imshow(overlay_warped)
-    plt.title('손상 감지 (원근 보정)')
-    plt.axis('off')
-    
-    plt.tight_layout()
-    plt.suptitle(f"도로 손상 분석 결과 (이미지 {img_num})", fontsize=16)
-    plt.subplots_adjust(top=0.9)
-    
-    # 이미지 저장
-    plt.savefig(file_path, dpi=300, bbox_inches='tight')
-    plt.close()
-    
-    print(f"핵심 이미지가 {file_path}에 저장되었습니다.")
-
-def visualize_corner_detection(img, mask):
-    """코너 검출 과정과 결과를 시각화하는 함수 - 하이브리드 방식 시각화"""
-    height, width = mask.shape
-    
-    # 코너 검출에 사용된 마스크 준비
-    mask_smooth = cv2.GaussianBlur(mask, (5, 5), 0)
-    
-    # Harris 코너 검출
-    corners = cv2.cornerHarris(mask_smooth, blockSize=5, ksize=3, k=0.04)
-    
-    # 결과 이진화 및 팽창
-    corners_dilated = cv2.dilate(corners, None)
-    _, corners_binary = cv2.threshold(corners_dilated, 0.01 * corners_dilated.max(), 255, 0)
-    corners_binary = np.uint8(corners_binary)
-
-    # 코너 좌표 추출
-    corner_coords = np.where(corners_binary > 0)
-    all_corners = []
-    for i in range(len(corner_coords[0])):
-        all_corners.append([corner_coords[1][i], corner_coords[0][i]])  # x, y 순서로 저장
-    
-    # 이미지 상단/하단 구분
-    h_mid = height // 2
-    w_mid = width // 2
-    
-    # 상단 영역의 코너 포인트 분류
-    top_left_corners = [p for p in all_corners if p[0] < w_mid and p[1] < h_mid]
-    top_right_corners = [p for p in all_corners if p[0] >= w_mid and p[1] < h_mid]
-    
-    # 최적의 상단 코너 포인트 계산
-    selected_corners = []
-    if top_left_corners:
-        top_left = min(top_left_corners, key=lambda p: (p[0]-w_mid)**2 + p[1]**2)
-        selected_corners.append(top_left)
-    
-    if top_right_corners:
-        top_right = min(top_right_corners, key=lambda p: (p[0]-w_mid)**2 + p[1]**2)
-        selected_corners.append(top_right)
-    
-    # 하단 포인트 계산 (기존 방식)
-    contours, _ = cv2.findContours(mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
-    if contours and len(contours) > 0:
-        main_contour = max(contours, key=cv2.contourArea)
-        all_points = main_contour.reshape(-1, 2)
-        
-        if len(all_points) > 0:
-            # 왼쪽 하단: x값 최소, y값 최대
-            left_bottom_idx = np.lexsort((all_points[:, 0], -all_points[:, 1]))[0]
-            bottom_left = all_points[left_bottom_idx]
-            selected_corners.append(bottom_left)
-            
-            # 오른쪽 하단: x값 최대, y값 최대
-            right_bottom_idx = np.lexsort((-all_points[:, 0], -all_points[:, 1]))[0]
-            bottom_right = all_points[right_bottom_idx]
-            selected_corners.append(bottom_right)
-    
-    # 시각화
-    plt.figure(figsize=(15, 10))
-    
-    # 원본 마스크
-    plt.subplot(2, 3, 1)
-    plt.imshow(mask, cmap='gray')
-    plt.title('원본 마스크')
-    plt.axis('off')
-    
-    # 스무딩된 마스크
-    plt.subplot(2, 3, 2)
-    plt.imshow(mask_smooth, cmap='gray')
-    plt.title('스무딩된 마스크')
-    plt.axis('off')
-    
-    # Harris 코너 검출 결과
-    plt.subplot(2, 3, 3)
-    plt.imshow(corners, cmap='jet')
-    plt.title('Harris 코너 검출 결과')
-    plt.axis('off')
-    
-    # 이진화된 코너 결과
-    plt.subplot(2, 3, 4)
-    plt.imshow(corners_binary, cmap='gray')
-    plt.title('이진화된 코너 결과')
-    plt.axis('off')
-    
-    # 상단 코너와 윤곽선 구분
-    plt.subplot(2, 3, 5)
-    visualization = np.zeros((height, width, 3), dtype=np.uint8)
-    
-    # 상단 영역 표시 (밝은 회색)
-    visualization[:h_mid, :] = [64, 64, 64]
-    
-    # 윤곽선 표시
-    if contours and len(contours) > 0:
-        cv2.drawContours(visualization, [main_contour], 0, [0, 128, 0], 2)
-    
-    # 상단 코너 표시
-    for p in top_left_corners:
-        cv2.circle(visualization, tuple(p), 2, [255, 0, 0], -1)  # 빨간색
-    for p in top_right_corners:
-        cv2.circle(visualization, tuple(p), 2, [0, 255, 0], -1)  # 초록색
-    
-    plt.imshow(visualization)
-    plt.title('상단 코너와 전체 윤곽선')
-    plt.axis('off')
-    
-    # 선택된 코너 포인트
-    plt.subplot(2, 3, 6)
-    img_with_corners = img.copy()
-    point_names = ['좌상단(코너)', '우상단(코너)', '좌하단(윤곽선)', '우하단(윤곽선)']
-    colors = [(255, 0, 0), (0, 255, 0), (0, 0, 255), (255, 255, 0)]
-    
-    for i, p in enumerate(selected_corners):
-        if i < len(point_names):
-            cv2.circle(img_with_corners, tuple(p), 10, colors[i], -1)
-            # PIL로 한글 텍스트 추가
-            img_with_corners = put_text_on_image(
-                img_with_corners, 
-                point_names[i], 
-                (p[0] + 15, p[1] + 15), 
-                font_size=0.7, 
-                color=colors[i]
-            )
-    
-    plt.imshow(img_with_corners)
-    plt.title('선택된 하이브리드 코너 포인트')
-    plt.axis('off')
-    
-    plt.tight_layout()
-    plt.suptitle("코너 검출 및 윤곽선 기반 포인트 선택 과정", fontsize=20)
-    plt.subplots_adjust(top=0.9)
-    plt.show()
-
-def visualize_results(original_img, road_mask, lane_mask, left_lane_mask, right_lane_mask,
+def visualize_results_masked(original_img, undistorted_img, road_mask, lane_mask, left_lane_mask, right_lane_mask,
                      road_lane_mask, road_polygon, mask_crack, mask_pothole, 
                      warped_img, warped_mask, warped_crack, warped_pothole, corner_points,
-                     edges, masked_edges, img_num):
-    """결과 시각화 함수"""
-    plt.figure(figsize=(20, 15))
-    
-    # 첫 번째 행: 기본 이미지와 마스크
-    plt.subplot(3, 4, 1)
+                     original_lane_mask, masked_edges, color_mask, final_mask,
+                     img_num=None, pixel_to_cm_ratio=1.0):
+    """
+    도로 손상 감지 및 분석 결과를 시각화하는 함수
+
+    Process:
+    1. 4x3 그리드로 12개 이미지 구성 (원본, 왜곡 보정, 도로 마스크, 엣지 마스크, 색상 마스크 등)
+    2. 도로 및 손상 영역 시각화
+    3. 손상 면적 및 비율 계산
+    4. 균열 심각도 및 포트홀 응급 상황 분석
+    5. LrPCI 계산 및 보수 방법 결정
+    6. 분석 결과 출력 및 저장
+
+    Parameters:
+        - original_img (numpy.ndarray) : 원본 이미지
+        - undistorted_img (numpy.ndarray) : 왜곡 보정된 이미지
+        - road_mask (numpy.ndarray) : 도로 마스크
+        - lane_mask (numpy.ndarray) : 차선 마스크
+        - left_lane_mask (numpy.ndarray) : 왼쪽 차선 마스크
+        - right_lane_mask (numpy.ndarray) : 오른쪽 차선 마스크
+        - road_lane_mask (numpy.ndarray) : 차선 내부 도로 마스크
+        - road_polygon (numpy.ndarray) : 도로 폴리곤 좌표
+        - mask_crack (numpy.ndarray) : 균열 마스크
+        - mask_pothole (numpy.ndarray) : 포트홀 마스크
+        - warped_img (numpy.ndarray) : 원근 변환된 이미지
+        - warped_mask (numpy.ndarray) : 원근 변환된 도로 마스크
+        - warped_crack (numpy.ndarray) : 원근 변환된 균열 마스크
+        - warped_pothole (numpy.ndarray) : 원근 변환된 포트홀 마스크
+        - corner_points (numpy.ndarray) : 원근 변환 코너 포인트
+        - original_lane_mask (numpy.ndarray) : 원본 차선 마스크 (연장 전)
+        - masked_edges (numpy.ndarray) : 엣지 마스크 (ROI 적용)
+        - color_mask (numpy.ndarray) : 색상 기반 마스크
+        - final_mask (numpy.ndarray) : 엣지와 색상 마스크 결합
+        - img_num (str) : 이미지 번호 (저장 시 사용)
+        - pixel_to_cm_ratio (float) : 픽셀 대 센티미터 비율
+
+    Returns:
+        - lrpci (float) : LrPCI 점수
+        - warped_crack_ratio (float) : 원근 보정된 이미지의 균열 비율
+        - warped_pothole_ratio (float) : 원근 보정된 이미지의 포트홀 비율
+        - crack_severity (float) : 균열 심각도
+        - crack_type (str) : 균열 유형
+        - crack_info (dict) : 균열 상세 정보
+        - pothole_info (dict) : 포트홀 상세 정보
+    """
+    plt.figure(figsize=(22, 16))
+   
+    # 1. 원본 이미지
+    plt.subplot(4, 3, 1)
     plt.imshow(original_img)
-    plt.title('원본 이미지')
+    plt.title('1. 원본 이미지')
+    plt.axis('off')
+
+    # 2. 왜곡 보정 이미지
+    plt.subplot(4, 3, 2)
+    plt.imshow(undistorted_img)
+    plt.title('2. 왜곡 보정 이미지')
     plt.axis('off')
     
-    plt.subplot(3, 4, 2)
+    # 3. 도로 마스크
+    plt.subplot(4, 3, 3)
     plt.imshow(road_mask, cmap='gray')
-    plt.title('도로 마스크')
+    plt.title('3. 도로 마스크')
     plt.axis('off')
     
-    plt.subplot(3, 4, 3)
-    plt.imshow(lane_mask, cmap='gray')
-    plt.title('차선 마스크')
+    # 4. 엣지 마스크
+    plt.subplot(4, 3, 4)
+    plt.imshow(masked_edges, cmap='gray')
+    plt.title('4. 엣지 마스크')
     plt.axis('off')
     
-    # 왼쪽/오른쪽 차선 구분
-    plt.subplot(3, 4, 4)
-    lane_combined = np.zeros((original_img.shape[0], original_img.shape[1], 3), dtype=np.uint8)
+    # 5. 색상 마스크
+    plt.subplot(4, 3, 5)
+    plt.imshow(color_mask, cmap='gray')
+    plt.title('5. 색상 마스크')
+    plt.axis('off')
+    
+    # 6. 엣지+색상 마스크
+    plt.subplot(4, 3, 6)
+    plt.imshow(final_mask, cmap='gray')
+    plt.title('6. 엣지+색상 마스크')
+    plt.axis('off')
+    
+    # 7. 차선 마스크 (RANSAC 적용 전)
+    plt.subplot(4, 3, 7)
+    plt.imshow(original_lane_mask, cmap='gray')  # RANSAC 적용 전 차선 마스크
+    plt.title('7. 차선 마스크 (원본)')
+    plt.axis('off')
+    
+    # 8. 차선 마스크 (RANSAC 적용 후)
+    plt.subplot(4, 3, 8)
+    lane_combined = np.zeros((undistorted_img.shape[0], undistorted_img.shape[1], 3), dtype=np.uint8)
     lane_combined[left_lane_mask == 255] = [255, 0, 0]  # 왼쪽 차선: 빨간색
     lane_combined[right_lane_mask == 255] = [0, 0, 255]  # 오른쪽 차선: 파란색
     plt.imshow(lane_combined)
-    plt.title('왼쪽/오른쪽 차선 구분')
+    plt.title('8. 차선 마스크 (연장 적용 후)')
     plt.axis('off')
     
-    # 두 번째 행: 도로 분석
-    plt.subplot(3, 4, 5)
-    plt.imshow(road_lane_mask, cmap='gray')
-    plt.title('차선 내 도로 마스크')
-    plt.axis('off')
-    
-    plt.subplot(3, 4, 6)
-    polygon_viz = original_img.copy()
-    if road_polygon is not None:
-        cv2.polylines(polygon_viz, [road_polygon], True, (0, 255, 0), 3)
-    plt.imshow(polygon_viz)
-    plt.title('도로 폴리곤')
-    plt.axis('off')
-    
-    # 손상 감지 시각화 (원본)
-    plt.subplot(3, 4, 7)
-    overlay_original = original_img.copy()
+    # 9. 최종 도로 및 차선 감지
+    plt.subplot(4, 3, 9)
+    road_overlay = undistorted_img.copy()
     alpha = 0.5
-    road_overlay = overlay_original.copy()
-    road_overlay[road_lane_mask == 255] = [0, 255, 0]  # 도로: 초록색
-    overlay_original = cv2.addWeighted(road_overlay, alpha, overlay_original, 1-alpha, 0)
-    overlay_original[mask_crack == 255] = [255, 0, 0]  # 균열: 빨간색
-    overlay_original[mask_pothole == 255] = [0, 0, 255]  # 포트홀: 파란색
-    plt.imshow(overlay_original)
-    plt.title('손상 감지 (원본)')
+    
+    # 도로 영역 반투명 초록색으로 표시
+    road_highlight = road_overlay.copy()
+    road_highlight[road_lane_mask == 255] = [0, 255, 0]  # 도로: 초록색
+    road_overlay = cv2.addWeighted(road_highlight, alpha, road_overlay, 1-alpha, 0)
+    
+    # 차선 표시
+    road_overlay[lane_mask == 255] = [255, 255, 0]  # 차선: 노란색
+    
+    # 도로 폴리곤 표시
+    if road_polygon is not None:
+        cv2.polylines(road_overlay, [road_polygon], True, (0, 255, 255), 2)
+    
+    plt.imshow(road_overlay)
+    plt.title('9. 최종 도로 및 차선 감지')
     plt.axis('off')
     
-    plt.subplot(3, 4, 8)
-    plt.imshow(warped_img)
-    plt.title('원근 보정 이미지')
-    plt.axis('off')
+    # 10. 손상 감지 (왜곡 보정)
+    plt.subplot(4, 3, 10)
+    overlay_undistorted = undistorted_img.copy()
+    alpha = 0.5
+    road_highlight = overlay_undistorted.copy()
+    road_highlight[road_lane_mask == 255] = [0, 255, 0]  # 도로: 초록색
+    overlay_undistorted = cv2.addWeighted(road_highlight, alpha, overlay_undistorted, 1-alpha, 0)
+    overlay_undistorted[mask_crack == 255] = [255, 0, 0]  # 균열: 빨간색
+    overlay_undistorted[mask_pothole == 255] = [0, 0, 255]  # 포트홀: 파란색
     
-    # 세 번째 행: 추가 분석
-    plt.subplot(3, 4, 9)
-    plt.imshow(edges, cmap='gray')
-    plt.title('캐니 엣지 (전체)')
+    plt.imshow(overlay_undistorted)
+    plt.title('10. 손상 감지 (왜곡 보정)')
     plt.axis('off')
-    
-    plt.subplot(3, 4, 10)
-    plt.imshow(masked_edges, cmap='gray')
-    plt.title('캐니 엣지 (상단 25% 제외)')
-    plt.axis('off')
-    
-    # 원근 변환 포인트 시각화
-    plt.subplot(3, 4, 11)
-    img_with_points = original_img.copy()
+
+    # 11. 원근 변환 포인트
+    plt.subplot(4, 3, 11)
+    img_with_points = undistorted_img.copy()
     colors = [(255, 0, 0), (0, 255, 0), (0, 0, 255), (255, 255, 0)]
-    point_names = ['왼쪽 아래', '오른쪽 아래', '왼쪽 위', '오른쪽 위']
+    point_names = ['왼쪽 위', '오른쪽 위', '왼쪽 아래', '오른쪽 아래']
     
+    # 도로 영역 윤곽선
+    if road_polygon is not None:
+        cv2.polylines(img_with_points, [road_polygon], True, (0, 255, 255), 2)
+    
+    # 변환 포인트 표시
     for i, point in enumerate(corner_points):
         cv2.circle(img_with_points, (int(point[0]), int(point[1])), 10, colors[i], -1)
-        # PIL로 한글 텍스트 추가
         img_with_points = put_text_on_image(
             img_with_points, 
             point_names[i], 
@@ -297,51 +168,73 @@ def visualize_results(original_img, road_mask, lane_mask, left_lane_mask, right_
             font_size=0.7, 
             color=colors[i]
         )
-    plt.imshow(img_with_points)
-    plt.title('원근 변환 포인트')
-    plt.axis('off')
     
-    # 원근 보정된 손상 감지
-    plt.subplot(3, 4, 12)
-    overlay_warped = warped_img.copy()
-    road_overlay_warped = overlay_warped.copy()
-    road_overlay_warped[warped_mask == 255] = [0, 255, 0]
-    overlay_warped = cv2.addWeighted(road_overlay_warped, alpha, overlay_warped, 1-alpha, 0)
-    overlay_warped[warped_crack == 255] = [255, 0, 0]
-    overlay_warped[warped_pothole == 255] = [0, 0, 255]
-    plt.imshow(overlay_warped)
-    plt.title('손상 감지 (원근 보정)')
+    plt.imshow(img_with_points)
+    plt.title('11. 원근 변환 포인트')
+    plt.axis('off')
+
+    # 12. 손상 감지 (원근 보정) - 코너 포인트 외부 영역 제거
+    plt.subplot(4, 3, 12)
+    plt.imshow(warped_img)  # 이미 마스킹된 이미지 사용
+    plt.title('12. 손상 감지 (원근 보정)')
     plt.axis('off')
     
     plt.tight_layout()
-    plt.suptitle("도로 손상 감지 및 분석 과정", fontsize=20)
-    plt.subplots_adjust(top=0.95)
-    plt.show()
+    plt.suptitle("도로 손상 감지 및 분석 결과", fontsize=16)
+    plt.subplots_adjust(top=0.94)
     
-    # 손상 면적 계산 및 출력
+    # 원본 이미지에서의 손상 면적 계산
     road_area = np.count_nonzero(road_lane_mask)
     crack_area = np.count_nonzero(cv2.bitwise_and(mask_crack, road_lane_mask))
     pothole_area = np.count_nonzero(cv2.bitwise_and(mask_pothole, road_lane_mask))
     
-    print(f"\n도로 영역 분석 결과:")
-    print(f"도로 면적: {road_area} 픽셀")
-    print(f"균열 면적: {crack_area} 픽셀 ({crack_area/road_area*100:.2f}%)")
-    print(f"포트홀 면적: {pothole_area} 픽셀 ({pothole_area/road_area*100:.2f}%)")
-    print(f"총 손상 면적: {crack_area + pothole_area} 픽셀 ({(crack_area + pothole_area)/road_area*100:.2f}%)")
-
-    # 원근 보정된 이미지에서의 손상 면적 계산 및 출력
+    # 원본 이미지의 손상률 계산
+    crack_ratio = crack_area / road_area if road_area > 0 else 0
+    pothole_ratio = pothole_area / road_area if road_area > 0 else 0
+    total_damage_ratio = crack_ratio + pothole_ratio
+    
+    # 원근 보정된 이미지에서의 손상 면적 계산
     warped_road_area = np.count_nonzero(warped_mask)
     warped_crack_area = np.count_nonzero(cv2.bitwise_and(warped_crack, warped_mask))
     warped_pothole_area = np.count_nonzero(cv2.bitwise_and(warped_pothole, warped_mask))
     
-    print(f"\n원근 보정된 도로 영역 분석 결과:")
-    print(f"도로 면적: {warped_road_area} 픽셀")
-    print(f"균열 면적: {warped_crack_area} 픽셀 ({warped_crack_area/warped_road_area*100:.2f}%)")
-    print(f"포트홀 면적: {warped_pothole_area} 픽셀 ({warped_pothole_area/warped_road_area*100:.2f}%)")
-    print(f"총 손상 면적: {warped_crack_area + warped_pothole_area} 픽셀 ({(warped_crack_area + warped_pothole_area)/warped_road_area*100:.2f}%)")
-
-    # 분석 결과 텍스트 파일로 저장
-    save_analysis_results(road_area, crack_area, pothole_area, warped_road_area, warped_crack_area, warped_pothole_area, img_num)
+    # 원근 보정된 이미지의 손상률 계산
+    warped_crack_ratio = warped_crack_area / warped_road_area if warped_road_area > 0 else 0
+    warped_pothole_ratio = warped_pothole_area / warped_road_area if warped_road_area > 0 else 0
+    warped_total_damage_ratio = warped_crack_ratio + warped_pothole_ratio
     
-    # 핵심 이미지 저장
-    save_key_images(original_img, overlay_original, img_with_points, overlay_warped, img_num)
+    # 균열 심각도 분석 - 원근 보정된 이미지 사용
+    crack_severity, crack_type, crack_info = analyze_crack_severity(
+        cv2.bitwise_and(warped_crack, warped_mask), pixel_to_cm_ratio
+    )
+    
+    # 포트홀 응급 상황 확인 - 원근 보정된 이미지 사용
+    is_emergency, pothole_info = check_pothole_emergency(
+        cv2.bitwise_and(warped_pothole, warped_mask), 
+        pixel_to_cm_ratio
+    )
+    
+    # 원근 보정된 이미지 기반으로 LrPCI 계산
+    lrpci = calculate_lrpci(warped_crack_ratio, warped_pothole_ratio, crack_severity, crack_type, pothole_info)
+    
+    # 원본 이미지 분석 결과 출력
+    print(f"\n도로 영역 분석 결과 (왜곡 보정 이미지):")
+    print(f"도로 면적: {road_area} 픽셀")
+    print(f"균열 면적: {crack_area} 픽셀 ({crack_ratio*100:.2f}%)")
+    print(f"포트홀 면적: {pothole_area} 픽셀 ({pothole_ratio*100:.2f}%)")
+    print(f"총 손상 면적: {crack_area + pothole_area} 픽셀 ({total_damage_ratio*100:.2f}%)")
+    
+    # 원근 보정된 이미지 분석 결과 출력 (LrPCI 포함)
+    print(f"\n도로 영역 분석 결과 (원근 보정된 이미지):")
+    print(f"도로 면적: {warped_road_area} 픽셀")
+    print(f"균열 면적: {warped_crack_area} 픽셀 ({warped_crack_ratio*100:.2f}%)")
+    print(f"포트홀 면적: {warped_pothole_area} 픽셀 ({warped_pothole_ratio*100:.2f}%)")
+    print(f"총 손상 면적: {warped_crack_area + warped_pothole_area} 픽셀 ({warped_total_damage_ratio*100:.2f}%)")
+    
+    # LrPCI 등급 계산
+    grade, description = get_lrpci_grade(lrpci)
+    print(f"LrPCI 평가 점수: {lrpci}/100.00 ({grade}: {description})")
+    
+    plt.show()
+    
+    return lrpci, warped_crack_ratio, warped_pothole_ratio, crack_severity, crack_type, crack_info, pothole_info
