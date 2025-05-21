@@ -470,7 +470,7 @@ const AuthForm: React.FC<AuthFormProps> = ({ isLoginTab, onTabChange }) => {
         <div className="pt-6">
           <Button
             type="submit"
-            className={`select-none w-full ${isSuccess ? 'bg-green-600 hover:bg-green-700' : ''}`}
+            className={`w-full select-none ${isSuccess ? 'bg-green-600 hover:bg-green-700' : ''}`}
             disabled={
               isLoading ||
               isSuccess ||

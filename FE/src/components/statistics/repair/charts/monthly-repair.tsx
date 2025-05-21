@@ -75,7 +75,9 @@ export default function MonthlyRepair() {
           label: {
             show: true,
             formatter: (params: echarts.DefaultLabelFormatterCallbackParams) =>
-              params.value === 0 ? '' : Math.round((params.value as number) * 1000) / 10 + '%',
+              params.value === 0
+                ? ''
+                : Math.round((params.value as number) * 1000) / 10 + '%',
           },
           data: rawData[sid].map((d, did) =>
             totalData[did] <= 0 ? 0 : d / totalData[did],

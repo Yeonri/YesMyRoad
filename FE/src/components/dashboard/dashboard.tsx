@@ -38,7 +38,6 @@ const RECEIVED = 1
 const IN_PROGRESS = 2
 const COMPLETED = 3
 
-
 export default function Dashboard() {
   const { updateGeoJSONData, defectDetailList, updateDefectDetailList } =
     useDefectStore()
