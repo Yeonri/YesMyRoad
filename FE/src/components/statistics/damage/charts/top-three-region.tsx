@@ -60,7 +60,11 @@ export default function TopThreeRegion(props: { cardHeight: string }) {
   const crackCounts =
     regionData?.map((region: Region) => region.crackCount) || []
 
-  const labelOption: BarLabelOption = { show: true, valueAnimation: true }
+  const labelOption: BarLabelOption = {
+    show: true,
+    valueAnimation: true,
+    formatter: (params: any) => (params.value === 0 ? '' : params.value),
+  }
 
   const option: echarts.EChartsOption = {
     tooltip: { trigger: 'axis', axisPointer: { type: 'shadow' } },

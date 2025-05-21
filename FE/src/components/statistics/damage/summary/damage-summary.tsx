@@ -85,46 +85,46 @@ export default function DamageSummary() {
   }
 
   // 값 처리 함수
-  const formatValue = (
-    count: number,
-    rate: number = 0,
-    period: string = '전날',
-  ) => {
-    if (!count && count !== 0) return '- 건'
+  const formatValue = (count: number, rate: number, period: string) => {
+    if (count === undefined || count === null) return undefined
+    if (count < 0) return `${period} 데이터 없음`
 
-    // 음수인 경우 절대값으로 변환하고 증감율은 "-"로 표시
-    const absoluteCount = Math.abs(count)
-    const rateText = count < 0 ? '-%' : `${rate}%`
+    const rateText =
+      rate < 0 ? `${-rate}% 감소` : rate > 0 ? `${rate}% 증가` : '변동 없음'
 
-    return `${absoluteCount}건, ${period} 대비 ${rateText} 증가`
+    return `${period} 대비 ${rateText}`
   }
 
   return (
     <div className={`col-span-1 flex h-auto flex-col gap-4`}>
       <SummaryCard
         title="일간 도로파손 건수"
-        value={formatValue(dailyReport?.count, dailyReport?.changeRate, '전일')}
-        textSize="small" // 작은 텍스트 크기 지정
+        value={Math.abs(dailyReport?.count) + '건'}
+        subValue={formatValue(
+          dailyReport?.count,
+          dailyReport?.changeRate,
+          '어제',
+        )}
         className="grow"
       />
       <SummaryCard
         title="주간 도로파손 건수"
-        value={formatValue(
+        value={Math.abs(weeklyReport?.count) + '건'}
+        subValue={formatValue(
           weeklyReport?.count,
           weeklyReport?.changeRate,
-          '전주',
+          '지난 주',
         )}
-        textSize="small" // 작은 텍스트 크기 지정
         className="grow"
       />
       <SummaryCard
         title="월간 도로파손 건수"
-        value={formatValue(
+        value={Math.abs(monthlyReport?.count) + '건'}
+        subValue={formatValue(
           monthlyReport?.count,
           monthlyReport?.changeRate,
-          '전월',
+          '지난 월',
         )}
-        textSize="small" // 작은 텍스트 크기 지정
         className="grow"
       />
     </div>
