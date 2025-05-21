@@ -5,6 +5,7 @@ import java.util.List;
 import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.GeometryFactory;
 import org.locationtech.jts.geom.Point;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClientException;
 
@@ -35,6 +36,7 @@ public class AiResultService {
 	private final RegionMapperUtil regionMapperUtil;
 
 	@Transactional
+	@CacheEvict(cacheNames = "capture_points_all", allEntries = true)
 	public void addAiResult(AiResultDto dto) {
 		log.info("[addAiResult] 호출됨, dto = {}", dto);
 

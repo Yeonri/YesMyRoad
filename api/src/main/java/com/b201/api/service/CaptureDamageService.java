@@ -1,6 +1,7 @@
 package com.b201.api.service;
 
 import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Caching;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -27,10 +28,10 @@ public class CaptureDamageService {
 	 * @throws EntityNotFoundException 해당 ID의 파손 기록이 없으면 예외
 	 */
 	@Transactional
-	@CacheEvict(
-		cacheNames = "capture_damage",
-		key = "#result.capturePoint.publicId"
-	)
+	@Caching(evict = {
+		@CacheEvict(cacheNames = "capture_damage", key = "#result.capturePoint.publicId"),
+		@CacheEvict(cacheNames = "capture_points_all")
+	})
 	public CaptureDamage changeStatus(Integer damageId, DamageStatus newStatus) {
 		log.info("[changeStatus] 호출됨, damageId={}, newStatus={}", damageId, newStatus);
 
