@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
+import jakarta.persistence.EntityNotFoundException;
 import lombok.extern.slf4j.Slf4j;
 
 @RestControllerAdvice
@@ -76,6 +77,14 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 	@ExceptionHandler(IllegalArgumentException.class)
 	public ResponseEntity<ErrorResponse> handleIllegalArgument(IllegalArgumentException ex) {
 		log.warn("[handleIllegalArgument] {}", ex.getMessage());
+		return ResponseEntity
+			.status(HttpStatus.BAD_REQUEST)
+			.body(new ErrorResponse(ex.getMessage()));
+	}
+
+	@ExceptionHandler(EntityNotFoundException.class)
+	public ResponseEntity<ErrorResponse> handleEntityNotFound(EntityNotFoundException ex) {
+		log.warn("[handleEntityNotFound] {}", ex.getMessage());
 		return ResponseEntity
 			.status(HttpStatus.BAD_REQUEST)
 			.body(new ErrorResponse(ex.getMessage()));
