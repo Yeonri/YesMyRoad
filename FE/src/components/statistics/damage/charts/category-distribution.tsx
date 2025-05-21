@@ -71,7 +71,7 @@ export default function CategoryDistribution(props: { cardHeight: string }) {
     <Card className={`col-span-2 ${cardHeight}`}>
       <CardHeader className="p-4">
         <CardTitle className="text-md">
-          보수 완료된 유형별 도로파손 분포
+          유형별 도로파손 분포
         </CardTitle>
       </CardHeader>
       <CardContent className="p-4 pt-0">
