@@ -33,6 +33,12 @@ import { useCallback, useEffect, useMemo, useState } from 'react'
 
 type FilterType = 'timeRange' | 'defectType' | 'severity' | 'process' | ''
 
+const REPORTED = 0
+const RECEIVED = 1
+const IN_PROGRESS = 2
+const COMPLETED = 3
+
+
 export default function Dashboard() {
   const { updateGeoJSONData, defectDetailList, updateDefectDetailList } =
     useDefectStore()
@@ -88,22 +94,32 @@ export default function Dashboard() {
 
   const filteredDefectDetailList = useMemo(() => {
     if (defectDetailList === null || defectDetailList.length === 0) return []
-    return defectDetailList.filter((detail) =>
-      filteredPublicIdsByBounds.includes(detail.publicId),
-    )
+    return defectDetailList.filter((detail) => {
+      // bounds 내 publicId 포함 여부
+      const inBounds = filteredPublicIdsByBounds.includes(detail.publicId)
+      // damages 배열에 status가 3이 아닌 damageItem이 하나라도 있으면 true
+      const hasNonStatus3 = detail.damages.some(
+        (damage) => damage.status !== COMPLETED,
+      )
+      return inBounds && hasNonStatus3
+    })
   }, [defectDetailList, filteredPublicIdsByBounds])
 
+  // useEffect(() => {
+  //   console.log('filteredDefectDetailList: ', filteredDefectDetailList)
+  // }, [filteredDefectDetailList])
+
   // DefectMap과 DefectHeatmap 컴포넌트를 메모이제이션
-  const memoizedDefectMap = useMemo(
-    () => (
-      <DefectMap
-        onSelectTab={selectTab}
-        filteredDefectDetailList={filteredDefectDetailList}
-        selectedTab={selectedTab}
-      />
-    ),
-    [filteredDefectDetailList, selectedTab],
-  )
+  // const memoizedDefectMap = useMemo(
+  //   () => (
+  //     <DefectMap
+  //       onSelectTab={selectTab}
+  //       filteredDefectDetailList={filteredDefectDetailList}
+  //       selectedTab={selectedTab}
+  //     />
+  //   ),
+  //   [filteredDefectDetailList, selectedTab],
+  // )
 
   const memoizedDefectHeatmap = useMemo(() => <DefectHeatmap />, [])
 
@@ -177,7 +193,11 @@ export default function Dashboard() {
             </div>
           </div>
           <TabsContent value="map" className="space-y-4" forceMount>
-            {memoizedDefectMap}
+            <DefectMap
+              onSelectTab={selectTab}
+              filteredDefectDetailList={filteredDefectDetailList}
+              selectedTab={selectedTab}
+            />
           </TabsContent>
           <TabsContent value="heatmap" className="space-y-4">
             <Card>

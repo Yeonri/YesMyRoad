@@ -34,7 +34,7 @@ export default function MonthlyRepair() {
     () =>
       monthlyMaintenanceStatusReport.map((item) => {
         const date = new Date(`${item.month}-01`)
-        return date.toLocaleString('ko-KR', { month: 'numeric' }) + '월'
+        return date.toLocaleString('ko-KR', { month: 'numeric' })
       }),
     [monthlyMaintenanceStatusReport],
   )
@@ -75,7 +75,7 @@ export default function MonthlyRepair() {
           label: {
             show: true,
             formatter: (params: echarts.DefaultLabelFormatterCallbackParams) =>
-              Math.round((params.value as number) * 1000) / 10 + '%',
+              params.value === 0 ? '' : Math.round((params.value as number) * 1000) / 10 + '%',
           },
           data: rawData[sid].map((d, did) =>
             totalData[did] <= 0 ? 0 : d / totalData[did],
