@@ -15,7 +15,7 @@ export default function AuthPage() {
   return (
     <>
       <header className="bg-background sticky top-0 z-50 flex h-16 items-center gap-4 border-b px-4 md:px-6">
-        <div className="select-none hidden font-bold md:flex">YES, MY ROAD</div>
+        <div className="hidden font-bold select-none md:flex">YES, MY ROAD</div>
       </header>
       <div className="relative h-[calc(100vh-4rem)] w-full select-none">
         <Image

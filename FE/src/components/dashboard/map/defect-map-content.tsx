@@ -1,5 +1,7 @@
 'use client'
 
+import { coordinateAPI } from '@/api/coordinate-api'
+import { getDisplayIdPublic } from '@/lib/formatter'
 import useAddressStore from '@/store/address-store'
 import { useDefectStore } from '@/store/defect-store'
 import { FeaturePoint } from '@/types/defects'
@@ -109,6 +111,53 @@ export default function DefectMapContent() {
   }, [longitude, latitude])
 
   // 마커 추가 로직을 별도 useEffect로 분리
+  // useEffect(() => {
+  //   if (!map.current || loading || !geoJsonData) return
+
+  //   // 기존 마커 제거
+  //   Object.values(markersRef.current).forEach((marker) => marker.remove())
+  //   markersRef.current = {}
+
+  //   // 각 결함에 대한 마커 추가
+  //   geoJsonData.forEach((defect: FeaturePoint) => {
+  //     // 마커 요소 생성
+  //     const markerEl = document.createElement('div')
+  //     markerEl.className = 'defect-marker'
+  //     markerEl.style.width = '20px'
+  //     markerEl.style.height = '20px'
+  //     markerEl.style.border = '2px solid white'
+  //     markerEl.style.borderRadius = '50%'
+  //     markerEl.style.backgroundColor = '#6b7280' // gray-500
+  //     markerEl.style.boxShadow = '0 2px 4px rgba(0,0,0,0.3)'
+
+  //     // GeoJSON에서 좌표는 [lng, lat] 순서로 저장됨
+  //     const lng = defect.geometry.coordinates[1]
+  //     const lat = defect.geometry.coordinates[0]
+
+  //     // 마커 클릭 이벤트 처리를 위한 publicId 저장
+  //     const publicId = defect.properties.publicId
+
+  //     // 팝업 생성
+  //     const popup = new mapboxgl.Popup({ offset: 25 }).setHTML(`
+  //       <div>
+  //         <h3 class="font-bold">ID: ${publicId.substring(0, 8)}</h3>
+  //         <p>주소: ${defect.properties.address.street}</p>
+  //         <p>정확도: ${defect.properties.accuracyMeters}m</p>
+  //       </div>
+  //     `)
+
+  //     // 지도에 마커 추가
+  //     const marker = new mapboxgl.Marker(markerEl)
+  //       .setLngLat([lng, lat])
+  //       .setPopup(popup)
+  //       .addTo(map.current!)
+
+  //     // 마커를 publicId로 구분하여 저장
+  //     markersRef.current[publicId] = marker
+  //   })
+  // }, [geoJsonData, loading])
+
+  // 마커 추가 로직을 별도 useEffect로 분리
   useEffect(() => {
     if (!map.current || loading || !geoJsonData) return
 
@@ -116,43 +165,52 @@ export default function DefectMapContent() {
     Object.values(markersRef.current).forEach((marker) => marker.remove())
     markersRef.current = {}
 
-    // 각 결함에 대한 마커 추가
-    geoJsonData.forEach((defect: FeaturePoint) => {
-      // 마커 요소 생성
-      const markerEl = document.createElement('div')
-      markerEl.className = 'defect-marker'
-      markerEl.style.width = '20px'
-      markerEl.style.height = '20px'
-      markerEl.style.border = '2px solid white'
-      markerEl.style.borderRadius = '50%'
-      markerEl.style.backgroundColor = '#6b7280' // gray-500
-      markerEl.style.boxShadow = '0 2px 4px rgba(0,0,0,0.3)'
+    // 비동기 마커 추가 함수 정의
+    const addMarkers = async () => {
+      // 각 결함에 대한 마커 추가
+      for (const defect of geoJsonData) {
+        // 마커 요소 생성
+        const markerEl = document.createElement('div')
+        markerEl.className = 'defect-marker'
+        markerEl.style.width = '20px'
+        markerEl.style.height = '20px'
+        markerEl.style.border = '2px solid white'
+        markerEl.style.borderRadius = '50%'
+        markerEl.style.backgroundColor = '#6b7280' // gray-500
+        markerEl.style.boxShadow = '0 2px 4px rgba(0,0,0,0.3)'
 
-      // GeoJSON에서 좌표는 [lng, lat] 순서로 저장됨
-      const lng = defect.geometry.coordinates[1]
-      const lat = defect.geometry.coordinates[0]
+        // GeoJSON에서 좌표는 [lng, lat] 순서로 저장됨
+        const lng = defect.geometry.coordinates[1]
+        const lat = defect.geometry.coordinates[0]
 
-      // 마커 클릭 이벤트 처리를 위한 publicId 저장
-      const publicId = defect.properties.publicId
+        // 마커 클릭 이벤트 처리를 위한 publicId 저장
+        const publicId = defect.properties.publicId
 
-      // 팝업 생성
-      const popup = new mapboxgl.Popup({ offset: 25 }).setHTML(`
+        // 여기가 문제였던 부분 - await 추가
+        const risk = await coordinateAPI.getDefectDetail(publicId)
+
+        // 팝업 생성
+        const popup = new mapboxgl.Popup({ offset: 25 }).setHTML(`
         <div>
-          <h3 class="font-bold">ID: ${publicId.substring(0, 8)}</h3>
+          <h3 class="font-bold">ID: ${getDisplayIdPublic(publicId)}</h3>
           <p>주소: ${defect.properties.address.street}</p>
-          <p>정확도: ${defect.properties.accuracyMeters}m</p>
+          <p>LrPCI: ${risk.data.risk}</p>
         </div>
       `)
 
-      // 지도에 마커 추가
-      const marker = new mapboxgl.Marker(markerEl)
-        .setLngLat([lng, lat])
-        .setPopup(popup)
-        .addTo(map.current!)
+        // 지도에 마커 추가
+        const marker = new mapboxgl.Marker(markerEl)
+          .setLngLat([lng, lat])
+          .setPopup(popup)
+          .addTo(map.current!)
 
-      // 마커를 publicId로 구분하여 저장
-      markersRef.current[publicId] = marker
-    })
+        // 마커를 publicId로 구분하여 저장
+        markersRef.current[publicId] = marker
+      }
+    }
+
+    // 비동기 함수 실행
+    addMarkers()
   }, [geoJsonData, loading])
 
   return (
