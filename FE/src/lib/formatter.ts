@@ -1,8 +1,12 @@
 import crypto from 'crypto'
 
 // 시간 포맷팅 함수
+// 시간 포맷팅 함수 (9시간 추가)
 export const formatDate = (dateString: string) => {
   const date = new Date(dateString)
+  
+  // 9시간 추가
+  date.setHours(date.getHours() + 9)
 
   const year = date.getFullYear()
   const month = String(date.getMonth() + 1).padStart(2, '0')
