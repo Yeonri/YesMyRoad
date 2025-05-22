@@ -22,6 +22,7 @@ export type FeaturePoint = {
     publicId: string
     address: { street: string }
     accuracyMeters: number
+    display: number // 0: 보이지 않음, 1: 보임
   }
 }
 
