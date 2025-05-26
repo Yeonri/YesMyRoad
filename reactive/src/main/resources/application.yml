@@ -1,0 +1,25 @@
+spring:
+  config:
+    import: optional:file:.env[.properties]
+  webflux:
+    multipart:
+      max-in-memory-size: 2MB
+
+  kafka:
+    bootstrap-servers: kafka-001:9092
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+    consumer:
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
+      properties:
+        spring.json.trusted.packages: "*"
+
+aws:
+  region: ${AWS_REGION}
+  s3:
+    bucket: ${AWS_S3_BUCKET}
+    credential:
+      access-key: ${AWS_S3_CREDENTIAL_ACCESS_KEY}
+      secret-key: ${AWS_S3_CREDENTIAL_SECRET_KEY}
