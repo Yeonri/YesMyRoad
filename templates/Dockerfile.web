@@ -1,0 +1,28 @@
+# ========== 1단계: 빌드용 ==========
+FROM node:22-alpine AS builder
+# pnpm 설치
+RUN corepack enable && corepack prepare pnpm@latest --activate
+# 작업 디렉토리 설정
+WORKDIR /app
+# 의존성 설치를 위한 파일 복사
+COPY package.json pnpm-lock.yaml* ./
+# 의존성 설치
+RUN pnpm install --frozen-lockfile
+# 소스 코드 복사
+COPY . .
+# Next.js 프로덕션 빌드 실행
+RUN pnpm build
+# ========== 2단계: 실행용 ==========
+FROM node:22-alpine
+# pnpm 설치
+RUN corepack enable && corepack prepare pnpm@latest --activate
+# 작업 디렉토리 설정
+WORKDIR /app
+# 빌드 결과물만 복사
+COPY --from=builder /app ./
+
+EXPOSE 3000
+# NODE_ENV를 production으로 설정
+ENV NODE_ENV=production
+# Next.js 애플리케이션 실행 (포트 지정)
+CMD ["pnpm", "start", "-p", "3000"]

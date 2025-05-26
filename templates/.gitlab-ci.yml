@@ -1,0 +1,115 @@
+variables:
+  DOCKER_HOST: tcp://docker:2375
+  DOCKER_TLS_CERTDIR: ""
+image: docker:20.10-dind
+services:
+  - docker:20.10-dind
+
+stages:
+  - build
+  - deploy
+
+##########################################################################################################################################################
+# Frontend
+##########################################################################################################################################################
+web-build:
+  stage: build
+  script:
+    - echo "🏗️ 프론트 빌드 시작"
+    - cd FE
+    - echo "NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN=${NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN}" >> .env
+    - docker build -t ${DOCKER_REPO_WEB}:latest -f ../templates/Dockerfile.web .
+
+    - echo "🚀 Docker Hub 로그인 및 푸시 시작"
+    - echo "${DOCKER_PASSWORD}" | docker login -u "${DOCKER_ID}" --password-stdin
+    - docker push ${DOCKER_REPO_WEB}:latest
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_BRANCH == "FE/rel"
+      when: always
+    - when: never
+
+web-deploy:
+  stage: deploy
+  script:
+    - echo "📝 .env 파일 작성"
+    - echo "NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN=${NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN}" >> .env
+
+    - echo "🚀 .env 파일 서버로 전송"
+    - apk update && apk add openssh-client
+    - mkdir -p ~/.ssh
+    - echo "${SSH_PRIVATE_KEY}" > ~/.ssh/id_ed25519
+    - chmod 600 ~/.ssh/id_ed25519
+    - scp -i ~/.ssh/id_ed25519 -o StrictHostKeyChecking=no .env ${SERVER_USER}@${SERVER_IP}:${TARGET_DIR_WEB}/.env
+
+    - echo "🚀 서버 접속 및 백엔드 배포 시작"
+    - ssh -i ~/.ssh/id_ed25519 -o StrictHostKeyChecking=no ${SERVER_USER}@${SERVER_IP} "
+        cd web &&
+        docker compose down && 
+        docker system prune -a -f &&
+        docker compose --env-file /home/ubuntu/web/.env up --build -d
+      "
+
+  dependencies:
+    - web-build
+  needs:
+    - web-build
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_BRANCH == "FE/rel"
+      when: always
+    - when: never
+
+##########################################################################################################################################################
+# Backend build (BE/rel)
+##########################################################################################################################################################
+api-build:
+  stage: build
+  script:
+    - echo "🏗️ 백엔드 빌드 시작"
+    - cd api
+    - docker build -t ${DOCKER_REPO_API}:latest -f ../templates/Dockerfile.api .
+
+    - echo "🚀 Docker Hub 로그인 및 푸시 시작"
+    - echo "${DOCKER_PASSWORD}" | docker login -u "${DOCKER_ID}" --password-stdin
+    - docker push ${DOCKER_REPO_API}:latest
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_BRANCH == "BE/rel"
+      when: always
+    - when: never
+
+api-deploy:
+  stage: deploy
+  script:
+    - echo "📝 .env 파일 작성"
+    - echo "MYSQL_USER=${MYSQL_USER}" >> .env
+    - echo "MYSQL_PASSWORD=${MYSQL_PASSWORD}" >> .env
+    - echo "MYSQL_DATABASE=${MYSQL_DATABASE}" >> .env
+    - echo "MYSQL_URL=${MYSQL_URL}" >> .env
+    - echo "MYSQL_DRIVER=${MYSQL_DRIVER}" >> .env
+    - echo "ADDRESS_API_KEY=${ADDRESS_API_KEY}" >> .env
+    - echo "JWT_SECRET=${JWT_SECRET}" >> .env
+    - echo "REDIS_HOST=${REDIS_HOST}" >> .env
+    - echo "REDIS_PORT=${REDIS_PORT}" >> .env
+
+    - echo "🚀 .env 파일 서버로 전송"
+    - apk update && apk add openssh-client
+    - mkdir -p ~/.ssh
+    - echo "${SSH_PRIVATE_KEY}" > ~/.ssh/id_ed25519
+    - chmod 600 ~/.ssh/id_ed25519
+    - ls -al ~/.ssh/id_ed25519
+    - scp -i ~/.ssh/id_ed25519 -o StrictHostKeyChecking=no .env ${SERVER_USER}@${SERVER_IP}:${TARGET_DIR_API}/.env
+
+    - echo "🚀 서버 접속 및 백엔드 배포 시작"
+    - ssh -i ~/.ssh/id_ed25519 -o StrictHostKeyChecking=no ${SERVER_USER}@${SERVER_IP} "
+        cd api &&
+        docker compose down &&
+        docker system prune -a -f &&
+        docker compose --env-file /home/ubuntu/api/.env up --build -d
+      "
+  dependencies:
+    - api-build
+  needs:
+    - api-build
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_BRANCH == "BE/rel"
+      when: always
+    - when: never
