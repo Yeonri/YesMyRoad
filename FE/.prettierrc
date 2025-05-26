@@ -1,0 +1,22 @@
+{
+  "semi": false,
+  "singleQuote": true,
+  "objectWrap": "collapse",
+  "proseWrap": "preserve",
+  "plugins": [
+    "@trivago/prettier-plugin-sort-imports",
+    "prettier-plugin-tailwindcss"
+  ],
+  "importOrder": [
+    "^[A-Z](.*)$",
+    "^@components/(.*)$",    
+    "^@ui/(.*)$",
+    "^@store/(.*)$",
+    "^@lib/(.*)$",
+    "^[./]"
+  ],
+  "importOrderSeparation": true,
+  "importOrderSortSpecifiers": true,
+  "singleAttributePerLine": false,
+  "bracketSpacing": true
+}
